@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>인공지능 | MDP와 강화학습 ()</title>
+<script>
+window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] }, svg: { fontCache: 'global' } };
+</script>
+<script defer="" onerror="console.warn('MathJax load failed');" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+
+:root {
+  --navy: #2C3E50;
+  --slate: #1F2D3A;
+  --blue: #2980B9;
+  --orange: #E67E22;
+  --green: #27AE60;
+  --red: #C0392B;
+  --muted: #7F8C8D;
+  --line: #DDE6EE;
+  --bg: #F6F8FA;
+  --paper: #FFFFFF;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: #111827; 
+  font-family: 'Noto Sans KR', 'Pretendard', sans-serif;
+  color: var(--navy); overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh;
+}
+.deck { 
+  width: 1920px; height: 1080px; 
+  transform-origin: center center;
+  position: relative;
+  background: var(--paper);
+  box-shadow: 0 0 50px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.slide {
+  display: none; position: absolute; top:0; left:0;
+  width: 1920px; height: 1080px;
+  padding: 80px 120px; 
+  background: var(--paper);
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.slide.active { display: flex; flex-direction: column; }
+.slide:before { content: ""; position: absolute; left: 0; top: 0; width: 16px; height: 100%; background: linear-gradient(var(--blue), #45A5C4); }
+.slide:after { content: "Medical AI & Computational Science (MACS lab), JBNU"; position: absolute; left: 120px; bottom: 35px; font-size: 24px; color: #7A8793; font-weight:500; }
+
+/* Typography */
+code { background: #EAF3F9; color: #2980B9; padding: 4px 8px; border-radius: 6px; font-family: monospace; }
+
+.topline { font-size: 28px; color: var(--blue); font-weight: 700; letter-spacing: 0.02em; margin-bottom: 20px; }
+h1 { font-size: 52px; line-height: 1.2; margin: 0 0 35px; color: var(--navy); font-weight: 800; }
+ul { margin: 0; padding-left: 40px; font-size: 32px; line-height: 1.6; font-weight: 500; }
+li { margin: 16px 0; }
+
+/* Layouts */
+.content { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; flex: 1; min-height: 0; }
+.content.single { grid-template-columns: 1fr; align-items: start; }
+.visual { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
+
+/* Section Divider */
+.section-slide { justify-content: center; align-items: center; background: linear-gradient(135deg, #fff 0%, #EAF3F9 100%); text-align: center; }
+.section-slide h1 { font-size: 80px; color: var(--navy); margin-top: 30px;}
+.section-slide .topline { font-size: 36px; color: var(--orange); margin-bottom: 25px; font-weight: 800; }
+.section-slide:before { background: linear-gradient(var(--orange), #F1C40F); }
+
+/* Title Slide */
+.title-slide { justify-content: center; align-items: center; background: linear-gradient(135deg, #1F2D3A 0%, #2C3E50 100%); text-align: center; }
+.title-slide h1 { font-size: 100px; color: #FFFFFF; margin-top: 30px;}
+.title-slide .topline { font-size: 40px; color: var(--orange); margin-bottom: 25px; font-weight: 800; }
+.title-slide:before { display:none; }
+.title-slide:after { display:none; }
+.title-slide p { font-size:36px; color:#DDE6EE; margin-top:40px; font-weight:500;}
+
+/* Components */
+.callout {
+  background: #FFF7ED; border-left: 12px solid var(--orange);
+  padding: 30px 40px; border-radius: 0 16px 16px 0;
+  font-size: 36px; font-weight: 700; color: var(--navy);
+  margin-top: 30px; line-height: 1.5;
+}
+.formula, .equation-card {
+  background: #F3F7FA; border: 3px solid var(--line);
+  border-radius: 16px; padding: 35px; font-size: 42px;
+  text-align: center; color: var(--slate); width: 100%;
+}
+table { width: 100%; border-collapse: collapse; font-size: 32px; background: white; border: 3px solid var(--line); }
+th { background: #EAF3F9; color: var(--navy); font-weight: 800; padding: 20px; border: 2px solid var(--line); text-align: center; }
+td { border: 2px solid var(--line); padding: 20px; vertical-align: middle; text-align: center; }
+.algorithm pre { font-size: 32px; line-height: 1.6; background: var(--slate); color: #F8FAFC; border-radius: 16px; padding: 40px; white-space: pre-wrap; font-family: monospace; width: 100%; }
+
+/* Grid World & Specific Visuals */
+.grid-world { display: grid; grid-template-columns: repeat(4, 200px); grid-template-rows: repeat(3, 180px); gap: 20px; justify-content: center; }
+.gw-cell { border: 5px solid #BFD1DD; border-radius: 16px; background: #F8FAFC; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 48px; font-weight: 700; position: relative; }
+.gw-cell span { font-size: 24px; color: var(--muted); font-weight: 500; position: absolute; bottom: 12px; }
+.gw-cell.wall { background: var(--slate); border-color: var(--slate); }
+.gw-cell.start { border-color: var(--blue); background: #EAF3F9; }
+.gw-cell.plus { background: #EAF8EF; border-color: var(--green); color: var(--green); }
+.gw-cell.minus { background: #FDEDEC; border-color: var(--red); color: var(--red); }
+
+.compare-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 100%; }
+.card { background: white; border: 3px solid var(--line); border-radius: 16px; padding: 40px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+.card h3 { margin: 0 0 25px; font-size: 40px; color: var(--blue); }
+.card p { font-size: 32px; color: var(--slate); margin: 15px 0; }
+
+/* Speaker Notes */
+.notes { display: none; }
+#speaker-overlay {
+  display: none; position: fixed; bottom: 5%; left: 10%; width: 80%;
+  background: rgba(31, 45, 58, 0.95); color: #fff; padding: 40px 50px;
+  border-radius: 20px; z-index: 1000; font-size: 36px; line-height: 1.6;
+  border: 5px solid var(--orange); box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.counter { position: absolute; right: 40px; bottom: 35px; color: #7A8793; font-size: 24px; z-index: 10; font-weight: 700; }
+
+@media print {
+  @page { size: 13.333in 7.5in; margin: 0; }
+  html, body { width: 13.333in !important; height: auto !important; margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; display: block !important; }
+  .deck { width: 13.333in !important; height: auto !important; transform: none !important; box-shadow: none !important; position: relative !important; overflow: visible !important; display: block !important; }
+  .slide { display: flex !important; width: 13.333in !important; height: 7.5in !important; page-break-after: always !important; break-after: page !important; position: relative !important; transform: none !important; box-shadow: none !important; animation: none !important; }
+  #speaker-overlay, .counter { display: none !important; }
+  /* MathJax colors and rendering fixes */
+  .MathJax { color: black !important; }
+}
+
+
+/* Semantic Layouts */
+.layout-hero { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; font-size: 56px; font-weight: 800; color: var(--navy); }
+.layout-single { display: flex; flex-direction: column; justify-content: flex-start; height: 100%; padding-top: 20px; font-size: 30px; line-height: 1.5; }
+.layout-visual-text { display: grid; grid-template-columns: 55% 45%; gap: 40px; height: 100%; align-items: center; }
+.layout-visual-text img { max-width: 100%; max-height: 600px; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.layout-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; height: 100%; align-items: start; }
+.compare-card { background: white; border-top: 6px solid var(--navy); padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 28px; }
+.compare-card.orange { border-top-color: var(--orange); }
+
+/* Pipeline & Custom Structures */
+.pipeline-container { display: flex; flex-direction: row; align-items: center; justify-content: space-around; width: 100%; padding: 40px; }
+.chip-column { display: flex; flex-direction: column; gap: 20px; }
+.domain-chip { background: var(--bg); border: 2px solid var(--blue); padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 28px; text-align: center; }
+.arrow { font-size: 60px; color: var(--orange); font-weight: bold; }
+.tuple-badge { background: var(--slate); color: white; border-radius: 50%; width: 120px; height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 48px; font-weight: bold; border: 4px solid var(--orange); }
+.tuple-row { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 40px; margin: 60px 0; }
+.algorithm pre { font-size: 22px !important; line-height: 1.4; max-height: 450px; overflow-y: auto; background: var(--bg); padding: 20px; border-radius: 8px; border-left: 4px solid var(--orange); }
+
+/* Polish Custom Visuals */
+.svg-diagram { width: 100%; max-height: 400px; margin-top: 30px; display: block; margin-left: auto; margin-right: auto; }
+.timeline-visual { display: flex; align-items: center; justify-content: space-between; font-size: 32px; font-weight: bold; background: var(--bg); padding: 30px; border-radius: 12px; margin-top: 40px; border: 2px solid var(--blue); }
+.timeline-arrow { color: var(--orange); font-size: 48px; }
+.timeline-item { text-align: center; }
+.timeline-sub { font-size: 20px; font-weight: normal; color: var(--slate); margin-top: 10px; }
+.agent-env-loop { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 40px; }
+
+/* Micro Polish Styles */
+.takeaway-callout { background: var(--bg); padding: 20px 30px; border-radius: 8px; border-left: 6px solid var(--blue); font-size: 26px; font-weight: bold; margin-top: 40px; text-align: left; }
+.roadmap-container { display: flex; flex-direction: row; justify-content: space-between; align-items: stretch; gap: 20px; width: 100%; margin-top: 40px; }
+.roadmap-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; flex: 1; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.roadmap-num { width: 40px; height: 40px; border-radius: 50%; background: var(--navy); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; margin-bottom: 15px; }
+.roadmap-title { font-size: 24px; font-weight: bold; color: var(--navy); margin-bottom: 10px; }
+.roadmap-desc { font-size: 18px; color: var(--slate); }
+
+.tuple-container { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 30px; }
+.tuple-equation { font-size: 48px; font-weight: bold; color: var(--navy); margin-bottom: 40px; padding: 20px 40px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.tuple-tiles { display: flex; flex-direction: row; justify-content: center; gap: 20px; width: 100%; }
+.tuple-tile { display: flex; flex-direction: column; align-items: center; padding: 20px; background: white; border-radius: 8px; border-top: 5px solid var(--orange); box-shadow: 0 4px 8px rgba(0,0,0,0.05); flex: 1; max-width: 200px; text-align: center; }
+.tuple-symbol { font-size: 36px; font-weight: bold; margin-bottom: 10px; }
+.tuple-name { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: var(--slate); }
+.tuple-desc { font-size: 16px; color: var(--slate); }
+
+.timeline-visual { display: flex; align-items: center; justify-content: space-between; font-size: 32px; font-weight: bold; background: var(--bg); padding: 40px; border-radius: 12px; margin-top: 40px; border: 2px solid #ddd; }
+.timeline-item { text-align: center; opacity: 0.6; }
+.timeline-item.active { opacity: 1; color: var(--blue); transform: scale(1.1); transition: all 0.3s; }
+.timeline-item.future { opacity: 0.8; color: var(--green); }
+.timeline-sub { font-size: 24px; font-weight: normal; margin-top: 15px; }
+
+/* Heatmap Styles for Grid World Value Iteration */
+.heatmap-0 { background-color: rgba(41, 128, 185, 0.0); }
+.heatmap-1 { background-color: rgba(41, 128, 185, 0.2); }
+.heatmap-2 { background-color: rgba(41, 128, 185, 0.4); }
+.heatmap-3 { background-color: rgba(41, 128, 185, 0.6); }
+.heatmap-4 { background-color: rgba(41, 128, 185, 0.8); }
+.heatmap-5 { background-color: rgba(41, 128, 185, 1.0); color: white; }
+.gw-cell.plus { background-color: rgba(39, 174, 96, 0.8); color: white; }
+.gw-cell.minus { background-color: rgba(192, 57, 43, 0.8); color: white; }
+</style>
+</head>
+<body>
+<main class="deck"><section class="slide title-slide" data-slide="1"><div class="topline">인공지능 | MDP와 강화학습</div><h1>MDP와 강화학습</h1><p>컴퓨터인공지능학부 | 이경수</p><div class="counter">1 / 188</div></section>
+<section class="slide section-slide" data-slide="2" style="background: linear-gradient(135deg, #2C3E50 0%, #1F2D3A 100%);"><div class="topline" style="color:var(--orange);">PART 1</div><h1 style="color:white; font-size:90px;">MDP &amp; Value Iteration</h1><p style="color:#DDE6EE; font-size:32px; margin-top:30px;">기초 개념부터 동적 계획법까지</p></section>
+<section class="slide" data-slide="3"><div class="topline">인공지능 | MDP와 강화학습</div><h1>들어가며: 우리가 배운 것</h1><div class="layout-single"><ul><li>지금까지 우리는 Search (BFS, DFS, A*) 알고리즘을 배웠습니다.</li><li>Search의 특징은 <strong>모든 것을 알고 있고(Fully Observable)</strong>, <strong>모든 행동이 100% 확실(Deterministic)</strong>하다는 점이었습니다.</li><li>이런 환경에서 에이전트는 Start에서 Goal까지의 완벽한 <strong>경로(Path)</strong>를 찾습니다.</li></ul></div><div class="counter">3 / 188</div></section>
+<section class="slide" data-slide="4"><div class="topline">인공지능 | MDP와 강화학습</div><h1>완벽한 계획의 함정 (1)</h1><div class="layout-single"><ul><li>만약 로봇에게 '앞으로 3칸, 오른쪽으로 1칸'이라는 계획(Plan)을 주었다고 해봅시다.</li><li>현실에서 로봇 바퀴가 미끄러져 2칸만 갔다면 어떻게 될까요?</li></ul><div class="callout">로봇은 자신이 잘못된 위치에 있다는 것을 모른 채 허공에 오른쪽으로 돌고 직진할 것입니다.</div></div><div class="counter">4 / 188</div></section>
+<section class="slide" data-slide="5"><div class="topline">인공지능 | MDP와 강화학습</div><h1>완벽한 계획의 함정 (2)</h1><div class="layout-single"><ul><li>이처럼 고정된 순서의 명령어(Plan)는 <strong>불확실성(Uncertainty)</strong>이 존재하는 환경에서 매우 취약합니다.</li><li>예측할 수 없는 변화가 생기면 전체 계획이 무용지물이 되기 때문입니다.</li></ul></div><div class="counter">5 / 188</div></section>
+<section class="slide" data-slide="6"><div class="topline">인공지능 | MDP와 강화학습</div><h1>현실의 의사결정</h1><div class="layout-single"><ul><li>자율주행: 옆 차가 갑자기 끼어들 확률이 존재합니다.</li><li>의료 진단: 같은 약을 투여해도 환자마다 반응이 다릅니다.</li><li>주식 투자: 내일의 가격을 100% 확신할 수 없습니다.</li></ul><div class="callout" style="text-align:center;">우리가 푸는 현실의 문제들은 모두 <b>불확실성</b>을 내포하고 있습니다.</div></div><div class="counter">6 / 188</div></section>
+<section class="slide" data-slide="7"><div class="topline">인공지능 | MDP와 강화학습</div><h1>오늘의 핵심 질문</h1><div class="layout-hero" style="text-align:center;"><h2 style="font-size:60px; color:var(--blue); margin-top:100px;">"내 맘대로 되지 않는 세상에서<br/><br/>어떻게 최적의 행동을 결정할까?"</h2></div><div class="counter">7 / 188</div></section>
+<section class="slide" data-slide="8"><div class="topline">인공지능 | MDP와 강화학습</div><h1>오늘의 로드맵</h1><div class="layout-single"><div class="roadmap-container"><div class="roadmap-step"><div class="roadmap-num">1</div><div class="roadmap-title">Search에서 Policy로</div><div class="roadmap-desc">불확실성 도입</div></div><div class="roadmap-step"><div class="roadmap-num">2</div><div class="roadmap-title">MDP 정의</div><div class="roadmap-desc">수학적 모델링</div></div><div class="roadmap-step"><div class="roadmap-num">3</div><div class="roadmap-title">Bellman Equation</div><div class="roadmap-desc">핵심 방정식</div></div><div class="roadmap-step"><div class="roadmap-num">4</div><div class="roadmap-title">Dynamic Programming</div><div class="roadmap-desc">알고리즘 계산</div></div><div class="roadmap-step"><div class="roadmap-num">5</div><div class="roadmap-title">RL Preview</div><div class="roadmap-desc">학습의 시작</div></div></div></div><div class="counter">8 / 188</div></section>
+<section class="slide" data-slide="9">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>핵심 예제: Grid World</h1>
+<div class="layout-visual-text">
+<div>
+<ul style="font-size:36px; line-height:1.8;">
+<li>앞으로 강의 내내 사용할 <strong>4x3 Grid World</strong>입니다.</li>
+<li>Start에서 +1로 안전하게 가는 것이 목표입니다.</li>
+<li>-1은 피해야 하며, Wall은 통과할 수 없습니다.</li>
+</ul>
+</div>
+<div class="visual">
+<div class="grid-world" style="transform:scale(0.9); margin-top:-20px;">
+<div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell plus">+1</div>
+<div class="gw-cell"></div><div class="gw-cell wall"></div><div class="gw-cell"></div><div class="gw-cell minus">-1</div>
+<div class="gw-cell start">Start</div><div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell"></div>
+</div>
+</div>
+</div>
+<div class="counter">9 / 188</div>
+
+</section>
+<section class="slide" data-slide="10"><div class="topline">인공지능 | MDP와 강화학습</div><h1>보조 예제: Racing Car</h1><div class="layout-single"><div><ul><li>공간 이동만이 MDP가 아님을 보여줄 보조 예제입니다.</li><li>자동차 엔진의 상태(Cool, Warm, Overheated)를 관리하며 달리는 게임입니다.</li><li>나중에 자세히 살펴보겠습니다.</li></ul></div><div class="visual"><h3>Racing MDP</h3><p>상태: Cool, Warm, Overheated</p><p>행동: Slow, Fast</p></div></div><div class="counter">10 / 188</div></section>
+<section class="slide section-slide" data-slide="11"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 01</h1><div class="layout-single" style="text-align:center;"><h2>From Search to Policies</h2><p style="font-size:32px;">완벽한 계획에서 유연한 대응으로</p></div><div class="counter">11 / 188</div></section>
+<section class="slide" data-slide="12"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Search 알고리즘 복습</h1><div class="layout-single"><ul><li>Search 트리를 탐색할 때, 내가 행동 \(A\)를 선택하면 환경은 반드시 결과 \(S'\)를 내놓았습니다.</li><li>결과가 하나뿐이므로 미래를 끝까지 완벽하게 그릴 수 있었습니다.</li></ul><h3>Search의 전제</h3><p>에이전트의 결정이 세계의 변화를 100% 지배한다.</p></div><div class="counter">12 / 188</div></section>
+<section class="slide" data-slide="13"><div class="topline">인공지능 | MDP와 강화학습</div><h1>환경과 계획: Deterministic vs Stochastic</h1><div class="layout-comparison"><div class="compare-card"><h3>Deterministic (Search)</h3><p>행동의 결과가 단 1개로 결정됨. 완벽한 Plan 수립 가능.</p></div><div class="compare-card" style="border-top-color: var(--orange);"><h3>Stochastic (MDP)</h3><p>행동 결과가 확률 분포로 나타남. Plan은 중간에 실패할 수 있음.</p></div></div><div class="counter">13 / 188</div></section>
+<section class="slide" data-slide="14"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Minimax와 Expectimax 복습</h1><div class="layout-single"><ul><li>우리는 이미 불확실성을 다루는 트리를 배운 적이 있습니다. (적대적 탐색)</li><li><strong>Minimax:</strong> 적이 최악의 행동을 할 것이라 가정 (결정론적 적).</li><li><strong>Expectimax:</strong> 환경이 확률적으로 움직인다고 가정 (Chance Node의 기댓값 계산).</li></ul></div><div class="counter">14 / 188</div></section>
+<section class="slide" data-slide="15">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>Expectimax의 한계: 트리의 폭발</h1>
+<div class="layout-visual-text">
+<div class="layout-single" style="font-size:26px; padding-top:0;">
+<ul>
+<li>그렇다면 이 세상의 모든 경우의 수를 Expectimax 트리로 그리면 되지 않을까요?</li>
+<li>가능한 모든 확률 분기점을 그리면 트리의 크기가 <strong>지수 함수적으로(Exponentially)</strong> 폭발합니다.</li>
+<li>더 큰 문제는, 똑같은 위치(상태)를 트리 안에서 <strong>수천 번 중복해서</strong> 계산하게 된다는 점입니다.</li>
+</ul>
+</div>
+<div class="visual" style="flex-direction:row; gap:20px; align-items:center;">
+<div style="flex:1; text-align:center;">
+<h4 style="color:var(--orange); font-size:24px; margin-bottom:10px;">Expectimax Tree (폭발)</h4>
+<svg height="300" viewbox="0 0 200 200" width="100%">
+<circle cx="100" cy="20" fill="var(--navy)" r="10"></circle>
+<path d="M100 20 L50 60" stroke="var(--slate)" stroke-width="2"></path>
+<path d="M100 20 L150 60" stroke="var(--slate)" stroke-width="2"></path>
+<rect fill="var(--blue)" height="20" width="20" x="40" y="60"></rect>
+<rect fill="var(--blue)" height="20" width="20" x="140" y="60"></rect>
+<path d="M50 80 L20 120" stroke="var(--slate)" stroke-width="2"></path>
+<path d="M50 80 L80 120" stroke="var(--slate)" stroke-width="2"></path>
+<circle cx="20" cy="120" fill="var(--orange)" r="8"></circle>
+<circle cx="80" cy="120" fill="var(--orange)" r="8"></circle>
+<path d="M150 80 L120 120" stroke="var(--slate)" stroke-width="2"></path>
+<path d="M150 80 L180 120" stroke="var(--slate)" stroke-width="2"></path>
+<circle cx="120" cy="120" fill="var(--orange)" r="8"></circle>
+<circle cx="180" cy="120" fill="var(--orange)" r="8"></circle>
+<path d="M20 128 L10 160" stroke="var(--slate)" stroke-dasharray="2,2" stroke-width="1"></path>
+<path d="M20 128 L30 160" stroke="var(--slate)" stroke-dasharray="2,2" stroke-width="1"></path>
+<path d="M80 128 L70 160" stroke="var(--slate)" stroke-dasharray="2,2" stroke-width="1"></path>
+<path d="M80 128 L90 160" stroke="var(--slate)" stroke-dasharray="2,2" stroke-width="1"></path>
+<path d="M120 128 L110 160" stroke="var(--slate)" stroke-dasharray="2,2" stroke-width="1"></path>
+<path d="M120 128 L130 160" stroke="var(--slate)" stroke-dasharray="2,2" stroke-width="1"></path>
+<path d="M180 128 L170 160" stroke="var(--slate)" stroke-dasharray="2,2" stroke-width="1"></path>
+<path d="M180 128 L190 160" stroke="var(--slate)" stroke-dasharray="2,2" stroke-width="1"></path>
+</svg>
+</div>
+<div style="font-size:40px; color:var(--muted); font-weight:bold;">vs</div>
+<div style="flex:1; text-align:center;">
+<h4 style="color:var(--green); font-size:24px; margin-bottom:10px;">MDP Graph (순환)</h4>
+<svg height="300" viewbox="0 0 200 200" width="100%">
+<defs><marker id="arrow-green-14" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--slate)"></path></marker></defs>
+<circle cx="100" cy="50" fill="var(--green)" r="20"></circle>
+<text fill="white" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="55">S</text>
+<circle cx="100" cy="150" fill="var(--green)" r="20"></circle>
+<text fill="white" font-size="14" font-weight="bold" text-anchor="middle" x="100" y="155">S'</text>
+<path d="M90 70 Q 50 100 90 120" fill="none" marker-end="url(#arrow-green-14)" stroke="var(--slate)" stroke-width="3"></path>
+<path d="M110 130 Q 150 100 110 80" fill="none" marker-end="url(#arrow-green-14)" stroke="var(--slate)" stroke-width="3"></path>
+<path d="M100 30 Q 150 -10 115 35" fill="none" marker-end="url(#arrow-green-14)" stroke="var(--slate)" stroke-width="3"></path>
+</svg>
+</div>
+</div>
+</div>
+<div class="counter">15 / 188</div>
+
+</section>
+<section class="slide" data-slide="16"><div class="topline">인공지능 | MDP와 강화학습</div><h1>상태의 반복 방문 문제</h1><div class="layout-single"><ul><li>Grid World에서 왼쪽으로 갔다가 오른쪽으로 오면 원래 자리입니다.</li><li>하지만 트리는 이를 완전히 새로운 가지(Branch)로 취급하여 또 계산합니다.</li></ul><div class="callout" style="text-align:center;">트리(Tree) 대신 그래프(Graph), 혹은 상태 지도(State Map)에 직접 정답을 적어두면 어떨까요?</div></div><div class="counter">16 / 188</div></section>
+<section class="slide" data-slide="17"><div class="topline">인공지능 | MDP와 강화학습</div><h1>새로운 접근: Policy (정책)</h1><div class="layout-single"><ul><li>Plan이 "앞으로 가, 오른쪽으로 가"라는 맹목적 명령어라면,</li><li><strong>Policy(정책)</strong>는 "만약 네가 (1,1)에 있다면 위로 가고, (1,2)에 있다면 오른쪽으로 가"라는 조건부 매뉴얼입니다.</li></ul></div><div class="counter">17 / 188</div></section>
+<section class="slide" data-slide="18"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Policy의 정의</h1><div class="layout-single"><ul><li>정책은 수학적으로 기호 \(\pi\) (파이)로 표기합니다.</li><li>상태(State)를 입력으로 받아, 행동(Action)을 출력하는 함수입니다.</li></ul><div class="equation-card" style="margin-top:50px;">\[ \pi(s) = a \]</div></div><div class="counter">18 / 188</div></section>
+<section class="slide" data-slide="19"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Plan vs Policy 비교</h1><div class="layout-single"><div class="layout-comparison"><div class="compare-card" style="border-top-color: var(--blue);"><h3>Plan (계획)</h3><ul style="font-size:26px; padding-left:20px; text-align:left;"><li><strong>출력물:</strong> 행동들의 순서 (List)</li><li><strong>유연성:</strong> 경로 이탈 시 실패</li><li><strong>비유:</strong> 내비게이션의 추천 경로</li></ul></div><div class="compare-card" style="border-top-color: var(--orange);"><h3>Policy (정책)</h3><ul style="font-size:26px; padding-left:20px; text-align:left;"><li><strong>출력물:</strong> 상태-행동 매핑 (Function)</li><li><strong>유연성:</strong> 어느 위치에서든 대응 가능</li><li><strong>비유:</strong> 모든 교차로에 서 있는 표지판</li></ul></div></div></div><div class="counter">19 / 188</div></section>
+<section class="slide" data-slide="20">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>예시: 로봇이 미끄러졌을 때 Plan의 반응</h1>
+<div class="layout-visual-text">
+<div class="layout-single" style="font-size:26px; padding-top:0;">
+<ul>
+<li>로봇이 (1,1)에서 위로 가려다 미끄러져 제자리(1,1)에 남았습니다.</li>
+<li><strong>Plan 로봇:</strong> "1번 명령 완료. 이제 2번 명령인 오른쪽으로 가야지."</li>
+<li>결과: 엉뚱한 곳(2,1)으로 가서 벽에 부딪힙니다.</li>
+</ul>
+<div class="callout" style="padding:20px; font-size:24px; border-color:var(--red);">고정된 순서(Plan)는 실수를 교정하지 못합니다!</div>
+</div>
+<div class="visual">
+<div class="grid-world" style="transform:scale(0.8)">
+<div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell plus">+1</div>
+<div class="gw-cell"></div><div class="gw-cell wall">WALL</div><div class="gw-cell"></div><div class="gw-cell minus">-1</div>
+<div class="gw-cell start" style="position:relative;">🤖<svg style="position:absolute; width:400px; height:400px; top:-100px; left:0; pointer-events:none; z-index:10;"><defs><marker id="arrow-red-19" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--red)"></path></marker></defs>
+<path d="M100 300 L100 250" marker-end="url(#arrow-red-19)" stroke="var(--red)" stroke-dasharray="10,10" stroke-width="6"></path>
+<text fill="var(--red)" font-size="20" x="110" y="270">미끄러짐!</text>
+<path d="M100 300 Q150 200 300 250" fill="none" marker-end="url(#arrow-red-19)" stroke="var(--red)" stroke-width="8"></path>
+<text fill="var(--red)" font-size="20" font-weight="bold" x="200" y="220">Plan: 우회전!</text>
+</svg></div><div class="gw-cell" style="border: 5px solid var(--red);">💥</div><div class="gw-cell"></div><div class="gw-cell"></div>
+</div>
+</div>
+</div>
+<div class="counter">20 / 188</div>
+
+</section>
+<section class="slide" data-slide="21">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>예시: 로봇이 미끄러졌을 때 Policy의 반응</h1>
+<div class="layout-visual-text">
+<div class="layout-single" style="font-size:26px; padding-top:0;">
+<ul>
+<li>로봇이 똑같이 (1,1)에서 제자리에 남았습니다.</li>
+<li><strong>Policy 로봇:</strong> "현재 내 위치 센서 확인. 아직 (1,1)이군. 메뉴얼 \\(\\pi(1,1)\\)을 보니 위로 가라고 되어 있네. 다시 위로 간다."</li>
+<li>결과: 목표를 향해 계속 수정하며 나아갑니다.</li>
+</ul>
+<div class="callout" style="padding:20px; font-size:24px; border-color:var(--blue);">Policy는 상태 기반이므로 즉시 궤도를 수정합니다!</div>
+</div>
+<div class="visual">
+<div class="grid-world" style="transform:scale(0.8)">
+<div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell plus">+1</div>
+<div class="gw-cell" style="border: 5px solid var(--blue); color:var(--blue);">↑</div><div class="gw-cell wall">WALL</div><div class="gw-cell"></div><div class="gw-cell minus">-1</div>
+<div class="gw-cell start" style="position:relative;">🤖<svg style="position:absolute; width:200px; height:400px; top:-200px; left:0; pointer-events:none; z-index:10;"><defs><marker id="arrow-blue-20" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--blue)"></path></marker></defs>
+<path d="M100 300 L100 250" stroke="var(--red)" stroke-dasharray="10,10" stroke-width="6"></path>
+<text fill="var(--red)" font-size="20" x="110" y="270">미끄러짐!</text>
+<path d="M100 300 Q 150 250 100 150" fill="none" marker-end="url(#arrow-blue-20)" stroke="var(--blue)" stroke-width="8"></path>
+<text fill="var(--blue)" font-size="20" font-weight="bold" x="130" y="200">Policy: 다시 위로!</text>
+</svg></div><div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell"></div>
+</div>
+</div>
+</div>
+<div class="counter">21 / 188</div>
+
+</section>
+<section class="slide section-slide" data-slide="22"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 02</h1><div class="layout-single" style="text-align:center;"><h2>Stochastic Actions &amp; Grid World</h2><p style="font-size:32px;">불확실성을 숫자로 나타내기</p></div><div class="counter">22 / 188</div></section>
+<section class="slide" data-slide="23"><div class="topline">인공지능 | MDP와 강화학습</div><h1>4x3 Grid World 구조</h1><div class="layout-single"><div><ul><li>앞으로 우리가 해결할 맵입니다.</li><li>에이전트가 겪을 수 있는 세계의 축소판입니다.</li></ul></div><div class="visual"><div class="grid-world" style="transform:scale(0.8)"><div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell plus">+1</div><div class="gw-cell"></div><div class="gw-cell wall"></div><div class="gw-cell"></div><div class="gw-cell minus">-1</div><div class="gw-cell start">Start</div><div class="gw-cell"></div><div class="gw-cell"></div><div class="gw-cell"></div></div></div></div><div class="counter">23 / 188</div></section>
+<section class="slide" data-slide="24"><div class="topline">인공지능 | MDP와 강화학습</div><h1>상태(State) 좌표계</h1><div class="layout-single"><ul><li>지도상의 각 칸을 우리는 좌표 <code>(x, y)</code>로 부르겠습니다.</li><li>왼쪽 아래가 <code>(1, 1)</code>입니다. 총 11개의 유효한 상태가 있습니다. (벽 제외)</li></ul><div class="grid-world" style="transform:scale(0.7); margin-top:20px;"><div class="gw-cell"><span>(1,3)</span></div><div class="gw-cell"><span>(2,3)</span></div><div class="gw-cell"><span>(3,3)</span></div><div class="gw-cell plus"><span>(4,3)</span></div><div class="gw-cell"><span>(1,2)</span></div><div class="gw-cell wall">WALL</div><div class="gw-cell"><span>(3,2)</span></div><div class="gw-cell minus"><span>(4,2)</span></div><div class="gw-cell start"><span>(1,1)</span></div><div class="gw-cell"><span>(2,1)</span></div><div class="gw-cell"><span>(3,1)</span></div><div class="gw-cell"><span>(4,1)</span></div></div></div><div class="counter">24 / 188</div></section>
+<section class="slide" data-slide="25"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Start, Wall, Terminal States</h1><div class="layout-single"><ul><li><strong>Start State (1,1):</strong> 에이전트가 항상 처음 시작하는 위치입니다.</li><li><strong>Wall (2,2):</strong> 들어갈 수 없는 물리적 장애물입니다. 좌표 집합에서 제외됩니다.</li><li><strong>Terminal States (4,3), (4,2):</strong> 이곳에 도착하면 게임(Episode)이 즉시 종료되며 보상을 받습니다.</li></ul></div><div class="counter">25 / 188</div></section>
+<section class="slide" data-slide="26"><div class="topline">인공지능 | MDP와 강화학습</div><h1>가능한 행동(Actions)</h1><div class="layout-single"><ul><li>에이전트는 매 턴마다 4가지 행동 중 하나를 고를 수 있습니다.</li><li>\(A = \{ \text{North}, \text{South}, \text{East}, \text{West} \}\)</li></ul><div class="callout" style="text-align:center; font-size:60px; padding:60px;">↑ ↓ → ←</div></div><div class="counter">26 / 188</div></section>
+<section class="slide" data-slide="27"><div class="topline">인공지능 | MDP와 강화학습</div><h1>결정론적 이동 시뮬레이션</h1><div class="layout-single"><ul><li>만약 이 세상이 결정론적(Deterministic)이라면, North를 누르면 100% 윗 칸으로 갑니다.</li><li>이 경우 Search 알고리즘으로 경로를 짜면 완벽합니다.</li></ul></div><div class="counter">27 / 188</div></section>
+<section class="slide" data-slide="28"><div class="topline">인공지능 | MDP와 강화학습</div><h1>확률적 이동: Noisy Movement 도입</h1><div class="layout-single"><ul><li>하지만 Grid World는 확률적(Stochastic) 환경입니다.</li><li>바닥이 미끄러워서, 또는 모터의 결함으로 인해 내가 의도한 방향과 다른 방향으로 이동할 수 있습니다.</li></ul></div><div class="counter">28 / 188</div></section>
+<section class="slide" data-slide="29">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>Grid World: 확률적 이동 (Noisy Movement)</h1>
+<div class="layout-visual-text">
+<div>
+<ul style="font-size:36px; line-height:1.8;">
+<li>의도한 방향으로 <strong>80% 확률</strong>로 전진</li>
+<li>좌/우 직각 방향으로 각각 <strong>10%</strong> 미끄러짐</li>
+<li>벽(Wall)이나 경계에 부딪히면 제자리에 정지</li>
+</ul>
+</div>
+<div class="visual">
+<svg height="400" style="background:#F8FAFC; border: 3px solid var(--line); border-radius:16px;" viewbox="0 0 300 300" width="100%">
+<defs>
+<marker id="arrow-green" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--green)"></path></marker>
+<marker id="arrow-red" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--red)"></path></marker>
+</defs>
+<circle cx="150" cy="220" fill="var(--blue)" r="30"></circle>
+<text fill="white" font-size="18" font-weight="bold" text-anchor="middle" x="150" y="226">Agent</text>
+<path d="M 150 180 L 150 60" fill="none" marker-end="url(#arrow-green)" stroke="var(--green)" stroke-dasharray="10,5" stroke-width="6"></path>
+<text fill="var(--green)" font-size="28" font-weight="bold" x="170" y="110">80%</text>
+<path d="M 115 210 Q 50 200 60 120" fill="none" marker-end="url(#arrow-red)" stroke="var(--red)" stroke-width="4"></path>
+<text fill="var(--red)" font-size="24" font-weight="bold" x="40" y="100">10%</text>
+<path d="M 185 210 Q 250 200 240 120" fill="none" marker-end="url(#arrow-red)" stroke="var(--red)" stroke-width="4"></path>
+<text fill="var(--red)" font-size="24" font-weight="bold" x="260" y="100">10%</text>
+</svg>
+</div>
+</div>
+<div class="counter">29 / 188</div>
+
+</section>
+<section class="slide" data-slide="30"><div class="topline">인공지능 | MDP와 강화학습</div><h1>전이 테이블 \( T(S, A, S') \) 예시</h1><div class="layout-single"><ul><li>T((1,1), North, (1,2)) = 0.8</li><li>T((1,1), North, (2,1)) = 0.1</li><li>T((1,1), North, (1,1)) = 0.1 (벽 충돌 제자리)</li></ul></div><div class="counter">30 / 188</div></section>
+<section class="slide" data-slide="31"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Living Reward 개념</h1><div class="layout-single"><ul><li>에이전트가 Terminal State에 도달하기 전까지, 매 턴 살아 숨쉴 때마다 받는 기본 보상을 <strong>Living Reward</strong>라고 부릅니다.</li><li>이 값이 양수냐 음수냐에 따라 에이전트의 성향이 완전히 바뀝니다.</li></ul></div><div class="counter">31 / 188</div></section>
+<section class="slide" data-slide="32"><div class="topline">인공지능 | MDP와 강화학습</div><h1>보상에 따른 행동 변화 (직관)</h1><div class="layout-single"><ul><li>Living Reward가 0이라면? \(\rightarrow\) 서두를 필요가 없습니다. 무한히 빙빙 돌지도 모릅니다.</li><li>Living Reward가 -0.01 이라면? \(\rightarrow\) 페널티가 작으므로 안전하게 돌아서 목적지로 갑니다.</li><li>Living Reward가 -2.0 이라면? \(\rightarrow\) 매 턴 고통받으므로, 위험을 감수하고서라도 최단 경로로 돌진합니다.</li></ul></div><div class="counter">32 / 188</div></section>
+<section class="slide section-slide" data-slide="33"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 03</h1><div class="layout-single" style="text-align:center;"><h2>Racing MDP Example</h2><p style="font-size:32px;">공간 이동이 아닌 MDP</p></div><div class="counter">33 / 188</div></section>
+<section class="slide" data-slide="34"><div class="topline">인공지능 | MDP와 강화학습</div><h1>공간이 아닌 MDP: Racing</h1><div class="layout-single"><ul><li>Grid World는 직관적이지만 자칫 MDP를 '지도 찾기' 알고리즘으로 오해하게 만듭니다.</li><li>자동차 경주 대회에서 엔진 온도를 관리하는 에이전트를 상상해 봅시다.</li></ul></div><div class="counter">34 / 188</div></section>
+<section class="slide" data-slide="35"><div class="topline">인공지능 | MDP와 강화학습</div><h1>상태 정의: 엔진의 상태</h1><div class="layout-single"><ul><li>여기서 상태(State)는 자동차의 위치가 아니라 <strong>엔진의 온도</strong>입니다.</li><li>\(S = \{ \text{Cool}, \text{Warm}, \text{Overheated} \}\)</li></ul></div><div class="counter">35 / 188</div></section>
+<section class="slide" data-slide="36"><div class="topline">인공지능 | MDP와 강화학습</div><h1>행동 정의: 운전 스타일</h1><div class="layout-single"><ul><li>에이전트가 할 수 있는 선택은 가속 페달을 얼마나 밟을지입니다.</li><li>\(A = \{ \text{Slow}, \text{Fast} \}\)</li></ul></div><div class="counter">36 / 188</div></section>
+<section class="slide" data-slide="37"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Racing MDP: 상태 전이 다이어그램</h1><div class="layout-visual-text"><div><svg height="300" style="background:white; border-radius:10px; padding:20px;" viewbox="0 0 500 300" width="100%">
+<defs>
+<marker id="arrow-blue" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--blue)"></path></marker>
+<marker id="arrow-red" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--red)"></path></marker>
+<marker id="arrow-orange" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--orange)"></path></marker>
+</defs>
+<circle cx="100" cy="150" fill="white" r="50" stroke="var(--blue)" stroke-width="4"></circle>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="100" y="155">Cool</text>
+<circle cx="250" cy="150" fill="white" r="50" stroke="var(--orange)" stroke-width="4"></circle>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="250" y="155">Warm</text>
+<circle cx="400" cy="150" fill="white" r="50" stroke="var(--red)" stroke-width="4"></circle>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="400" y="155">Overheated</text>
+<path d="M 125 115 Q 175 80 225 115" fill="none" marker-end="url(#arrow-orange)" stroke="var(--orange)" stroke-width="4"></path>
+<text fill="var(--orange)" font-size="16" font-weight="bold" text-anchor="middle" x="175" y="90">Fast (0.7)</text>
+<path d="M 225 185 Q 175 220 125 185" fill="none" marker-end="url(#arrow-blue)" stroke="var(--blue)" stroke-width="4"></path>
+<text fill="var(--blue)" font-size="16" font-weight="bold" text-anchor="middle" x="175" y="225">Slow</text>
+<path d="M 275 115 Q 325 80 375 115" fill="none" marker-end="url(#arrow-red)" stroke="var(--red)" stroke-width="4"></path>
+<text fill="var(--red)" font-size="16" font-weight="bold" text-anchor="middle" x="325" y="90">Fast (0.6)</text>
+<path d="M 60 115 Q 10 50 60 50 Q 110 50 140 115" fill="none" marker-end="url(#arrow-blue)" stroke="var(--blue)" stroke-width="4"></path>
+<text fill="var(--blue)" font-size="16" font-weight="bold" text-anchor="middle" x="80" y="40">Slow (+1)</text>
+</svg></div><div class="layout-single" style="font-size:26px; padding-top:0;"><ul><li>상태(State): Cool, Warm, Overheated</li><li>행동(Action): Slow, Fast</li><li>Fast는 빠르지만 엔진이 가열될 위험(확률) 존재</li><li>Overheated 도달 시 큰 패널티와 함께 에피소드 종료</li></ul><div style="margin-top:20px;">
+<table style="font-size:22px; width:100%; text-align:left;">
+<tr style="background:var(--navy); color:white;"><th>State</th><th>Action</th><th>Next State (Prob)</th><th>Reward</th></tr>
+<tr><td>Cool / Warm</td><td>Slow</td><td>Deterministic</td><td>+1</td></tr>
+<tr><td>Cool</td><td>Fast</td><td>Warm (0.7) / Cool (0.3)</td><td>+2</td></tr>
+<tr><td>Warm</td><td>Fast</td><td>Overheated (0.6) / Warm (0.4)</td><td>+2</td></tr>
+<tr><td>Overheated</td><td>-</td><td>-</td><td>-10</td></tr>
+</table>
+</div></div></div><div class="counter">37 / 188</div></section>
+<section class="slide" data-slide="38"><div class="topline">인공지능 | MDP와 강화학습</div><h1>보상(Reward) 구조</h1><div class="layout-single"><ul><li>Slow로 달리면 보상 +1.</li><li>Fast로 달리면 더 빨리 가므로 보상 +2.</li><li>하지만 Overheated 상태가 되면 게임이 끝나며 페널티 보상 -10.</li></ul></div><div class="counter">38 / 188</div></section>
+<section class="slide" data-slide="39"><div class="topline">인공지능 | MDP와 강화학습</div><h1>위험과 보상의 트레이드오프</h1><div class="layout-single"><ul><li>이 예제는 단기적인 큰 보상(Fast)을 쫓다가 장기적인 파멸(Overheated)을 맞을지, 안전하게(Slow) 갈지를 수학적으로 계산하는 문제를 제기합니다.</li></ul></div><div class="counter">39 / 188</div></section>
+<section class="slide" data-slide="40"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Grid World와 Racing의 공통점</h1><div class="layout-single"><ul><li>모양은 전혀 다르지만 본질은 완전히 같습니다.</li><li>현재의 State가 있고, Action을 선택하면, 확률적 Transition을 거쳐 다음 State로 가며 Reward를 받습니다.</li></ul></div><div class="counter">40 / 188</div></section>
+<section class="slide" data-slide="41"><div class="topline">인공지능 | MDP와 강화학습</div><h1>추상화(Abstraction)의 힘</h1><div class="layout-single"><div class="pipeline-container"><div class="chip-column"><div class="domain-chip">Grid World</div><div class="domain-chip">Racing Car</div><div class="domain-chip">Robot Cleaner</div><div class="domain-chip">Portfolio</div></div><div class="arrow">➔</div><div class="compare-card" style="text-align: center; font-size: 32px; font-weight: bold; border-color: var(--orange);">MDP = ⟨S, A, T, R, γ⟩</div><div class="arrow">➔</div><div class="compare-card" style="text-align: center; font-size: 32px; font-weight: bold; border-color: var(--blue);">Bellman Equation</div></div><div class="takeaway-callout">겉모양은 달라도, MDP로 추상화하면 모두 같은 수학적 프레임워크로 해결할 수 있다.</div></div><div class="counter">41 / 188</div></section>
+<section class="slide section-slide" data-slide="42"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 04</h1><div class="layout-single" style="text-align:center;"><h2>Formal Definition of MDP</h2><p style="font-size:32px;">세상을 규정하는 5가지 알파벳</p></div><div class="counter">42 / 188</div></section>
+<section class="slide" data-slide="43"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Markov Decision Process 수학적 정의</h1><div class="layout-single"><ul><li>우리가 지금까지 본 모든 요소들을 모아서, 수학적으로 엄밀한 튜플(Tuple)로 정의합니다.</li></ul><div class="equation-card" style="margin-top:60px;">\[ \text{MDP} = \langle S, A, T, R, \gamma \rangle \]</div></div><div class="counter">43 / 188</div></section>
+<section class="slide" data-slide="44"><div class="topline">인공지능 | MDP와 강화학습</div><h1>MDP 5-Tuple</h1><div class="layout-single"><div class="tuple-container"><div class="tuple-equation">MDP = ⟨ S, A, T, R, γ ⟩</div><div class="tuple-tiles"><div class="tuple-tile"><div class="tuple-symbol">S</div><div class="tuple-name">State</div><div class="tuple-desc">가능한 상황의 집합</div></div><div class="tuple-tile"><div class="tuple-symbol">A</div><div class="tuple-name">Action</div><div class="tuple-desc">선택 가능한 행동</div></div><div class="tuple-tile"><div class="tuple-symbol">T</div><div class="tuple-name">Transition</div><div class="tuple-desc">행동 후 다음 상태 확률</div></div><div class="tuple-tile"><div class="tuple-symbol">R</div><div class="tuple-name">Reward</div><div class="tuple-desc">전이에 따른 보상</div></div><div class="tuple-tile"><div class="tuple-symbol">γ</div><div class="tuple-name">Discount</div><div class="tuple-desc">미래 가치 할인</div></div></div></div><div class="takeaway-callout">이 다섯 요소가 주어지면, 하나의 의사결정 환경이 수학적으로 완벽하게 정의된다.</div></div><div class="counter">44 / 188</div></section>
+<section class="slide" data-slide="45"><div class="topline">인공지능 | MDP와 강화학습</div><h1>S: State Space</h1><div class="layout-single"><ul><li>에이전트가 처할 수 있는 모든 상황의 집합입니다.</li><li>이산적(Discrete)일 수도 있고 연속적(Continuous)일 수도 있습니다.</li><li>본 강의에서는 유한한 갯수의 이산 상태(Grid World)만 다룹니다.</li></ul><div class="takeaway-callout">상태는 에이전트가 의사결정을 내리기 위해 알아야 하는 최소한의 정보 집합입니다.</div></div><div class="counter">45 / 188</div></section>
+<section class="slide" data-slide="46"><div class="topline">인공지능 | MDP와 강화학습</div><h1>A: Action Space</h1><div class="layout-single"><ul><li>각 상태에서 에이전트가 취할 수 있는 선택지입니다.</li><li>일반적으로 상태 \(s\)에 따라 가능한 행동 집합 \(A(s)\)가 다를 수 있지만, 편의상 전역 집합 \(A\)로 표기합니다.</li></ul><div class="takeaway-callout">환경에 영향을 미치고 변화를 이끌어내는 유일한 수단입니다.</div></div><div class="counter">46 / 188</div></section>
+<section class="slide" data-slide="47"><div class="topline">인공지능 | MDP와 강화학습</div><h1>T: Transition Function</h1><div class="layout-single"><ul><li>가장 중요한 요소입니다. 환경의 물리법칙(Dynamics)을 나타냅니다.</li><li>\(T(s, a, s')\)는 상태 \(s\)에서 행동 \(a\)를 했을 때 다음 상태가 \(s'\)이 될 <strong>확률</strong>입니다.</li><li>표기법: \(P(S_{t+1}=s' \mid S_t=s, A_t=a)\)</li></ul></div><div class="counter">47 / 188</div></section>
+<section class="slide" data-slide="48"><div class="topline">인공지능 | MDP와 강화학습</div><h1>T 확률의 총합 조건</h1><div class="layout-single"><ul><li>상태 \(s\)에서 행동 \(a\)를 취했을 때 일어날 수 있는 모든 미래의 확률을 더하면 항상 1이 되어야 합니다.</li></ul><div class="equation-card" style="margin-top:50px;">\[ \sum_{s'} T(s,a,s') = 1 \]</div></div><div class="counter">48 / 188</div></section>
+<section class="slide" data-slide="49"><div class="topline">인공지능 | MDP와 강화학습</div><h1>R: Reward Function</h1><div class="layout-single"><ul><li>에이전트가 목표를 향해 가도록 유도하는 신호입니다.</li><li>전이가 일어날 때 얻는 즉각적인(Immediate) 점수입니다.</li></ul><div class="takeaway-callout">어떤 행동이 좋은지 나쁜지를 알려주는 유일한 신호표지판입니다.</div></div><div class="counter">49 / 188</div></section>
+<section class="slide" data-slide="50"><div class="topline">인공지능 | MDP와 강화학습</div><h1>R의 다양한 표기법</h1><div class="layout-single"><ul><li>문헌에 따라 Reward 함수를 표기하는 방식이 다릅니다.</li><li>\(R(s)\) : 특정 상태 \(s\)에 들어섰을 때의 보상 (Grid World에 적합)</li><li>\(R(s, a)\) : 상태 \(s\)에서 행동 \(a\)를 취할 때의 보상 (비용/에너지 소모)</li><li>\(R(s, a, s')\) : 가장 엄밀한 표현. 상태, 행동, 결과에 따른 보상.</li></ul><div class="callout" style="font-size:28px;">본 강의에서는 혼용하되, 주로 간단한 \(R(s)\) 또는 상수 \(R\)을 사용합니다.</div></div><div class="counter">50 / 188</div></section>
+<section class="slide" data-slide="51"><div class="topline">인공지능 | MDP와 강화학습</div><h1>γ: Discount Factor (할인율)</h1><div class="layout-single"><ul><li>미래 가치를 현재 가치로 환산할 때 곱해주는 0과 1 사이의 상수입니다. \(0 \le \gamma &lt; 1\)</li><li>왜 필요한지는 잠시 후 'Return' 파트에서 자세히 증명합니다.</li></ul></div><div class="counter">51 / 188</div></section>
+<section class="slide" data-slide="52"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Terminal States (종료 상태)</h1><div class="layout-single"><ul><li>에피소드가 끝나는 상태입니다.</li><li>Grid World의 (+1), (-1) 칸이 여기에 해당합니다.</li><li>종료 상태에 도달하면 모든 Action에 대해 자기 자신으로 100% 돌아오고, 이후의 보상은 영원히 0인 상태(Absorbing state)로 간주할 수 있습니다.</li></ul></div><div class="counter">52 / 188</div></section>
+<section class="slide" data-slide="53"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Finite vs Infinite Horizon</h1><div class="layout-single"><ul><li><strong>Finite Horizon (유한 시간):</strong> \(T\)턴이 지나면 무조건 게임이 끝남. 시간에 따라 최적 정책이 바뀔 수 있음. (예: 1턴 남았을 때와 100턴 남았을 때의 전략이 다름 - Non-stationary)</li><li><strong>Infinite Horizon (무한 시간):</strong> 기한이 없음. 항상 동일한 최적 정책이 유지됨. (Stationary policy).</li></ul><div class="callout">본 강의는 무한 시간(Infinite Horizon) MDP를 다룹니다.</div></div><div class="counter">53 / 188</div></section>
+<section class="slide" data-slide="54"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Model-based Assumption (T와 R을 앎)</h1><div class="layout-single"><ul><li>알려진 MDP 모델(T, R)을 바탕으로 최적 정책을 계산하는 과정을 <strong>Planning(계획)</strong>이라 합니다.</li><li>이때 우리는 환경의 확률 \(T\)와 보상 \(R\)의 모든 숫자를 완벽하게 알고 있다고 가정합니다. (신의 시점)</li><li>나중에 배울 강화학습(RL)은 이 \(T\)와 \(R\)을 모를 때의 이야기입니다.</li></ul></div><div class="counter">54 / 188</div></section>
+<section class="slide" data-slide="55"><div class="topline">인공지능 | MDP와 강화학습</div><h1>매핑 연습: Grid World를 MDP Tuple로</h1><div class="layout-single"><ul><li>S = { (1,1), (1,2), ... (4,3) }</li><li>A = { N, S, E, W }</li><li>T = North 시 의도방향 80%, 수직방향 각 10%...</li><li>R = (4,3)에서 +1, (4,2)에서 -1, 그 외에는 Living Reward.</li><li>\(\gamma = 0.9\) (예시)</li></ul></div><div class="counter">55 / 188</div></section>
+<section class="slide section-slide" data-slide="56"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 05</h1><div class="layout-single" style="text-align:center;"><h2>Markov Property</h2><p style="font-size:32px;">과거는 잊어라, 현재만 남겨라</p></div><div class="counter">56 / 188</div></section>
+<section class="slide" data-slide="57"><div class="topline">인공지능 | MDP와 강화학습</div><h1>과거, 현재, 그리고 미래</h1><div class="layout-single"><div class="timeline-visual"><div class="timeline-item">History<div class="timeline-sub">\(S_0, A_0, S_1, A_1, \dots\)</div></div><div class="timeline-arrow">➔</div><div class="timeline-item active">Current State<div class="timeline-sub">\(S_t\)</div></div><div class="timeline-arrow">➔</div><div class="timeline-item future">Future<div class="timeline-sub">\(S_{t+1}\)</div></div></div><div class="takeaway-callout">Markov Property: 현재 상태 \(S_t\)가 충분하면, 과거의 전체 History는 더 이상 필요하지 않다.</div></div><div class="counter">57 / 188</div></section>
+<section class="slide" data-slide="58"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Markov Property의 직관적 의미</h1><div class="layout-single"><ul><li>"미래는 오직 <strong>현재 상태</strong>에 의해서만 결정되며, 그 상태에 도달하기까지의 <strong>과거 역사(History)</strong>와는 독립적이다."</li><li>현재 상황만 알면, 과거에 무슨 일이 있었는지는 미래를 예측하는 데 아무런 추가 정보를 주지 않는다는 뜻입니다.</li></ul></div><div class="counter">58 / 188</div></section>
+<section class="slide" data-slide="59"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Markov Property 수학식</h1><div class="layout-single"><div class="equation-card" style="font-size:36px;">\[ P( S_{t+1}  \mid  S_t , A_t, S_{t-1}, A_{t-1}, \dots,  S_0 ) = P( S_{t+1}  \mid  S_t , A_t) \]</div><ul style="margin-top:40px;"><li>조건부 확률에서 조건부 부분에 과거 \(S_{t-1}, A_{t-1}\) 등을 넣어도 값이 변하지 않는다는 수학적 표현입니다.</li></ul></div><div class="counter">59 / 188</div></section>
+<section class="slide" data-slide="60"><div class="topline">인공지능 | MDP와 강화학습</div><h1>History vs Current State</h1><div class="layout-single"><ul><li>History = \(S_0, A_0, S_1, A_1, \dots, S_t\) (지금까지의 모든 기록)</li><li>State = \(S_t\) (현재의 요약본)</li><li>마르코프 성질이 성립하면, 거대한 History 데이터를 굳이 메모리에 저장할 필요 없이 State 하나만 들고 있으면 됩니다.</li></ul></div><div class="counter">60 / 188</div></section>
+<section class="slide" data-slide="61"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Sufficient Statistic (충분 통계량)</h1><div class="layout-single"><ul><li>즉, State는 미래를 예측하기 위한 <strong>충분 통계량(Sufficient Statistic)</strong> 역할을 해야 합니다.</li><li>과거 정보 중 미래 예측에 필요한 엑기스만 현재 State 안에 모두 담겨 있어야 합니다.</li></ul></div><div class="counter">61 / 188</div></section>
+<section class="slide" data-slide="62"><div class="topline">인공지능 | MDP와 강화학습</div><h1>예시 1: 로봇의 위치</h1><div class="layout-single"><ul><li>로봇이 지금 (2,2) 좌표에 서 있습니다.</li><li>이 로봇이 1초 뒤 어디로 갈지 예측하려면 좌표 <code>(x,y)</code>만 알면 될까요?</li></ul></div><div class="counter">62 / 188</div></section>
+<section class="slide" data-slide="63">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>예시 1의 한계: 속도가 필요하다면?</h1>
+<div class="layout-visual-text">
+<div class="layout-single" style="font-size:26px; padding-top:0;">
+<ul>
+<li>만약 로봇이 시속 100km로 달리고 있었다면, 관성 때문에 멈출 수 없습니다.</li>
+<li>과거(1초 전 위치)를 알아야 속도를 알 수 있으므로, 단순 좌표 <code>(x,y)</code>만으로는 마르코프 성질이 깨집니다!</li>
+</ul>
+<div class="callout" style="font-size:24px; padding:15px; margin-top:20px; text-align:center;">
+현재 좌표 <b>(x,y)</b>만 알면 로봇이 정지해있는지 달리고 있는지 알 수 없다!
+</div>
+</div>
+<div class="visual">
+<svg height="400" viewbox="0 0 400 300" width="100%">
+<defs>
+<marker id="vel-arrow" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3">
+<path d="M0,0 L0,6 L6,3 z" fill="var(--red)"></path>
+</marker>
+</defs>
+<rect fill="#EAF3F9" height="100" width="400" x="0" y="150"></rect>
+<path d="M0 200 L400 200" stroke="white" stroke-dasharray="15,15" stroke-width="4"></path>
+<rect fill="var(--navy)" height="40" rx="10" width="80" x="150" y="160"></rect>
+<circle cx="170" cy="200" fill="var(--slate)" r="10"></circle>
+<circle cx="210" cy="200" fill="var(--slate)" r="10"></circle>
+<text fill="white" font-size="14" font-weight="bold" text-anchor="middle" x="190" y="185">(2, 2)</text>
+<path d="M 230 180 L 350 180" marker-end="url(#vel-arrow)" stroke="var(--red)" stroke-width="6"></path>
+<text fill="var(--red)" font-size="20" font-weight="bold" text-anchor="middle" x="290" y="165">Velocity (vx, vy)</text>
+<rect fill="var(--navy)" height="40" opacity="0.3" rx="10" width="80" x="50" y="160"></rect>
+<text fill="var(--slate)" font-size="16" text-anchor="middle" x="90" y="145">1초 전 과거 위치</text>
+</svg>
+</div>
+</div>
+<div class="counter">63 / 188</div>
+
+</section>
+<section class="slide" data-slide="64"><div class="topline">인공지능 | MDP와 강화학습</div><h1>State Augmentation (상태 확장)</h1><div class="layout-single"><ul><li>마르코프 성질을 만족시키려면 어떻게 해야 할까요?</li><li>과거의 필수 정보를 현재 상태에 끼워 넣습니다. (Augmentation)</li><li>새로운 State = <code>(위치 x, 위치 y, 속도 vx, 속도 vy)</code></li><li>이제 이 State만 보면 과거가 필요 없습니다. 마르코프 성질이 회복되었습니다!</li></ul></div><div class="counter">64 / 188</div></section>
+<section class="slide" data-slide="65"><div class="topline">인공지능 | MDP와 강화학습</div><h1>예시 2: 체스판의 상태</h1><div class="layout-single"><ul><li>체스판에 말들이 놓여 있는 현재 사진 한 장은 마르코프 상태일까요?</li><li>거의 그렇습니다. 과거에 말을 어떻게 움직였든 현재 판도만으로 최선의 수를 계산할 수 있습니다.</li><li>(엄밀히는 앙파상, 캐슬링 조건 때문에 약간의 추가 정보가 필요함)</li></ul></div><div class="counter">65 / 188</div></section>
+<section class="slide" data-slide="66"><div class="topline">인공지능 | MDP와 강화학습</div><h1>예시 3: 의료 AI의 환자 상태</h1><div class="layout-single"><ul><li>오늘 환자의 혈압, 심박수, 체온만 측정했습니다. 이것은 마르코프 상태일까요?</li><li>아닙니다. 이 환자가 어제 어떤 약을 먹었는지(History) 모르면 내일의 부작용을 예측할 수 없습니다.</li><li>State는 과거 전체가 아니라, 미래 예측에 필요한 약물 이력, 검사 결과 등을 충분히 담은 요약 정보(충분 통계량)여야 합니다.</li></ul></div><div class="counter">66 / 188</div></section>
+<section class="slide section-slide" data-slide="67"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 06</h1><div class="layout-single" style="text-align:center;"><h2>Reward, Return, and Discounting</h2><p style="font-size:32px;">눈앞의 마시멜로와 미래의 이익</p></div><div class="counter">67 / 188</div></section>
+<section class="slide" data-slide="68"><div class="topline">인공지능 | MDP와 강화학습</div><h1>단기 보상 vs 장기 가치</h1><div class="layout-single"><ul><li>강화학습 에이전트는 지금 당장의 \(R_{t+1}\)만 보고 달리지 않습니다.</li><li>앞으로 남은 모든 인생(?)에서 받을 보상들의 총합을 극대화하려 합니다.</li></ul></div><div class="counter">68 / 188</div></section>
+<section class="slide" data-slide="69"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Return (누적 보상)의 정의</h1><div class="layout-single"><ul><li>에피소드 시작부터 끝까지 받는 보상의 총합을 Return (\(G_t\))이라 합니다.</li></ul><div class="equation-card" style="margin-top:50px;">\[  G_t  = R_{t+1} + R_{t+2} + R_{t+3} + \dots \]</div></div><div class="counter">69 / 188</div></section>
+<section class="slide" data-slide="70"><div class="topline">인공지능 | MDP와 강화학습</div><h1>무한한 에피소드의 문제 (발산)</h1><div class="layout-single"><ul><li>만약 게임이 영원히 끝나지 않는다면(Infinite horizon), \(G_t\)는 무한대로 발산(Infinity)해버립니다.</li><li>무한대와 무한대를 비교할 수 없으므로 수학적인 최적화를 수행할 수 없습니다.</li></ul></div><div class="counter">70 / 188</div></section>
+<section class="slide" data-slide="71"><div class="topline">인공지능 | MDP와 강화학습</div><h1>해결책: Discounting (할인)</h1><div class="layout-single"><ul><li>이 문제를 해결하기 위해 <strong>Discount Factor (할인율, \(\gamma\))</strong>를 도입합니다.</li><li>이번 강의의 infinite-horizon 문제에서는 \(0 \le \gamma &lt; 1\) 범위를 주로 사용합니다.</li><li>미래의 보상일수록 \(\gamma\)를 여러 번 곱해서 그 가치를 깎아버립니다.</li></ul></div><div class="counter">71 / 188</div></section>
+<section class="slide" data-slide="72"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Discounted Return 수식</h1><div class="layout-single"><div class="equation-card" style="font-size:36px; padding:60px;">\[  G_t  = R_{t+1} + \gamma  R_{t+2} + \gamma ^2 R_{t+3} + \dots = \sum_{k=0}^{\infty} \gamma ^k R_{t+k+1} \]</div></div><div class="counter">72 / 188</div></section>
+<section class="slide" data-slide="73"><div class="topline">인공지능 | MDP와 강화학습</div><h1>γ = 0 일 때의 에이전트</h1><div class="layout-single"><ul><li>만약 \(\gamma = 0\) 이라면 어떻게 될까요?</li><li>\( G_t = R_{t+1} + 0 + 0 + \dots = R_{t+1}\)</li><li>오직 눈앞의 보상만 보는 <strong>초근시안적(Myopic)</strong> 에이전트가 됩니다.</li></ul></div><div class="counter">73 / 188</div></section>
+<section class="slide" data-slide="74"><div class="topline">인공지능 | MDP와 강화학습</div><h1>γ가 1에 가까울 때의 에이전트</h1><div class="layout-single"><ul><li>만약 \(\gamma = 0.99\) 이라면 어떻게 될까요?</li><li>100 스텝 뒤의 보상도 현재 가치의 약 36% 로 꽤 크게 쳐줍니다.</li><li>먼 미래까지 내다보는 <strong>장기적(Farsighted)</strong> 에이전트가 됩니다.</li></ul></div><div class="counter">74 / 188</div></section>
+<section class="slide" data-slide="75"><div class="topline">인공지능 | MDP와 강화학습</div><h1>무한 등비급수 수렴 증명</h1><div class="layout-single"><ul><li>매 턴마다 에이전트가 받을 수 있는 최대 보상을 \(R_{\max}\)라고 합시다.</li><li>무한한 보상의 합은 기하급수의 합 공식에 의해 유한한 상수로 수렴합니다.</li></ul><div class="equation-card" style="margin-top:30px;">\[  G_t  \le \sum_{k=0}^{\infty} \gamma ^k R_{\max} = \frac{R_{\max}}{1 - \gamma } \]</div><div class="callout" style="font-size:24px; padding:20px;">발산 문제가 수학적으로 아름답게 해결되었습니다!</div></div><div class="counter">75 / 188</div></section>
+<section class="slide" data-slide="76"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Reward Shaping: Living Reward</h1><div class="layout-single"><ul><li>Grid World에서 매 턴 이동할 때마다 기본으로 받는 보상(Living Reward)을 바꿔보면 에이전트의 성격이 어떻게 변할까요?</li><li>목표: +1, 함정: -1</li></ul></div><div class="counter">76 / 188</div></section>
+<section class="slide" data-slide="77"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Living Reward에 따른 최적 정책 변화</h1><div class="layout-comparison"><div class="compare-card"><h3>R = -0.01 (풍요로운 세상)</h3><p>패널티가 거의 없어, 가장 안전한 길로 크게 우회함 (보수적).</p></div><div class="compare-card" style="border-top-color: var(--orange);"><h3>R = -2.00 (가혹한 세상)</h3><p>살아있는 것 자체가 엄청난 고통. 위험(-1)을 감수하더라도 최단거리로 질주함 (공격적/자살특공대).</p></div></div><div class="counter">77 / 188</div></section>
+<section class="slide title-slide" data-slide="78" style="background: #2C3E50;"><div class="topline" style="color:var(--orange);">Check-up 1</div><h1 style="color:white; font-size:60px; line-height:1.4;">\(\gamma = 0\)이면 에이전트는 어떤 보상을 중요하게 볼까?</h1><div class="layout-single" style="margin-top:60px; color:#DDE6EE; width:100%;"><ul style="list-style:none; padding:0; text-align:center; width:100%;"><li style="margin:20px 0;">미래의 보상은 완전히 무시하고,</li><li style="margin:20px 0; font-size:45px; color:#F1C40F; font-weight:bold;">오직 '현재 당장 받을 수 있는 보상'만 추구합니다. (Myopic)</li></ul></div></section>
+<section class="slide section-slide" data-slide="79"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 07</h1><div class="layout-single" style="text-align:center;"><h2>Policy, Value, Q Function</h2><p style="font-size:32px;">무엇을 할 것인가, 그것은 얼마나 좋은가</p></div><div class="counter">79 / 188</div></section>
+<section class="slide" data-slide="80"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Policy (π)란 무엇인가?</h1><div class="layout-single"><ul><li>앞서 짧게 배웠듯, 어떤 상태에서 어떤 행동을 할지 알려주는 맵(Map)입니다.</li><li>단순한 지시문이 아니라, 조건부 확률로 표현됩니다.</li></ul></div><div class="counter">80 / 188</div></section>
+<section class="slide" data-slide="81"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Deterministic Policy</h1><div class="layout-single"><ul><li>결정론적 정책: 상태 \(s\)가 주어지면 100% 확률로 특정한 행동 하나만 반환합니다.</li></ul><div class="equation-card" style="margin-top:50px;">\[ a = \pi(s) \]</div></div><div class="counter">81 / 188</div></section>
+<section class="slide" data-slide="82"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Stochastic Policy</h1><div class="layout-single"><ul><li>확률론적 정책: 상태 \(s\)에서 여러 행동을 확률적으로 섞어서 사용합니다.</li><li>예: 가위바위보 게임에서 (묵 33%, 찌 33%, 빠 33%)를 내는 전략.</li></ul><div class="equation-card" style="margin-top:50px;">\[ \pi(a|s) = P(A_t=a \mid  S_t =s) \]</div></div><div class="counter">82 / 188</div></section>
+<section class="slide" data-slide="83"><div class="topline">인공지능 | MDP와 강화학습</div><h1>최적 정책 (Optimal Policy, π*)</h1><div class="layout-single"><ul><li>수많은 정책 중에서, 평균적으로 가장 높은 Return을 가져다주는 정책을 <strong>최적 정책 \(\pi^*\)</strong> 라고 부릅니다.</li><li>강화학습의 궁극적인 목표는 바로 이 \(\pi^*\)를 찾는 것입니다.</li></ul></div><div class="counter">83 / 188</div></section>
+<section class="slide" data-slide="84"><div class="topline">인공지능 | MDP와 강화학습</div><h1>상태 가치 함수 \( V(s) \)의 정의</h1><div class="layout-single"><ul><li>상태 가치 함수 \(V^\pi(s)\)는 에이전트가 어떤 정책 \(\pi\)를 따르고 있을 때, 상태 \(s\)에 서 있으면 앞으로 평균적으로 몇 점을 벌 것 같은지 나타내는 '상태 점수'입니다.</li></ul><div class="equation-card" style="margin-top:50px;">\[ V^\pi(s) = \mathbb{E}_\pi \left[  G_t  \mid  S_t  = s \right] \]</div></div><div class="counter">84 / 188</div></section>
+<section class="slide" data-slide="85"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Grid World \( V(s) \) 히트맵 예시</h1><div class="layout-single"><div><ul><li>+1 목적지에 가까운 상태일수록 V 값이 높습니다 (예: 0.8, 0.9).</li><li>멀어질수록 감가상각과 험난한 여정 때문에 값이 작아집니다.</li></ul></div><div class="visual"><h3 style="font-size:32px; margin-bottom:10px;">\( V(s) \) 예시</h3><p style="font-size:24px; margin:0;">0.6 | 0.7 | 0.8 | +1.0</p></div></div><div class="counter">85 / 188</div></section>
+<section class="slide" data-slide="86"><div class="topline">인공지능 | MDP와 강화학습</div><h1>행동 가치 함수 \( Q(s,a) \)의 정의</h1><div class="layout-single"><ul><li>행동 가치 함수 \(Q^\pi(s,a)\)는 상태 \(s\)에서 일단 <strong>행동 \(a\)를 한번 강제로 취해보고</strong>, 그 다음부터는 정책 \(\pi\)를 따랐을 때 얻게 될 '상태-행동 점수'입니다.</li></ul><div class="equation-card" style="margin-top:50px;">\[ Q^\pi(s,a) = \mathbb{E}_\pi \left[  G_t  \mid  S_t  = s, A_t = a \right] \]</div></div><div class="counter">86 / 188</div></section>
+<section class="slide" data-slide="87"><div class="topline">인공지능 | MDP와 강화학습</div><h1>V vs Q (상태 점수 vs 행동 점수)</h1><div class="layout-comparison"><div class="compare-card" style="border-top-color: var(--blue);"><h3>V(s) : State Value</h3><ul style="font-size:26px; padding-left:20px; text-align:left;"><li><strong>핵심 아이디어:</strong> 이 상태(State)가 얼마나 좋은가?</li><li><strong>업데이트 대상:</strong> 현재 서 있는 '칸'의 가치</li><li><strong>장점:</strong> 상태의 가치를 명확히 파악 가능</li><li><strong>주의점:</strong> 행동을 결정하려면 추가 연산 필요</li></ul></div><div class="compare-card" style="border-top-color: var(--orange);"><h3>Q(s, a) : Action Value</h3><ul style="font-size:26px; padding-left:20px; text-align:left;"><li><strong>핵심 아이디어:</strong> 이 상태에서 이 행동(Action)을 하는 것이 얼마나 좋은가?</li><li><strong>업데이트 대상:</strong> 상태에서 특정 행동을 선택했을 때의 가치</li><li><strong>장점:</strong> 최적의 행동을 즉시 선택 가능 (Max Q)</li><li><strong>주의점:</strong> 상태-행동 쌍의 개수가 많아 연산량이 큼</li></ul></div></div><div class="counter">87 / 188</div></section>
+<section class="slide" data-slide="88"><div class="topline">인공지능 | MDP와 강화학습</div><h1>V와 Q의 수학적 관계</h1><div class="layout-single"><ul><li>상태 \(s\)의 최적 가치 \(V^*(s)\)는, 그 자리에서 할 수 있는 모든 행동들의 가치 \(Q(s,a)\) 중에서 <strong>가장 큰 값</strong>과 같습니다.</li></ul><div class="equation-card" style="margin-top:50px; font-weight:800; border-color:var(--orange);">\[ V^*(s) = \max_{a} Q^*(s,a) \]</div></div><div class="counter">88 / 188</div></section>
+<section class="slide" data-slide="89">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>V와 Q 관계 시각화</h1>
+<div class="layout-visual-text">
+<div class="layout-single" style="font-size:26px; padding-top:0;">
+<div style="gap:20px; display:flex; flex-direction:column; margin-top:20px;">
+<p>상태 <strong>s</strong>에서 행동을 고민합니다.</p>
+<p>• 북쪽 Q-value: <b style="color:var(--green);">8.5</b></p>
+<p>• 동쪽 Q-value: <b>6.2</b></p>
+<p>• 남쪽 Q-value: <b>4.0</b></p>
+</div>
+<div class="callout" style="text-align:left; font-size:24px; padding:20px;">\\( V(s) \\)는 이 중 자동으로 <b>가장 큰 값인 8.5</b>가 됩니다.</div>
+</div>
+<div class="visual">
+<svg height="400" viewbox="0 0 300 300" width="100%">
+<defs><marker id="arrow-87" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--orange)"></path></marker></defs>
+<circle cx="150" cy="40" fill="var(--bg)" r="30" stroke="var(--navy)" stroke-width="5"></circle>
+<text fill="var(--navy)" font-size="24" font-weight="bold" text-anchor="middle" x="150" y="48">V(s)</text>
+<path d="M 150 70 L 60 180" stroke="var(--line)" stroke-width="4"></path>
+<path d="M 150 70 L 150 180" stroke="var(--line)" stroke-width="4"></path>
+<path d="M 150 70 L 240 180" stroke="var(--line)" stroke-width="4"></path>
+<path d="M 60 180 L 140 85" marker-end="url(#arrow-87)" stroke="var(--orange)" stroke-dasharray="10,5" stroke-width="6"></path>
+<text fill="var(--orange)" font-size="18" font-weight="bold" transform="rotate(-50 100 120)" x="100" y="120">max!</text>
+<rect fill="var(--navy)" height="40" width="40" x="40" y="180"></rect>
+<rect fill="var(--slate)" height="40" width="40" x="130" y="180"></rect>
+<rect fill="var(--slate)" height="40" width="40" x="220" y="180"></rect>
+<text fill="var(--green)" font-size="22" font-weight="bold" text-anchor="middle" x="60" y="245">Q=8.5</text>
+<text fill="var(--slate)" font-size="20" text-anchor="middle" x="150" y="245">Q=6.2</text>
+<text fill="var(--slate)" font-size="20" text-anchor="middle" x="240" y="245">Q=4.0</text>
+<text fill="var(--blue)" font-size="18" text-anchor="middle" x="60" y="170">북쪽</text>
+<text fill="var(--slate)" font-size="18" text-anchor="middle" x="150" y="170">동쪽</text>
+<text fill="var(--slate)" font-size="18" text-anchor="middle" x="240" y="170">남쪽</text>
+</svg>
+</div>
+</div>
+<div class="counter">89 / 188</div>
+
+</section>
+<section class="slide" data-slide="90"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Q가 있으면 정책 찾기가 쉬운 이유</h1><div class="layout-single"><ul><li>만약 내 손에 완벽한 Q-table이 있다면 어떻게 행동할까요?</li><li>간단합니다. 지금 서 있는 상태 행에서 가장 값이 큰 행동 열을 고르면 끝입니다!</li><li>환경의 룰(T, R)을 몰라도 행동할 수 있습니다. (Model-free의 핵심)</li></ul></div><div class="counter">90 / 188</div></section>
+<section class="slide" data-slide="91"><div class="topline">인공지능 | MDP와 강화학습</div><h1>최적 가치 \( V^*(s) \)와 \( Q^*(s,a) \)</h1><div class="layout-single"><ul><li>모든 정책 중에서 가장 높은 가치를 내는 함수를 최적 가치 함수라 부릅니다.</li><li>별표(\(*\))를 붙여 표기합니다.</li></ul><div class="equation-card" style="margin-top:50px;">\[ V^*(s) = \max_\pi V^\pi(s) \]</div></div><div class="counter">91 / 188</div></section>
+<section class="slide title-slide" data-slide="92" style="background: #2C3E50;"><div class="topline" style="color:var(--orange);">Check-up 2</div><h1 style="color:white; font-size:60px; line-height:1.4;">\(V(s)\)와 \(Q(s,a)\)의 가장 결정적인 차이는 무엇인가?</h1><div class="layout-single" style="margin-top:60px; color:#DDE6EE; width:100%;"><ul style="list-style:none; padding:0; text-align:center; width:100%;"><li style="margin:20px 0;">\(V(s)\)는 '현재 상태'의 가치만을 의미하고,</li><li style="margin:20px 0; font-size:45px; color:#F1C40F; font-weight:bold;">\(Q(s,a)\)는 '상태에서 특정 행동'을 했을 때의 가치를 의미합니다.</li></ul></div></section>
+<section class="slide section-slide" data-slide="93"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 08</h1><div class="layout-single" style="text-align:center;"><h2>Bellman Equation Intuition</h2><p style="font-size:32px;">현재와 미래를 잇는 마법의 방정식</p></div><div class="counter">93 / 188</div></section>
+<section class="slide" data-slide="94"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Bellman 방정식의 철학: 재귀(Recursion)</h1><div class="layout-single"><ul><li>만약 100칸짜리 미로 끝에 보물이 있다면, 99번째 칸의 가치는 얼마일까요? 당연히 보물에 가깝습니다.</li><li>Bellman 방정식의 핵심: <strong>"현재 내 자리의 가치는 바로 옆 칸의 가치로 정의할 수 있다."</strong></li></ul></div><div class="counter">94 / 188</div></section>
+<section class="slide" data-slide="95"><div class="topline">인공지능 | MDP와 강화학습</div><h1>가치 = 즉각 보상 + 미래 가치</h1><div class="layout-single"><ul><li>수식을 아주 단순한 형태에서부터 조립해봅시다.</li></ul><div class="equation-card" style="margin-top:60px; font-weight:800; font-size:48px;">가치 = [보상] + [미래의 가치]</div></div><div class="counter">95 / 188</div></section>
+<section class="slide" data-slide="96"><div class="topline">인공지능 | MDP와 강화학습</div><h1>미래 가치의 할인 (γ 도입)</h1><div class="layout-single"><ul><li>앞서 배웠듯 미래의 가치는 이자가 깎이듯 할인율 \(\gamma\)가 붙어야 합니다.</li></ul><div class="equation-card" style="margin-top:60px; font-weight:800; font-size:48px;">가치 = [보상] + \(\gamma\) \(\times\) [다음 칸의 가치]</div></div><div class="counter">96 / 188</div></section>
+<section class="slide" data-slide="97"><div class="topline">인공지능 | MDP와 강화학습</div><h1>미래는 불확실하다 (확률의 개입)</h1><div class="layout-single"><ul><li>결정론적 환경이라면 위 수식으로 끝납니다.</li><li>하지만 Grid World처럼 북쪽으로 가려다 미끄러지는 세상이라면? "다음 칸"이 어딘지 확정할 수 없습니다.</li></ul></div><div class="counter">97 / 188</div></section>
+<section class="slide" data-slide="98"><div class="topline">인공지능 | MDP와 강화학습</div><h1>하나의 행동, 여러 개의 다음 상태</h1><div class="layout-single"><ul><li>행동 \(a\)를 했을 때 떨어질 수 있는 다음 상태 \(s'\)가 여러 개 존재합니다.</li><li>이들의 가치를 어떻게 하나로 묶어야 할까요?</li></ul></div><div class="counter">98 / 188</div></section>
+<section class="slide" data-slide="99"><div class="topline">인공지능 | MDP와 강화학습</div><h1>환경의 불확실성: 기댓값 (Expectation)</h1><div class="layout-single"><ul><li>정답은 <strong>가중 평균(Weighted Average)</strong>을 내는 것입니다.</li><li>확률 분포를 가중치로 삼아 모든 가능한 미래의 가치를 합산합니다.</li></ul></div><div class="counter">99 / 188</div></section>
+<section class="slide" data-slide="100"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Sum (합산) 연산자의 의미 (파란색)</h1><div class="layout-single"><h3 style="color:var(--blue); font-size:48px; margin-bottom:30px;">환경의 확률적 합산</h3><div style="font-size:48px; font-weight:800;"><span style="color:var(--blue);">\(\sum_{s'} T(s,a,s')\)</span> \(\times\) [결과]</div><p style="margin-top:30px;">도달할 수 있는 모든 \(s'\) 우주에 대해 확률을 곱해 더한다.</p></div><div class="counter">100 / 188</div></section>
+<section class="slide" data-slide="101"><div class="topline">인공지능 | MDP와 강화학습</div><h1>전이 확률 T는 가중치다</h1><div class="layout-single"><ul><li>앞에서 배운 \(T(s,a,s')\)가 바로 여기서 가중치 역할을 합니다.</li><li>80% 확률로 일어날 미래는 가치에 크게 반영되고, 10% 확률인 미래는 작게 반영됩니다.</li></ul></div><div class="counter">101 / 188</div></section>
+<section class="slide" data-slide="102"><div class="topline">인공지능 | MDP와 강화학습</div><h1>에이전트의 자유 의지: 선택</h1><div class="layout-single"><ul><li>우리는 환경이 던지는 주사위만 맞는 존재가 아닙니다.</li><li>에이전트는 여러 행동(North, South, East, West) 중에서 내 의지로 하나를 <strong>선택</strong>할 수 있습니다.</li></ul></div><div class="counter">102 / 188</div></section>
+<section class="slide" data-slide="103"><div class="topline">인공지능 | MDP와 강화학습</div><h1>에이전트의 최적화: Max 연산자 (오렌지색)</h1><div class="layout-single"><h3 style="color:var(--orange); font-size:48px; margin-bottom:30px;">에이전트의 최적 선택</h3><div style="font-size:48px; font-weight:800;"><span style="color:var(--orange);">\(\max_{a}\)</span> [행동 \(a\)의 결과]</div><p style="margin-top:30px;">여러 선택지 중 가치가 가장 높은 최선의 행동만을 고른다.</p></div><div class="counter">103 / 188</div></section>
+<section class="slide" data-slide="104"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Max와 Sum의 충돌과 결합</h1><div class="layout-single"><ul><li>내가 <strong>선택(Max)</strong>한 행동이 환경에 들어가면, 환경은 <strong>주사위(Sum)</strong>를 굴려 결과를 돌려줍니다.</li><li>이 두 블록을 합치면 그 유명한 방정식이 완성됩니다.</li></ul></div><div class="counter">104 / 188</div></section>
+<section class="slide" data-slide="105"><div class="topline">인공지능 | MDP와 강화학습</div><h1>블록 조립: Bellman Expectation Equation</h1><div class="layout-single"><ul><li>고정된 정책 \(\pi\)를 따를 때의 방정식입니다. (Max가 없음)</li></ul><div class="equation-card" style="margin-top:40px; font-size:38px; padding:50px;">\[ V^\pi(s) = \sum_a \pi(a|s) \color{#2980B9}{\sum_{s'}} \color{#2980B9}{ T(s,a,s') } \Big[ R + \gamma  V^\pi(s') \Big] \]</div></div><div class="counter">105 / 188</div></section>
+<section class="slide" data-slide="106"><div class="topline">인공지능 | MDP와 강화학습</div><h1>블록 조립: Bellman Optimality Equation</h1><div class="layout-single"><ul><li>최적 정책을 찾기 위한 방정식입니다. (에이전트의 의지 Max가 들어감)</li></ul><div class="equation-card" style="margin-top:40px; font-size:38px; padding:50px;">\[ V^*(s) = \color{#E67E22}{\max_a} \color{#2980B9}{\sum_{s'}} \color{#2980B9}{ T(s,a,s') } \Big[ R(s,a,s') + \gamma  V^*(s') \Big] \]</div></div><div class="counter">106 / 188</div></section>
+<section class="slide" data-slide="107"><div class="topline">인공지능 | MDP와 강화학습</div><h1>블록 조립: Q-form Bellman Equation</h1><div class="layout-single"><ul><li>똑같은 원리를 행동 가치 Q 기준으로 쓴 것입니다.</li><li>이미 현재 행동 \(a\)를 했으므로 바깥에 Max는 없고, 다음 상태 \(s'\)에서 최고의 행동 \(a'\)를 고르기 위해 괄호 안쪽에 Max가 붙습니다.</li></ul><div class="equation-card" style="margin-top:30px; font-size:34px;">\[ Q^*(s,a) = \color{#2980B9}{\sum_{s'}} \color{#2980B9}{ T(s,a,s') } \Big[ R + \gamma  \color{#E67E22}{\max_{a'}} Q^*(s', a') \Big] \]</div></div><div class="counter">107 / 188</div></section>
+<section class="slide" data-slide="108"><div class="topline">인공지능 | MDP와 강화학습</div><h1>자주 묻는 질문: 왜 Sum이 Max 안에 있나요?</h1><div class="layout-single"><ul><li>수학식을 보면 항상 \(\max\) 기호 뒤에 \(\sum\) 기호가 나옵니다. 왜 그럴까요?</li><li><strong>시간의 순서</strong> 때문입니다!</li><li>내가 <strong>먼저</strong> 행동을 고르고(Max), 그 <strong>다음에</strong> 환경이 미끄러짐을 결정(Sum)하기 때문입니다.</li></ul><div class="callout">선택이 먼저, 확률적 결과는 나중입니다.</div></div><div class="counter">108 / 188</div></section>
+<section class="slide" data-slide="109"><div class="topline">인공지능 | MDP와 강화학습</div><h1>V의 재귀 트리 시각화</h1><div class="layout-visual-text"><div><svg height="400" style="background:white; border-radius:10px; padding:20px;" viewbox="0 0 400 400" width="100%">
+<circle cx="200" cy="50" fill="white" r="30" stroke="var(--navy)" stroke-width="4"></circle>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="200" y="55">s</text>
+<rect fill="var(--navy)" height="40" rx="5" width="40" x="180" y="160"></rect>
+<text fill="white" font-size="20" font-weight="bold" text-anchor="middle" x="200" y="185">a</text>
+<circle cx="100" cy="300" fill="white" r="30" stroke="var(--navy)" stroke-width="4"></circle>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="100" y="305">s'₁</text>
+<circle cx="300" cy="300" fill="white" r="30" stroke="var(--navy)" stroke-width="4"></circle>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="300" y="305">s'₂</text>
+<path d="M 200 80 L 200 160" fill="none" marker-end="url(#arrow-blue)" stroke="var(--orange)" stroke-width="4"></path>
+<text fill="var(--orange)" font-size="18" font-weight="bold" text-anchor="start" x="220" y="125">Max (정책)</text>
+<path d="M 180 200 L 115 275" fill="none" marker-end="url(#arrow-blue)" stroke="var(--blue)" stroke-width="4"></path>
+<text fill="var(--blue)" font-size="18" font-weight="bold" text-anchor="end" x="120" y="230">Sum (확률)</text>
+<text fill="var(--muted)" font-size="16" text-anchor="end" x="120" y="250">+r₁</text>
+<path d="M 220 200 L 285 275" fill="none" marker-end="url(#arrow-blue)" stroke="var(--blue)" stroke-width="4"></path>
+<text fill="var(--blue)" font-size="18" font-weight="bold" text-anchor="start" x="280" y="230">Sum (확률)</text>
+<text fill="var(--muted)" font-size="16" text-anchor="start" x="280" y="250">+r₂</text>
+</svg></div><div><div><ul><li>루트 노드: 현재 상태 \(s\) (V)</li><li>첫 번째 가지: 행동 \(a\) 선택 (Max)</li><li>두 번째 가지: 다음 상태 \(s'\) 전이 (Sum)</li></ul></div><div class="visual"><div class="card" style="width:100%;"><h3>Backup Diagram</h3><p style="font-size:40px;">\(\bigcirc\) \( V(s) \)</p><p style="font-size:30px;">\(\downarrow\) max</p><p style="font-size:40px;">\(\blacksquare\) \( Q(s,a) \)</p><p style="font-size:30px;">\(\downarrow\) sum</p><p style="font-size:40px;">\(\bigcirc\) V(s')</p></div></div></div></div><div class="counter">109 / 188</div></section>
+<section class="slide title-slide" data-slide="110" style="background: #2C3E50;"><div class="topline" style="color:var(--orange);">Check-up 3</div><h1 style="color:white; font-size:60px; line-height:1.4;">Bellman 방정식에서 max와 sum은 각각 무엇을 의미하는가?</h1><div class="layout-single" style="margin-top:60px; color:#DDE6EE; width:100%;"><ul style="list-style:none; padding:0; text-align:center; width:100%;"><li style="margin:20px 0;"><strong>max</strong>: 에이전트의 주도적인 '최선의 선택'</li><li style="margin:20px 0; font-size:45px; color:#F1C40F; font-weight:bold;"><strong>sum</strong>: 환경이 무작위로 결정하는 '확률적 결과'</li></ul></div></section>
+<section class="slide section-slide" data-slide="111"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 09</h1><div class="layout-single" style="text-align:center;"><h2>Bellman Backup Worked Example</h2><p style="font-size:32px;">숫자로 직접 계산해보자</p></div><div class="counter">111 / 188</div></section>
+<section class="slide" data-slide="112"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Bellman Backup: 손으로 풀어보자</h1><div class="layout-visual-text"><div><svg height="400" style="background:white; border-radius:10px; padding:20px;" viewbox="0 0 400 400" width="100%">
+<circle cx="200" cy="50" fill="white" r="30" stroke="var(--navy)" stroke-width="4"></circle>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="200" y="55">s</text>
+<rect fill="var(--navy)" height="40" rx="5" width="40" x="180" y="160"></rect>
+<text fill="white" font-size="20" font-weight="bold" text-anchor="middle" x="200" y="185">a</text>
+<circle cx="100" cy="300" fill="white" r="30" stroke="var(--navy)" stroke-width="4"></circle>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="100" y="305">s'₁</text>
+<circle cx="300" cy="300" fill="white" r="30" stroke="var(--navy)" stroke-width="4"></circle>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="300" y="305">s'₂</text>
+<path d="M 200 80 L 200 160" fill="none" marker-end="url(#arrow-blue)" stroke="var(--orange)" stroke-width="4"></path>
+<text fill="var(--orange)" font-size="18" font-weight="bold" text-anchor="start" x="220" y="125">Max (정책)</text>
+<path d="M 180 200 L 115 275" fill="none" marker-end="url(#arrow-blue)" stroke="var(--blue)" stroke-width="4"></path>
+<text fill="var(--blue)" font-size="18" font-weight="bold" text-anchor="end" x="120" y="230">Sum (확률)</text>
+<text fill="var(--muted)" font-size="16" text-anchor="end" x="120" y="250">+r₁</text>
+<path d="M 220 200 L 285 275" fill="none" marker-end="url(#arrow-blue)" stroke="var(--blue)" stroke-width="4"></path>
+<text fill="var(--blue)" font-size="18" font-weight="bold" text-anchor="start" x="280" y="230">Sum (확률)</text>
+<text fill="var(--muted)" font-size="16" text-anchor="start" x="280" y="250">+r₂</text>
+</svg></div><div><ul><li>방금 본 길고 복잡한 수식이 실제 코딩할 때는 그저 사칙연산에 불과하다는 것을 증명하겠습니다.</li></ul></div></div><div class="counter">112 / 188</div></section>
+<section class="slide" data-slide="113"><div class="topline">인공지능 | MDP와 강화학습</div><h1>문제 상황 세팅</h1><div class="layout-single"><ul><li>현재 위치 상태 \(s\)에서 행동을 고르려 합니다.</li><li>선택지는 단 두 개: <code>North</code> 와 <code>East</code></li><li>다음 상태들의 기존 \(V\) 값은 이미 알고 있다고 가정합니다.</li></ul></div><div class="counter">113 / 188</div></section>
+<section class="slide" data-slide="114"><div class="topline">인공지능 | MDP와 강화학습</div><h1>주어진 조건</h1><div class="layout-single"><ul><li>할인율: \(\gamma\) = 0.9\)</li><li>Living Reward: 이동 시 항상 \(R = -1\)</li></ul></div><div class="counter">114 / 188</div></section>
+<section class="slide" data-slide="115"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Q(s, North) 기대 미래 가치 도출</h1><div class="layout-single"><ul><li>North 행동 시 3가지 전이 가능성:</li><li>0.8 확률로 (1,2) 도달 → V(1,2) 반영</li><li>0.1 확률로 (2,1) 도달 → V(2,1) 반영</li><li>0.1 확률로 제자리 (1,1) → V(1,1) 반영</li><li>기대 미래 가치 = 0.8*V(1,2) + 0.1*V(2,1) + 0.1*V(1,1)</li><li>\( Q(s, \text{North}) = R + \gamma \times \text{기대 미래 가치} \)</li></ul></div><div class="counter">115 / 188</div></section>
+<section class="slide" data-slide="116"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Q(s, East) 기대 미래 가치 도출</h1><div class="layout-single"><ul><li>East 행동 시 3가지 전이 가능성:</li><li>0.8 확률로 (2,1) 도달 → V(2,1) 반영</li><li>0.1 확률로 (1,2) 도달 → V(1,2) 반영</li><li>0.1 확률로 제자리 (1,1) → V(1,1) 반영</li><li>기대 미래 가치 = 0.8*V(2,1) + 0.1*V(1,2) + 0.1*V(1,1)</li><li>\( Q(s, \text{East}) = R + \gamma \times \text{기대 미래 가치} \)</li></ul></div><div class="counter">116 / 188</div></section>
+<section class="slide" data-slide="117"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Max 연산: 최적 행동의 선택</h1><div class="layout-single"><ul><li>두 행동의 가치를 모두 구했습니다. 이제 에이전트의 시간입니다.</li><li>\(Q(s, North) = 6.56\)</li><li>\(Q(s, East) = 3.50\)</li></ul><div class="equation-card" style="margin-top:40px; border-color:var(--orange);">\[  V(s)  = \max(6.56, 3.50) = \mathbf{6.56} \]</div></div><div class="counter">117 / 188</div></section>
+<section class="slide" data-slide="118"><div class="topline">인공지능 | MDP와 강화학습</div><h1>결과 해석: 불확실성 감수</h1><div class="layout-single"><ul><li>왜 \(V=5\) 인 확실한 길을 놔두고 불확실한 North를 선택했을까요?</li><li>20% 확률로 망할 위험(V=2)을 감수하더라도, 80% 확률로 터지는 대박(V=10)의 기댓값이 훨씬 크기 때문입니다.</li></ul><div class="callout">강화학습 에이전트는 기댓값을 기반으로 용감한 베팅을 합니다.</div></div><div class="counter">118 / 188</div></section>
+<section class="slide section-slide" data-slide="119"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 10</h1><div class="layout-single" style="text-align:center;"><h2>Dynamic Programming View</h2><p style="font-size:32px;">알고리즘으로 문제 풀기</p></div><div class="counter">119 / 188</div></section>
+<section class="slide" data-slide="120"><div class="topline">인공지능 | MDP와 강화학습</div><h1>수학 식에서 알고리즘으로</h1><div class="layout-single"><ul><li>방금까지 우리는 \(V\)를 구하는 '수학 공식'을 배웠습니다.</li><li>하지만 컴퓨터에게 이 공식을 주고 코드를 짜라고 하면 에러가 납니다. 왜일까요?</li></ul></div><div class="counter">120 / 188</div></section>
+<section class="slide" data-slide="121"><div class="topline">인공지능 | MDP와 강화학습</div><h1>순환 참조의 문제</h1><div class="layout-single"><ul><li>방정식의 좌변에 \(V(s)\)가 있고, 우변에도 \(V(s')\)가 있습니다.</li><li>자기 자신을 정의하기 위해 자기 자신이 필요한 <strong>순환 참조(Recursive)</strong> 구조입니다.</li><li>연립방정식으로 풀기에는 상태가 너무 많습니다. (바둑의 상태 = \(10^{170}\))</li></ul></div><div class="counter">121 / 188</div></section>
+<section class="slide" data-slide="122"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Dynamic Programming (동적 계획법)</h1><div class="layout-single"><ul><li>복잡한 문제를 잘게 쪼개어 풀고, 그 결과를 저장해 두었다가 다시 쓰는 프로그래밍 기법입니다.</li><li>Bellman 방정식을 알고리즘으로 변환하는 핵심 도구입니다.</li></ul></div><div class="counter">122 / 188</div></section>
+<section class="slide" data-slide="123">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>DP의 핵심: Overlapping Subproblems</h1>
+<div class="layout-visual-text">
+<div class="layout-single" style="font-size:26px; padding-top:0;">
+<ul>
+<li>Grid World에서 (1,1)의 가치를 구하려면 (1,2)의 가치를 알아야 합니다.</li>
+<li>그런데 (2,1)의 가치를 구할 때도 (1,2)의 가치가 필요할 수 있습니다.</li>
+<li>부분 문제들이 겹칩니다! 매번 새로 계산하지 않고 <strong>기억(Memoization)</strong> 해둡니다.</li>
+</ul>
+</div>
+<div class="visual">
+<svg height="350" viewbox="0 0 300 250" width="100%">
+<defs>
+<marker id="arrow-dark" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--navy)"></path></marker>
+</defs>
+<circle cx="80" cy="180" fill="var(--bg)" r="30" stroke="var(--blue)" stroke-width="4"></circle>
+<text fill="var(--navy)" font-weight="bold" text-anchor="middle" x="80" y="186">V(1,1)</text>
+<circle cx="220" cy="180" fill="var(--bg)" r="30" stroke="var(--blue)" stroke-width="4"></circle>
+<text fill="var(--navy)" font-weight="bold" text-anchor="middle" x="220" y="186">V(2,1)</text>
+<circle cx="150" cy="60" fill="#EAF8EF" r="35" stroke="var(--green)" stroke-width="5"></circle>
+<text fill="var(--green)" font-size="20" font-weight="bold" text-anchor="middle" x="150" y="66">V(1,2)</text>
+<path d="M 95 155 L 125 90" marker-end="url(#arrow-dark)" stroke="var(--navy)" stroke-width="4"></path>
+<path d="M 205 155 L 175 90" marker-end="url(#arrow-dark)" stroke="var(--navy)" stroke-width="4"></path>
+<text fill="var(--red)" font-size="16" font-weight="bold" text-anchor="middle" x="150" y="230">트리는 이를 두 번 계산하지만, DP는 캐싱(기억)합니다.</text>
+</svg>
+</div>
+</div>
+<div class="counter">123 / 188</div>
+
+</section>
+<section class="slide" data-slide="124"><div class="topline">인공지능 | MDP와 강화학습</div><h1>반복 업데이트 (Iterative Update)</h1><div class="layout-single"><ul><li>정확한 정답을 한 번에 구하려 하지 않습니다.</li><li>처음엔 아무 숫자나 (예: 0) 적어둔 뒤, Bellman 공식을 <strong>업데이트 룰</strong>로 사용하여 값을 계속 고쳐 나갑니다.</li></ul><div class="equation-card" style="margin-top:30px;">\[ V_{new}(s) \leftarrow \max_a \sum T [R + \gamma  V_{old}(s')] \]</div></div><div class="counter">124 / 188</div></section>
+<section class="slide" data-slide="125"><div class="topline">인공지능 | MDP와 강화학습</div><h1>가치 전파(Value Propagation)의 직관</h1><div class="layout-single"><ul><li>처음 0으로 가득 찬 세상에서, 목표 지점(+1) 근처의 칸들만 다음 턴에 점수를 얻습니다.</li><li>시간이 흐르며 그 점수가 물결처럼 퍼져나가 출발점까지 도달하게 됩니다.</li></ul></div><div class="counter">125 / 188</div></section>
+<section class="slide section-slide" data-slide="126"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 11</h1><div class="layout-single" style="text-align:center;"><h2>Value Iteration</h2><p style="font-size:32px;">가치가 파도처럼 밀려온다</p></div><div class="counter">126 / 188</div></section>
+<section class="slide" data-slide="127"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Value Iteration 알고리즘 목표</h1><div class="layout-single"><ul><li>목표: 모든 상태의 최적 가치 \(V^*(s)\)를 컴퓨터가 스스로 찾아내게 만드는 것.</li><li>준비물: Bellman Optimality Equation (업데이트용).</li></ul></div><div class="counter">127 / 188</div></section>
+<section class="slide" data-slide="128"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Step 0: 모든 V를 0으로 초기화</h1><div class="layout-single"><ul><li>아무 정보가 없는 상태 \(k=0\) 단계입니다. 모든 칸의 가치가 0.0 입니다.</li><li>(단, Terminal state인 +1 칸은 고정된 자기 점수를 가집니다.)</li></ul><div class="grid-world" style="transform:scale(0.6); margin-top:-20px;"><div class="gw-cell">0.0</div><div class="gw-cell">0.0</div><div class="gw-cell">0.0</div><div class="gw-cell plus">+1</div><div class="gw-cell">0.0</div><div class="gw-cell wall">WALL</div><div class="gw-cell">0.0</div><div class="gw-cell minus">-1</div><div class="gw-cell start">0.0</div><div class="gw-cell">0.0</div><div class="gw-cell">0.0</div><div class="gw-cell">0.0</div></div></div><div class="counter">128 / 188</div></section>
+<section class="slide" data-slide="129"><div class="topline">인공지능 | MDP와 강화학습</div><h1>k=1: 첫 번째 업데이트</h1><div class="layout-single"><ul><li>Bellman Backup을 한 번 돌렸습니다. (\(k=1\))</li><li>+1 바로 옆에 있던 칸만 (보상+1 * 확률) 계산에 의해 0.7 이라는 값을 얻었습니다. 나머지는 여전히 근처에 0밖에 없어서 0입니다.</li></ul><div class="visual" style="margin-top:20px;">
+<svg style="background:var(--gray-light); border-radius:10px; padding:10px;" viewbox="0 0 300 100" width="400">
+<rect fill="white" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="10" y="10"></rect>
+<text fill="var(--navy)" font-size="24" text-anchor="middle" x="50" y="55">0.0</text>
+<rect fill="white" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="110" y="10"></rect>
+<text fill="var(--navy)" font-size="24" text-anchor="middle" x="150" y="55">0.7</text>
+<rect fill="var(--green)" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="210" y="10"></rect>
+<text fill="white" font-size="24" text-anchor="middle" x="250" y="55">+1</text>
+</svg>
+</div></div><div class="counter">129 / 188</div></section>
+<section class="slide" data-slide="130"><div class="topline">인공지능 | MDP와 강화학습</div><h1>k=2: 가치의 확산</h1><div class="layout-single"><ul><li>두 번 돌렸습니다. (\(k=2\))</li><li>이제 0.7 옆에 있던 칸들이 0.7의 존재를 깨닫고 0.5 정도의 값을 얻기 시작합니다. 값이 퍼져나갑니다.</li></ul><div class="visual" style="margin-top:20px;">
+<svg style="background:var(--gray-light); border-radius:10px; padding:10px;" viewbox="0 0 300 100" width="400">
+<rect fill="white" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="10" y="10"></rect>
+<text fill="var(--navy)" font-size="24" text-anchor="middle" x="50" y="55">0.5</text>
+<rect fill="white" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="110" y="10"></rect>
+<text fill="var(--navy)" font-size="24" text-anchor="middle" x="150" y="55">0.7</text>
+<rect fill="var(--green)" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="210" y="10"></rect>
+<text fill="white" font-size="24" text-anchor="middle" x="250" y="55">+1</text>
+</svg>
+</div></div><div class="counter">130 / 188</div></section>
+<section class="slide" data-slide="131"><div class="topline">인공지능 | MDP와 강화학습</div><h1>k=100: 전체 맵으로의 수렴</h1><div class="layout-single"><ul><li>수백 번을 돌리면, 어느 순간 값이 더 이상 변하지 않고 고정됩니다.</li><li>이를 <strong>수렴(Convergence)</strong>이라 하며, 이때의 값들이 바로 정답인 최적 가치 \(V^*\)입니다.</li></ul><div class="visual" style="margin-top:20px;">
+<svg style="background:var(--gray-light); border-radius:10px; padding:10px;" viewbox="0 0 400 100" width="500">
+<rect fill="white" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="10" y="10"></rect>
+<text fill="var(--navy)" font-size="24" text-anchor="middle" x="50" y="55">0.6</text>
+<rect fill="white" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="110" y="10"></rect>
+<text fill="var(--navy)" font-size="24" text-anchor="middle" x="150" y="55">0.7</text>
+<rect fill="white" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="210" y="10"></rect>
+<text fill="var(--navy)" font-size="24" text-anchor="middle" x="250" y="55">0.8</text>
+<rect fill="var(--green)" height="80" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="310" y="10"></rect>
+<text fill="white" font-size="24" text-anchor="middle" x="350" y="55">+1</text>
+</svg>
+</div></div><div class="counter">131 / 188</div></section>
+<section class="slide" data-slide="132"><div class="topline">인공지능 | MDP와 강화학습</div><h1>수렴 조건 (Stopping Condition)</h1><div class="layout-single"><ul><li>컴퓨터는 언제 while 루프를 멈춰야 할까요?</li><li>모든 칸의 \(V_{new}\) 와 \(V_{old}\) 의 차이를 구합니다.</li><li>가장 크게 변한 칸의 변화량조차 아주 작은 상수 \(\epsilon\) 보다 작다면 종료합니다.</li></ul></div><div class="counter">132 / 188</div></section>
+<section class="slide" data-slide="133"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Δ &lt; ε 의 시각적 의미</h1><div class="layout-single"><ul><li>돌을 던진 호수의 파문이 점점 잦아들다가, 마침내 수면이 완전히 잔잔해지는 현상과 완벽히 일치합니다.</li></ul><div class="equation-card" style="margin-top:40px;">\[ \max_s | V_{new}(s) - V_{old}(s) | &lt; \epsilon \]</div></div><div class="counter">133 / 188</div></section>
+<section class="slide" data-slide="134"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Value Iteration 의사코드</h1><div class="layout-single"><div class="algorithm"><pre>Initialize V(s) = 0 for all states s
+Repeat:
+    V_old = V
+    For each state s:
+        V_new(s) = max_a sum_{s'} T(s,a,s') [R(s,a,s') + gamma V_old(s')]
+    delta = max_s |V_new(s) - V_old(s)|
+    V = V_new
+Until delta &lt; epsilon</pre></div></div><div class="counter">134 / 188</div></section>
+<section class="slide" data-slide="135"><div class="topline">인공지능 | MDP와 강화학습</div><h1>한계점: Max 연산의 무거움</h1><div class="layout-single"><ul><li>Value Iteration은 한 스텝을 돌 때마다 모든 가능한 행동 \(a\)에 대해 수식을 다 전개한 뒤 <code>max</code>를 찾아야 합니다.</li><li>행동의 가짓수가 1,000개라면? 매 반복마다 끔찍한 연산이 필요합니다.</li></ul></div><div class="counter">135 / 188</div></section>
+<section class="slide section-slide" data-slide="136"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 12</h1><div class="layout-single" style="text-align:center;"><h2>Policy Extraction</h2><p style="font-size:32px;">숫자에서 행동 화살표 뽑아내기</p></div><div class="counter">136 / 188</div></section>
+<section class="slide" data-slide="137"><div class="topline">인공지능 | MDP와 강화학습</div><h1>V는 행동을 직접 말해주지 않는다</h1><div class="layout-single"><ul><li>우리는 완벽한 가치 지도 \(V^*(s)\)를 얻어냈습니다.</li><li>하지만 \(V\) 맵만으로는 어떤 방향으로 가야 할지 행동이 직접 주어지지 않습니다. 단, 모델 T, R을 알면 One-step lookahead로 행동을 찾을 수 있습니다.</li></ul></div><div class="counter">137 / 188</div></section>
+<section class="slide" data-slide="138"><div class="topline">인공지능 | MDP와 강화학습</div><h1>One-step Lookahead의 필요성</h1><div class="layout-single"><ul><li>내 옆 칸에 +10점, 아래 칸에 +5점이 적혀 있다고 합시다. 무조건 옆으로 가면 될까요?</li><li>만약 옆으로 가는 길이 얼음판이라 90% 확률로 뒤로 미끄러진다면?</li><li>즉, 점수(V)뿐만 아니라 <strong>환경의 확률(T)</strong>을 고려하여 기댓값을 한 번 더 계산해야만 진짜 행동을 고를 수 있습니다.</li></ul></div><div class="counter">138 / 188</div></section>
+<section class="slide" data-slide="139"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Argmax 연산자 도입</h1><div class="layout-single"><ul><li><code>max</code>는 가장 큰 "값"을 반환합니다. (예: 8.5)</li><li><code>argmax</code>는 그 가장 큰 값을 만들어낸 "행동"을 반환합니다. (예: North)</li></ul><div class="callout">우리가 원하는 정책(Policy) 화살표는 바로 <code>argmax</code>의 결과물입니다.</div></div><div class="counter">139 / 188</div></section>
+<section class="slide" data-slide="140"><div class="topline">인공지능 | MDP와 강화학습</div><h1>V에서 정책 화살표 도출하기</h1><div class="layout-single"><div class="equation-card" style="padding:50px;">\[ \pi^*(s) = \arg\max_a \sum_{s'}  T(s,a,s')  \Big[ R + \gamma  V^*(s') \Big] \]</div><ul style="margin-top:40px;"><li>결국 V를 알고 있어도, 행동을 하려면 매번 \(T\)를 꺼내서 Sum 연산을 다시 해야 합니다.</li></ul></div><div class="counter">140 / 188</div></section>
+<section class="slide" data-slide="141"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Q를 알면 정책 추출이 쉬운 이유</h1><div class="layout-single"><ul><li>반면, 최적 행동 가치 \(Q^*(s,a)\) 지도를 가지고 있다면 어떨까요?</li></ul><div class="equation-card" style="margin-top:40px; border-color:var(--orange);">\[ \pi^*(s) = \arg\max_a Q^*(s,a) \]</div><ul style="margin-top:40px;"><li>Sum과 T 계산이 Q 안에 이미 다 녹아있기 때문에, 그냥 표에서 제일 큰 값을 보고 화살표를 그리면 끝납니다!</li></ul></div><div class="counter">141 / 188</div></section>
+<section class="slide title-slide" data-slide="142" style="background: #2C3E50;"><div class="topline" style="color:var(--orange);">Check-up 4</div><h1 style="color:white; font-size:60px; line-height:1.4;">Value Iteration은 Policy를 직접 업데이트하는가?</h1><div class="layout-single" style="margin-top:60px; color:#DDE6EE; width:100%;"><ul style="list-style:none; padding:0; text-align:center; width:100%;"><li style="margin:20px 0;">아닙니다. Policy는 아예 저장하지 않습니다.</li><li style="margin:20px 0; font-size:45px; color:#F1C40F; font-weight:bold;">오직 'Value(숫자)'만 갱신하며, 마지막에 Policy를 추출합니다.</li></ul></div></section>
+<section class="slide section-slide" data-slide="143" style="background: linear-gradient(135deg, #2C3E50 0%, #1F2D3A 100%);"><div class="topline" style="color:var(--orange);">PART 2</div><h1 style="color:white; font-size:90px;">Policy Iteration &amp; RL Preview</h1><p style="color:#DDE6EE; font-size:32px; margin-top:30px;">정책 반복과 모델-프리 강화학습으로의 확장</p></section>
+<section class="slide section-slide" data-slide="144"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 13</h1><div class="layout-single" style="text-align:center;"><h2>Policy Iteration</h2><p style="font-size:32px;">평가와 개선의 이분법</p></div><div class="counter">144 / 188</div></section>
+<section class="slide" data-slide="145"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Value Iteration의 단점 극복</h1><div class="layout-single"><ul><li>VI는 매 루프마다 모든 방향의 기댓값을 구하고 <code>max</code>를 치는 피곤한 짓을 수백 번 반복합니다.</li><li>이런 아이디어는 어떨까요? "일단 대충 방향 화살표를 픽스해놓고, 이 화살표대로만 끝까지 가보고 나중에 화살표를 고치면 덜 피곤하지 않을까?"</li></ul></div><div class="counter">145 / 188</div></section>
+<section class="slide" data-slide="146"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Step 1: Policy Evaluation (정책 평가)</h1><div class="layout-single"><ul><li>현재 내가 가진 화살표(정책 \(\pi\))대로 행동했을 때의 성적표(V)를 구합니다.</li><li>이때는 행동이 하나로 고정되어 있으므로 귀찮은 <strong>Max 연산이 아예 빠집니다!</strong></li></ul><div class="equation-card" style="margin-top:40px; font-size:32px;">\[ V^\pi(s) = \sum_{s'} T(s,\pi(s),s') \Big[ R + \gamma  V^\pi(s') \Big] \]</div></div><div class="counter">146 / 188</div></section>
+<section class="slide" data-slide="147"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Step 2: Policy Improvement (정책 개선)</h1><div class="layout-single"><ul><li>성적표(V)가 나왔습니다.</li><li>이제 현재 V를 바탕으로 앞서 배운 <code>argmax</code>를 한 번 돌려서, 더 나은 방향으로 모든 화살표를 동시에 돌려버립니다 (업데이트).</li></ul></div><div class="counter">147 / 188</div></section>
+<section class="slide" data-slide="148"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Greedy Improvement</h1><div class="layout-single"><ul><li>화살표를 바꿀 때 눈치 보지 않고 당장 기댓값이 제일 높은 쪽으로 무자비하게 돌립니다. (탐욕적 개선)</li><li>놀랍게도 수학적으로 이렇게 바뀐 새 정책은 무조건 이전 정책보다 같거나 더 낫다는 것이 증명되어 있습니다. (Policy Improvement Theorem)</li></ul></div><div class="counter">148 / 188</div></section>
+<section class="slide" data-slide="149"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Policy Iteration 의사코드</h1><div class="layout-single"><div class="algorithm" style="font-size:28px;"><pre>Initialize random policy π
+Repeat:
+  # 1. Evaluation
+  V = Solve_Linear_Equations(π)
+  
+  # 2. Improvement
+  policy_stable = true
+  For each state s:
+    old_a = π(s)
+    π(s) = argmax_a ∑ T [ R + γ V(s') ]
+    if old_a != π(s) then policy_stable = false
+    
+Until policy_stable is true</pre></div></div><div class="counter">149 / 188</div></section>
+<section class="slide" data-slide="150"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Grid World: 화살표의 턴어라운드</h1><div class="layout-single"><ul><li>초기: 엉망진창 무작위 화살표 (벽으로 돌진 등)</li><li>1회 개선: 벽으로 가지 않게 꺾임.</li><li>2회 개선: +1 칸을 향해 정렬됨.</li><li>3회: 화살표가 더 이상 안 바뀜 (Stable = 최적화 완료!)</li></ul></div><div class="counter">150 / 188</div></section>
+<section class="slide section-slide" data-slide="151"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 14</h1><div class="layout-single" style="text-align:center;"><h2>VI vs PI</h2><p style="font-size:32px;">어떤 알고리즘을 쓸 것인가</p></div><div class="counter">151 / 188</div></section>
+<section class="slide" data-slide="152"><div class="topline">인공지능 | MDP와 강화학습</div><h1>차이점 요약: 업데이트 대상</h1><div class="layout-single"><ul><li><strong>Value Iteration:</strong> 계속 V를 깎고 다듬다 보면 자연스럽게 최적의 Policy가 완성됨.</li><li><strong>Policy Iteration:</strong> Policy를 직접 통째로 바꾸면서 최적을 찾아감.</li></ul></div><div class="counter">152 / 188</div></section>
+<section class="slide" data-slide="153"><div class="topline">인공지능 | MDP와 강화학습</div><h1>계산 비용 (Computational Trade-off)</h1><div class="layout-single"><ul><li><strong>VI:</strong> 한 스텝(루프 1회)은 빠르지만, 수렴할 때까지 루프를 엄청 많이 돌아야 함.</li><li><strong>PI:</strong> 루프 횟수는 아주 적음 (몇 번 화살표 바꾸면 끝남). 대신 루프 1회 안에서 V를 완벽히 구해야 하므로(역행렬 또는 내부 루프) 한 스텝이 무거움.</li></ul></div><div class="counter">153 / 188</div></section>
+<section class="slide" data-slide="154"><div class="topline">인공지능 | MDP와 강화학습</div><h1>요약 비교 테이블</h1><div class="layout-single"><table style="margin-top:40px;"><thead><tr><th>항목</th><th>Value Iteration</th><th>Policy Iteration</th></tr></thead><tbody><tr><td>타겟</td><td>Value</td><td>Policy</td></tr><tr><td>Max 연산</td><td>매 스텝마다 모든 상태에 대해</td><td>Improvement 단계에서만 1회</td></tr><tr><td>루프 횟수</td><td>매우 많음</td><td>매우 적음</td></tr><tr><td>적합한 환경</td><td>상태가 적당할 때</td><td>행동 공간이 커서 Max가 버거울 때</td></tr></tbody></table></div><div class="counter">154 / 188</div></section>
+<section class="slide section-slide" data-slide="155"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 15</h1><div class="layout-single" style="text-align:center;"><h2>From MDP to RL</h2><p style="font-size:32px;">규칙을 모르는 세상으로의 첫 발</p></div><div class="counter">155 / 188</div></section>
+<section class="slide" data-slide="156"><div class="topline">인공지능 | MDP와 강화학습</div><h1>지금까지의 대전제: T와 R을 안다</h1><div class="layout-single"><ul><li>지금까지 배운 VI와 PI는 환경의 모델(T, R)이 주어졌을 때 사용하는 완벽한 계획(Planning) 알고리즘입니다.</li><li>환경의 설계자처럼 \(T(s,a,s')\) 확률과 \(R\) 점수를 모두 알고 있어야 작동합니다. (Model-based)</li></ul></div><div class="counter">156 / 188</div></section>
+<section class="slide" data-slide="157"><div class="topline">인공지능 | MDP와 강화학습</div><h1>현실 세계: 규칙을 모른다</h1><div class="layout-single"><ul><li>당신이 처음 자전거 타기를 배울 때, 핸들을 15도 꺾으면 바퀴가 어떻게 굴러가는지 확률 미분 방정식을 머리로 계산하고 탔나요?</li><li>아닙니다. 직접 넘어지면서(Experience) 몸으로 배웠습니다.</li><li>강화학습은 에이전트가 환경과 상호작용하며 경험으로 정책을 개선하는 문제 설정이다. 이번 강의 후반부에서는 그중 환경 모델 T, R을 명시적으로 모른다고 가정하는 model-free RL을 preview한다.</li></ul></div><div class="counter">157 / 188</div></section>
+<section class="slide" data-slide="158"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Offline Planning vs Online Learning</h1><div class="layout-visual-text"><div><div class="compare-card"><h3>Offline Planning (MDP)</h3><p>T와 R을 이미 알고 계산만 수행 (Value Iteration)</p></div><div class="compare-card" style="border-top-color: var(--orange); margin-top:20px;"><h3>Online Learning (RL)</h3><p>규칙을 모른 채 환경과 부딪히며 경험(Trajectory)을 통해 학습</p></div></div><div class="agent-env-loop">
+<svg class="svg-diagram" viewbox="0 0 300 150">
+<rect fill="#2B3A67" height="50" rx="5" width="80" x="20" y="50"></rect>
+<text fill="white" font-size="20" text-anchor="middle" x="60" y="80">Agent</text>
+<rect fill="#E86A33" height="50" rx="5" width="80" x="200" y="50"></rect>
+<text fill="white" font-size="20" text-anchor="middle" x="240" y="80">Env</text>
+<path d="M 100 65 L 200 65" marker-end="url(#arrow)" stroke="#2B3A67" stroke-width="3"></path>
+<text font-size="16" text-anchor="middle" x="150" y="55">Action (A_t)</text>
+<path d="M 200 85 L 100 85" marker-end="url(#arrow2)" stroke="#E86A33" stroke-width="3"></path>
+<text font-size="16" text-anchor="middle" x="150" y="105">State, Reward</text>
+<defs>
+<marker id="arrow" markerheight="10" markerunits="strokeWidth" markerwidth="10" orient="auto" refx="9" refy="3"><path d="M0,0 L0,6 L9,3 z" fill="#2B3A67"></path></marker>
+<marker id="arrow2" markerheight="10" markerunits="strokeWidth" markerwidth="10" orient="auto" refx="9" refy="3"><path d="M0,0 L0,6 L9,3 z" fill="#E86A33"></path></marker>
+</defs>
+</svg>
+</div></div><div class="counter">158 / 188</div></section>
+<section class="slide" data-slide="159"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Trajectory (궤적)의 개념</h1><div class="layout-single"><ul><li>에이전트가 환경과 직접 부딪히며 남기는 발자취를 궤적(Trajectory)이라고 합니다.</li><li>기호: \(S_0, A_0, R_1, S_1, A_1, R_2, S_2, \dots\)</li><li>RL은 이 발자취 기록물(Data)을 모아서 V와 Q를 역산해냅니다.</li></ul></div><div class="counter">159 / 188</div></section>
+<section class="slide" data-slide="160"><div class="topline">인공지능 | MDP와 강화학습</div><h1>새로운 딜레마: Exploration vs Exploitation</h1><div class="layout-single"><ul><li>지도를 모른 채 길을 찾아야 하므로 새로운 문제가 생깁니다.</li><li><strong>Exploitation (활용):</strong> 내가 가본 길 중 제일 안전한 길로만 간다. (안전하지만 우물 안 개구리)</li><li><strong>Exploration (탐험):</strong> 안 가본 험지로 가본다. (위험하지만 더 큰 대박 발견 가능성)</li><li>이 둘의 밸런스를 맞추는 것이 RL의 숙명입니다.</li></ul></div><div class="counter">160 / 188</div></section>
+<section class="slide section-slide" data-slide="161"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 16</h1><div class="layout-single" style="text-align:center;"><h2>Monte Carlo &amp; Temporal Difference</h2><p style="font-size:32px;">경험에서 가치를 뽑아내는 두 가지 방법</p></div><div class="counter">161 / 188</div></section>
+<section class="slide" data-slide="162"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Monte Carlo (MC) 접근법</h1><div class="layout-single"><ul><li><strong>철학:</strong> "끝날 때까지 끝난 게 아니다."</li><li>게임이 완전히 종료(Terminal state)될 때까지 기다렸다가, 실제로 얻은 총점수(Return, \(G_t\))를 내가 거쳐온 상태들의 점수로 사용합니다.</li></ul></div><div class="counter">162 / 188</div></section>
+<section class="slide" data-slide="163"><div class="topline">인공지능 | MDP와 강화학습</div><h1>MC의 장점과 단점</h1><div class="layout-single"><ul><li><strong>장점:</strong> 중간에 가짜로 예측한 값이 섞이지 않아서 평균을 내면 아주 정확합니다 (Unbiased).</li><li><strong>단점:</strong> 자율주행차가 사고가 날 때까지 기다려야 점수를 배웁니다. 운전 중에 방향이 잘못되었음을 깨달아도 게임이 끝나기 전까진 모릅니다. (High Variance)</li></ul></div><div class="counter">163 / 188</div></section>
+<section class="slide" data-slide="164"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Temporal Difference (TD) 접근법</h1><div class="layout-single"><ul><li><strong>철학:</strong> "한 걸음 가보면 안다."</li><li>딱 한 걸음(One step)만 움직여서 1턴어치 보상(\(R\))을 받은 뒤, 내가 도착한 다음 상태의 '예상 점수'(\(V(s')\))를 더해서 현재 상태의 점수를 <strong>즉시</strong> 수정합니다.</li></ul></div><div class="counter">164 / 188</div></section>
+<section class="slide" data-slide="165">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>Bootstrapping 개념</h1>
+<div class="layout-visual-text">
+<div class="layout-single" style="font-size:26px; padding-top:0;">
+<ul>
+<li>추정치(예상 점수)를 사용해 또 다른 추정치(현재 점수)를 업데이트하는 기법을 붓스트래핑(Bootstrapping)이라고 부릅니다.</li>
+<li>Bellman 방정식의 재귀적 성질을 경험 데이터에 그대로 적용한 것입니다.</li>
+</ul>
+</div>
+<div class="visual">
+<svg height="300" viewbox="0 0 400 200" width="100%">
+<defs>
+<marker id="arrow-green-159" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--green)"></path></marker>
+</defs>
+<rect fill="var(--bg)" height="60" rx="8" stroke="var(--blue)" stroke-width="4" width="100" x="20" y="80"></rect>
+<text fill="var(--navy)" font-size="20" font-weight="bold" text-anchor="middle" x="70" y="115">V(S_t)</text>
+<text fill="var(--muted)" font-size="16" text-anchor="middle" x="70" y="160">(현재 추정치)</text>
+<rect fill="#EAF8EF" height="60" rx="8" stroke="var(--green)" stroke-width="4" width="100" x="280" y="80"></rect>
+<text fill="var(--green)" font-size="20" font-weight="bold" text-anchor="middle" x="330" y="115">V(S_{t+1})</text>
+<text fill="var(--muted)" font-size="16" text-anchor="middle" x="330" y="160">(다음 추정치)</text>
+<path d="M 120 110 L 280 110" stroke="var(--line)" stroke-dasharray="5,5" stroke-width="3"></path>
+<circle cx="200" cy="110" fill="var(--orange)" r="15"></circle>
+<text fill="white" font-size="14" font-weight="bold" text-anchor="middle" x="200" y="115">R</text>
+<path d="M 330 75 Q 200 -20 70 75" fill="none" marker-end="url(#arrow-green-159)" stroke="var(--green)" stroke-width="5"></path>
+<text fill="var(--green)" font-size="20" font-weight="bold" text-anchor="middle" x="200" y="30">업데이트 (Bootstrapping)</text>
+</svg>
+</div>
+</div>
+<div class="counter">165 / 188</div>
+
+</section>
+<section class="slide" data-slide="166"><div class="topline">인공지능 | MDP와 강화학습</div><h1>TD Error</h1><div class="layout-single"><ul><li>TD에서는 "내가 원래 생각했던 점수"와 "한 걸음 가보고 깨달은 새로운 예측 점수"의 차이를 에러(Error)로 봅니다.</li></ul><div class="equation-card" style="margin-top:30px; font-size:32px;">\[ \text{TD Error } (\delta) = \color{#27AE60}{[ R_{t+1} + \gamma  V( S_{t+1} ) ]} - V( S_t ) \]</div><p style="text-align:center; color:var(--green);">초록색 부분이 새로운 타겟(정답지)입니다.</p></div><div class="counter">166 / 188</div></section>
+<section class="slide" data-slide="167"><div class="topline">인공지능 | MDP와 강화학습</div><h1>TD Update 공식</h1><div class="layout-single"><ul><li>우리의 점수 \(V\)를 저 에러만큼 살짝(\(\alpha\), 학습률) 고쳐줍니다.</li></ul><div class="equation-card" style="margin-top:40px; font-size:36px;">\[ V( S_t ) \leftarrow V( S_t ) + \alpha \Big[ R_{t+1} + \gamma  V( S_{t+1} ) - V( S_t ) \Big] \]</div></div><div class="counter">167 / 188</div></section>
+<section class="slide" data-slide="168"><div class="topline">인공지능 | MDP와 강화학습</div><h1>숫자로 보는 TD 학습 시뮬레이션</h1><div class="layout-single"><ul style="font-size:28px;"><li>현재 가치 \(V(s)=4.0\), 이동한 다음 상태 가치 \(V(s')=6.0\)</li><li>이동 보상 \(R=1\), 감가상각 \(\gamma=0.9\), 학습률 \(\alpha=0.1\)</li></ul><p>1. <b>TD Target</b> = 1 + 0.9 * 6.0 = <b>6.4</b></p><p>2. <b>TD Error</b> = Target - 기존가치 = 6.4 - 4.0 = <b>+2.4</b> (오! 생각보다 2.4점 더 좋네!)</p><p>3. <b>업데이트</b> = 4.0 + 0.1 * (+2.4) = <b>4.24</b> (상향 조정)</p></div><div class="counter">168 / 188</div></section>
+<section class="slide" data-slide="169"><div class="topline">인공지능 | MDP와 강화학습</div><h1>MC vs TD 요약</h1><div class="layout-comparison"><div class="compare-card" style="border-top-color: var(--blue);"><h3>Monte Carlo (MC)</h3><ul style="font-size:26px; padding-left:20px; text-align:left;"><li><strong>업데이트 시점:</strong> 에피소드 종료 후</li><li><strong>사용 데이터:</strong> 실제 측정된 Return (G)</li><li><strong>특징:</strong> 분산(Variance)이 큼, 편향 없음</li></ul></div><div class="compare-card" style="border-top-color: var(--orange);"><h3>Temporal Difference (TD)</h3><ul style="font-size:26px; padding-left:20px; text-align:left;"><li><strong>업데이트 시점:</strong> 매 스텝마다 즉시</li><li><strong>사용 데이터:</strong> 다음 상태의 예측값 (V)</li><li><strong>특징:</strong> 분산이 작음, 편향 있음 (Bootstrapping)</li></ul></div></div><div class="counter">169 / 188</div></section>
+<section class="slide section-slide" data-slide="170"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 17</h1><div class="layout-single" style="text-align:center;"><h2>SARSA &amp; Q-learning</h2><p style="font-size:32px;">어떻게 행동할 것인가 (Control)</p></div><div class="counter">170 / 188</div></section>
+<section class="slide" data-slide="171"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Model-free Control: 정책 찾기</h1><div class="layout-single"><ul><li>앞서 V를 구하는 법(평가)을 배웠습니다. 이제 행동 화살표를 찾아야 합니다.</li><li>환경 룰(T)을 모르므로 V만으로는 정책을 추출할 수 없습니다.</li><li>따라서 행동 점수인 <strong>Q-value를 직접 학습</strong>해야 합니다.</li></ul></div><div class="counter">171 / 188</div></section>
+<section class="slide" data-slide="172">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>어떻게 움직일까? Exploration vs Exploitation</h1>
+<div class="layout-comparison">
+<div class="compare-card" style="border-top-color: var(--blue);">
+<h3>Exploitation (탐욕, 이용)</h3>
+<p>지금까지 학습된 지식 중 <strong>가장 좋은 행동(Max Q)</strong>을 선택합니다. (당장의 이익 추구)</p>
+</div>
+<div class="compare-card" style="border-top-color: var(--orange);">
+<h3>Exploration (탐험)</h3>
+<p>가끔씩 <strong>랜덤한 행동</strong>을 선택하여, 아직 모르는 새로운 길을 발견합니다. (미래의 이익 추구)</p>
+</div>
+</div>
+<div class="layout-single" style="margin-top:20px; font-size:24px;">
+<ul>
+<li>이 딜레마를 해결하는 가장 대표적인 방법이 <strong>\(\epsilon\)-Greedy (엡실론-그리디)</strong> 전략입니다.</li>
+<li>\(1-\epsilon\) 확률로 아는 길을 가고, \(\epsilon\) 확률로 랜덤한 길을 갑니다. 학습이 진행될수록 \(\epsilon\)을 줄여나갑니다.</li>
+</ul>
+</div>
+
+<div class="counter">172 / 188</div></section>
+<section class="slide" data-slide="173"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SARSA 알고리즘 (On-policy)</h1><div class="layout-single"><ul><li>TD 방식을 Q에 그대로 적용한 첫 번째 방법입니다.</li><li>내가 선택한 행동(Action)을 한 번 하고 받은 보상(Reward), 그리고 다음 상태(State)에서 <strong>내가 진짜로 할 다음 행동(Action)</strong>을 타겟으로 삼습니다.</li><li>그래서 이름이 S-A-R-S-A 입니다.</li></ul><div class="equation-card" style="margin-top:30px; font-size:32px;">\[ Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \Big[ R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t) \Big] \]</div></div><div class="counter">173 / 188</div></section>
+<section class="slide" data-slide="174"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Q-learning 알고리즘 (Off-policy)</h1><div class="layout-single"><ul><li>Q-learning은 가장 널리 알려진 대표적인 강화학습 알고리즘 중 하나입니다.</li><li>SARSA와 비슷하지만, 다음 상태에서 내가 무슨 행동을 하든 상관없이, 그 상태에서 <strong>가장 점수가 높은 가상의 행동(Max)</strong>을 타겟으로 삼아버립니다.</li></ul><div class="equation-card" style="margin-top:30px; font-size:32px;">\[ Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \Big[ R_{t+1} + \gamma \max_{a'} Q(S_{t+1}, a') - Q(S_t, A_t) \Big] \]</div></div><div class="counter">174 / 188</div></section>
+<section class="slide" data-slide="175"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Q-learning의 핵심 아이디어: Off-policy Target</h1><div class="layout-single"><ul><li>탐험적 행동을 하더라도</li><li>실제로 수행한 행동과 별개로 greedy target을 사용해 업데이트합니다.</li></ul></div><div class="counter">175 / 188</div></section>
+<section class="slide" data-slide="176">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>직관적 비교: 절벽 걷기(Cliff Walking)</h1>
+<div class="layout-visual-text">
+<div class="layout-single" style="font-size:24px; padding-top:0;">
+<ul>
+<li><strong>SARSA 에이전트 (파란색):</strong> "자꾸 삐끗하네. 절벽 근처는 위험해. 크게 돌아서 안전하게 가야지." (보수적)</li>
+<li><strong>Q-learning 에이전트 (빨간색):</strong> "이론상 내 컨트롤(Max)이 완벽하다면 절벽 옆이 최단거리야. 직진!" (최적주의)</li>
+</ul>
+</div>
+<div class="visual">
+<svg height="300" viewbox="0 0 500 200" width="100%">
+<defs>
+<marker id="arrow-blue-cliff" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--blue)"></path></marker>
+<marker id="arrow-red-cliff" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--red)"></path></marker>
+</defs>
+<rect fill="var(--bg)" height="200" stroke="var(--line)" stroke-width="2" width="500" x="0" y="0"></rect>
+<rect fill="var(--slate)" height="100" width="300" x="100" y="100"></rect>
+<text fill="white" font-size="24" font-weight="bold" text-anchor="middle" x="250" y="160">절벽 (The Cliff) -100</text>
+<rect fill="#EAF3F9" height="100" stroke="var(--line)" width="100" x="0" y="100"></rect>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="50" y="155">S</text>
+<rect fill="#EAF8EF" height="100" stroke="var(--line)" width="100" x="400" y="100"></rect>
+<text font-size="20" font-weight="bold" text-anchor="middle" x="450" y="155">G</text>
+<path d="M 50 100 L 50 50 L 450 50 L 450 100" fill="none" marker-end="url(#arrow-blue-cliff)" stroke="var(--blue)" stroke-linejoin="round" stroke-width="6"></path>
+<text fill="var(--blue)" font-size="18" font-weight="bold" text-anchor="middle" x="250" y="35">안전한 우회 경로 (SARSA)</text>
+<path d="M 100 90 L 400 90" fill="none" marker-end="url(#arrow-red-cliff)" stroke="var(--red)" stroke-dasharray="10,5" stroke-linejoin="round" stroke-width="6"></path>
+<text fill="var(--red)" font-size="18" font-weight="bold" text-anchor="middle" x="250" y="80">위험한 최단 경로 (Q-Learning)</text>
+</svg>
+</div>
+</div>
+<div class="counter">176 / 188</div>
+
+</section>
+<section class="slide section-slide" data-slide="177"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 18</h1><div class="layout-single" style="text-align:center;"><h2>Deep RL Preview</h2><p style="font-size:32px;">표(Table)의 한계를 넘어서</p></div><div class="counter">177 / 188</div></section>
+<section class="slide" data-slide="178"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Tabular Q-learning의 한계</h1><div class="layout-single"><ul><li>우리가 지금까지 배운 Q러닝은, 모든 상태 \(s\)와 행동 \(a\)에 대해 엑셀 표(Table)를 만들어 점수를 기록했습니다.</li><li>Grid World는 상태가 11개뿐이라 표가 작았습니다.</li></ul></div><div class="counter">178 / 188</div></section>
+<section class="slide" data-slide="179"><div class="topline">인공지능 | MDP와 강화학습</div><h1>차원의 저주 (State Explosion)</h1><div class="layout-single"><ul><li>바둑판의 상태 수: \(10^{170}\)</li><li>아타리 게임 화면의 픽셀 상태 수: 무한대</li><li>이 우주의 모든 원자를 하드디스크로 써도 표를 저장할 수 없습니다.</li></ul></div><div class="counter">179 / 188</div></section>
+<section class="slide" data-slide="180"><div class="topline">인공지능 | MDP와 강화학습</div><h1>해결책: Function Approximation</h1><div class="layout-single"><ul><li>모든 상태를 표에 외우지 말고, 상태의 특징(Feature)을 보고 점수를 <strong>예측하는 함수(방정식)</strong>를 만들자.</li><li>가장 강력한 예측 함수가 무엇일까요? 바로 <strong>인공신경망(Neural Network)</strong>입니다.</li></ul></div><div class="counter">180 / 188</div></section>
+<section class="slide" data-slide="181">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>신경망의 도입: Deep Q-Network (DQN)</h1>
+<div class="layout-single">
+<ul>
+<li>게임 화면 이미지를 CNN(합성곱 신경망)에 입력으로 넣으면, 신경망이 4개 버튼(상하좌우) 각각의 Q값을 예측해서 출력합니다.</li>
+</ul>
+<div class="visual" style="margin-top:20px;">
+<svg height="200" style="background:var(--gray-light); border-radius:10px; padding:10px;" viewbox="0 0 600 200" width="100%">
+<defs>
+<marker id="arrow-blue-dqn" markerheight="6" markerwidth="6" orient="auto" refx="5" refy="3"><path d="M0,0 L0,6 L6,3 z" fill="var(--navy)"></path></marker>
+</defs>
+<rect fill="white" height="100" rx="5" stroke="var(--navy)" stroke-width="2" width="80" x="20" y="50"></rect>
+<text font-size="18" font-weight="bold" text-anchor="middle" x="60" y="105">State (s)</text>
+<text fill="var(--gray)" font-size="14" text-anchor="middle" x="60" y="130">(Pixel)</text>
+<rect fill="var(--blue)" height="160" rx="10" width="150" x="180" y="20"></rect>
+<text fill="white" font-size="24" font-weight="bold" text-anchor="middle" x="255" y="105">Deep Neural Net</text>
+<text fill="white" font-size="16" text-anchor="middle" x="255" y="135">Weights: \(\theta\)</text>
+<rect fill="white" height="40" rx="5" stroke="var(--navy)" stroke-width="2" width="150" x="410" y="20"></rect>
+<text font-size="18" font-weight="bold" text-anchor="middle" x="485" y="47">Q(s, Up)</text>
+<rect fill="white" height="40" rx="5" stroke="var(--navy)" stroke-width="2" width="150" x="410" y="70"></rect>
+<text font-size="18" font-weight="bold" text-anchor="middle" x="485" y="97">Q(s, Down)</text>
+<rect fill="white" height="40" rx="5" stroke="var(--navy)" stroke-width="2" width="150" x="410" y="120"></rect>
+<text font-size="18" font-weight="bold" text-anchor="middle" x="485" y="147">Q(s, Left)</text>
+<path d="M 100 100 L 180 100" fill="none" marker-end="url(#arrow-blue-dqn)" stroke="var(--navy)" stroke-width="4"></path>
+<path d="M 330 100 L 410 40" fill="none" marker-end="url(#arrow-blue-dqn)" stroke="var(--navy)" stroke-width="2"></path>
+<path d="M 330 100 L 410 90" fill="none" marker-end="url(#arrow-blue-dqn)" stroke="var(--navy)" stroke-width="2"></path>
+<path d="M 330 100 L 410 140" fill="none" marker-end="url(#arrow-blue-dqn)" stroke="var(--navy)" stroke-width="2"></path>
+</svg>
+</div>
+<ul style="margin-top:20px;">
+<li>이것이 바로 세상을 놀라게 한 딥마인드의 <strong>DQN (Deep Q-Network)</strong> 입니다.</li>
+</ul>
+</div>
+
+<div class="counter">181 / 188</div></section>
+<section class="slide" data-slide="182"><div class="topline">인공지능 | MDP와 강화학습</div><h1>다음 주 강의: Deep Reinforcement Learning</h1><div class="layout-single"><ul><li>다음 주에는 신경망과 강화학습이 만날 때 발생하는 극도의 불안정성(망각, 타겟 요동)과 이를 해결한 Replay Buffer 기술 등을 다룹니다.</li></ul></div><div class="counter">182 / 188</div></section>
+<section class="slide section-slide" data-slide="183"><div class="topline">인공지능 | MDP와 강화학습</div><h1>SECTION 19</h1><div class="layout-single" style="text-align:center;"><h2>Final Summary and Review</h2><p style="font-size:32px;">강의 총정리</p></div><div class="counter">183 / 188</div></section>
+<section class="slide" data-slide="184"><div class="topline">인공지능 | MDP와 강화학습</div><h1>오늘 배운 내용 총정리</h1><div class="layout-single"><ul><li>1. 불확실성 하에서는 Plan이 아닌 <strong>Policy</strong>가 필요하다.</li><li>2. 불확실한 세상을 <strong>MDP (S, A, T, R, \(\gamma\))</strong> 튜플로 정의했다.</li><li>3. 단기 보상이 아닌 장기 <strong>Return</strong>을 최적화하는 것이 목표다.</li></ul></div><div class="counter">184 / 188</div></section>
+<section class="slide" data-slide="185">
+<div class="topline">인공지능 | MDP와 강화학습</div>
+<h1>가장 중요한 수식: Bellman Equation</h1>
+<div class="layout-comparison">
+<div class="compare-card">
+<h3 style="font-size:24px;">Bellman Expectation Eq. (정책 평가)</h3>
+<p style="font-size:20px;">주어진 정책 \(\pi\)에 따라 움직일 때의 가치</p>
+<div class="equation-card" style="font-size:22px; padding:10px; margin-top:20px;">\[ V_\pi(s) = \sum_a \pi(a|s) \sum_{s', r} p(s', r | s, a) [r + \gamma V_\pi(s')] \]</div>
+</div>
+<div class="compare-card" style="border-top-color: var(--red);">
+<h3 style="font-size:24px; color:var(--red);">Bellman Optimality Eq. (최적 제어)</h3>
+<p style="font-size:20px;">가장 완벽한 정책으로 움직일 때의 가치</p>
+<div class="equation-card" style="font-size:22px; padding:10px; margin-top:20px; border-left: 5px solid var(--red);">\[ V^*(s) = \max_a \sum_{s', r} p(s', r | s, a) [r + \gamma V^*(s')] \]</div>
+</div>
+</div>
+<div class="layout-single" style="margin-top:20px;">
+<ul>
+<li><strong>파란색 Sum:</strong> 환경이 굴리는 주사위 (기댓값) / <strong>오렌지색 Max:</strong> 에이전트의 자유 의지 (최적화)</li>
+<li>두 블록의 조립이 모든 계획과 학습의 기초입니다.</li>
+</ul>
+</div>
+
+<div class="counter">185 / 188</div></section>
+<section class="slide" data-slide="186"><div class="topline">인공지능 | MDP와 강화학습</div><h1>DP 알고리즘 요약</h1><div class="layout-single"><ul><li><strong>Value Iteration:</strong> Bellman 수식으로 가치를 수백 번 덮어쓰다 보면 최적 정책이 나옴.</li><li><strong>Policy Iteration:</strong> 평가(Evaluation)와 개선(Improvement)의 두 단계를 오가며 화살표를 능동적으로 돌림.</li></ul></div><div class="counter">186 / 188</div></section>
+<section class="slide" data-slide="187"><div class="topline">인공지능 | MDP와 강화학습</div><h1>MDP에서 RL로의 확장</h1><div class="layout-single"><ul><li>이번 강의 후반부에서는 Model-Free 강화학습(RL)의 기초를 Preview합니다.</li><li>확률(Sum) 계산을 경험 샘플의 평균으로 흉내 내며, MC와 TD 방식을 사용해 점진적으로 학습한다.</li></ul></div><div class="counter">187 / 188</div></section>
+<section class="slide" data-slide="188"><div class="topline">인공지능 | MDP와 강화학습</div><h1>Q &amp; A</h1><div class="layout-single" style="text-align:center;"><h2 style="font-size:80px; color:var(--navy); margin-top:100px;">질문 있습니까?</h2><p style="font-size:32px; color:var(--muted); margin-top:40px;">긴 시간 수고 많으셨습니다.</p></div><div class="counter">188 / 188</div></section></main>
+
+<script>
+
+const deck = document.querySelector('.deck');
+const slides = [...document.querySelectorAll('.slide')];
+let index = 0;
+const counter = document.querySelector('.counter');
+
+function setScale() {
+  const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  deck.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', setScale);
+setScale();
+
+function show(i) {
+  index = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, n) => {
+    if (n === index) {
+      s.classList.add('active');
+      const c = s.querySelector('.counter');
+      if(c) c.textContent = `${index + 1} / ${slides.length}`;
+    } else {
+      s.classList.remove('active');
+    }
+  });
+  location.hash = `#${index + 1}`;
+  updateNotes();
+}
+
+function updateNotes() {
+  const overlay = document.getElementById('speaker-overlay');
+  if (document.body.classList.contains('show-notes')) {
+    const noteEl = slides[index].querySelector('.notes');
+    const txt = noteEl ? noteEl.innerHTML : "이 슬라이드에는 작성된 발표자 노트가 없습니다.";
+    overlay.innerHTML = `<strong style="color:#F1C40F;">[Slide ${index+1}] 발표자 노트</strong><br><br>${txt}`;
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); show(index + 1); }
+  if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); show(index - 1); }
+  if (e.key === 'Home') show(0);
+  if (e.key === 'End') show(slides.length - 1);
+  if (e.key === 'n' || e.key === 'N') { document.body.classList.toggle('show-notes'); updateNotes(); }
+});
+
+window.addEventListener('hashchange', () => {
+  const n = parseInt(location.hash.replace('#', ''), 10);
+  if (Number.isFinite(n) && n - 1 !== index) show(n - 1);
+});
+
+const start = parseInt(location.hash.replace('#', ''), 10);
+show(Number.isFinite(start) ? start - 1 : 0);
+
+</script>
+</body>
+</html>
