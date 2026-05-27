@@ -1,0 +1,25 @@
+{
+  "name": "mongodb",
+  "version": "1.0.0",
+  "description": "This repository contains lecture materials and practice problems for MongoDB, specifically covering Schema Design and Practical Applications.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JBNU-MACS/MongoDB-Lecture.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/JBNU-MACS/MongoDB-Lecture/issues"
+  },
+  "homepage": "https://github.com/JBNU-MACS/MongoDB-Lecture#readme",
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^25.1.0"
+  }
+}

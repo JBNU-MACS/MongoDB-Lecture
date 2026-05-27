@@ -20,3 +20,6 @@
 .idea/
 *.swp
 *.swo
+
+# Node modules
+node_modules/

@@ -245,6 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (progressBar) progressBar.style.width = `${((nextIndex + 1) / slides.length) * 100}%`;
         if (prevButton) prevButton.disabled = nextIndex === 0;
         if (nextButton) nextButton.disabled = nextIndex === slides.length - 1;
+
+        const newHash = `#/${nextIndex + 1}`;
+        if (window.location.hash !== newHash) {
+            window.history.replaceState(null, '', newHash);
+        }
     }
 
     function nextSlide() {
@@ -288,7 +293,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (prevButton) prevButton.addEventListener('click', prevSlide);
     if (nextButton) nextButton.addEventListener('click', nextSlide);
     
-    showSlide(0);
+    function handleHash() {
+        const hash = window.location.hash;
+        if (hash) {
+            const slideNum = parseInt(hash.replace(/[^0-9]/g, ''), 10);
+            if (!isNaN(slideNum) && slideNum >= 1 && slideNum <= slides.length) {
+                showSlide(slideNum - 1);
+                return;
+            }
+        }
+        showSlide(0);
+    }
+    window.addEventListener('hashchange', handleHash);
+    handleHash();
 
     function updateScale() {
         const deck = document.querySelector('.deck');
