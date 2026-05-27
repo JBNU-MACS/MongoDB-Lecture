@@ -42,7 +42,7 @@ body {
   animation: fadeIn 0.3s ease;
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.slide.active { display: flex; flex-direction: column; }
+.slide.active { display: flex; flex-direction: column; overflow: hidden; }
 .slide:before { content: ""; position: absolute; left: 0; top: 0; width: 16px; height: 100%; background: linear-gradient(var(--mongo-green), var(--green)); }
 /* Typography */
 code { background: #EAF3F9; color: var(--blue); padding: 4px 8px; border-radius: 6px; font-family: monospace; font-size: 0.9em; }
@@ -54,7 +54,7 @@ li { margin: 16px 0; }
 /* Layouts */
 .content { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; flex: 1; min-height: 0; }
 .content.single { grid-template-columns: 1fr; align-items: start; }
-.visual { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.visual { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 0; }
 
 /* Section Divider */
 .section-slide { justify-content: center; align-items: center; background: linear-gradient(135deg, #001E2B 0%, #005C42 100%); text-align: center; }
@@ -86,17 +86,24 @@ th { background: #E8F5E9; color: var(--navy); font-weight: 800; padding: 15px; b
 td { border: 2px solid var(--line); padding: 15px; vertical-align: middle; text-align: center; }
 
 /* Custom Layouts */
+.layout-single,
+.layout-visual-text,
+.layout-comparison {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
 .layout-hero { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; font-size: 56px; font-weight: 800; color: var(--navy); }
-.layout-single { display: flex; flex-direction: column; justify-content: flex-start; height: 100%; padding-top: 20px; font-size: 30px; line-height: 1.5; }
-.layout-visual-text { display: grid; grid-template-columns: 55% 45%; gap: 40px; height: 100%; align-items: center; }
-.layout-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; height: 100%; align-items: start; }
+.layout-single { display: flex; flex-direction: column; justify-content: flex-start; padding-top: 20px; font-size: 30px; line-height: 1.5; }
+.layout-visual-text { display: grid; grid-template-columns: 55% 45%; gap: 40px; align-items: center; }
+.layout-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
 .compare-card { background: white; border-top: 6px solid var(--mongo-green); padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 26px; border-radius: 12px; height: 100%; }
 .compare-card h3 { margin-top: 0; color: var(--navy); font-size: 32px; }
 
 /* Custom Visuals */
 .json-block {
     background: #1E1E1E; color: #D4D4D4; padding: 25px; border-radius: 12px; font-family: monospace; font-size: 22px; white-space: pre-wrap; line-height: 1.4;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; overflow-x: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; overflow: auto; max-height: 100%;
 }
 .json-key { color: #9CDCFE; }
 .json-string { color: #CE9178; }
@@ -142,6 +149,41 @@ td { border: 2px solid var(--line); padding: 15px; vertical-align: middle; text-
 @media (min-width: 900px) {
   .touch-controls { opacity: 0.62; }
   .touch-controls:hover { opacity: 1; }
+}
+
+/* Dense / Code-Heavy / Compact-Table Slide Classes */
+.slide.dense ul {
+  font-size: 26px;
+  line-height: 1.45;
+}
+.slide.dense li {
+  margin: 10px 0;
+}
+.slide.dense .callout {
+  font-size: 24px;
+  line-height: 1.35;
+  padding: 22px 30px;
+  margin-top: 18px;
+}
+.slide.dense .roadmap-desc {
+  font-size: 15px;
+  line-height: 1.35;
+}
+.slide.code-heavy .json-block {
+  font-size: 15px; /* Slightly larger code blocks for readability */
+  line-height: 1.35;
+  padding: 20px;
+}
+.slide.code-heavy .layout-visual-text {
+  grid-template-columns: 50% 50%;
+  gap: 30px;
+}
+.slide.compact-table table {
+  font-size: 23px;
+}
+.slide.compact-table th,
+.slide.compact-table td {
+  padding: 10px;
 }
 </style>
 <script>
@@ -359,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </section>
 
 <!-- Slide 6 -->
-<section class="slide" data-slide="6">
+<section class="slide dense" data-slide="6">
     <div class="topline">PART 1 | NoSQL & MongoDB 기초</div>
     <h1>분산 시스템과 CAP 정리</h1>
     <div class="layout-visual-text">
@@ -378,12 +420,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3 style="color:var(--navy); margin-top:0;">네트워크 장애 발생 시 데이터베이스의 선택</h3>
                 <p><strong>CA (가용성+일관성):</strong> 단일 노드 RDBMS (분산 네트워크 고려 없음)</p>
                 <p><strong>AP (가용성+분할내성):</strong> Cassandra, DynamoDB (최종 일관성 보장)</p>
-                <p><strong style="color:var(--mongo-green);">CP (일관성+분할내성):</strong> MongoDB, HBase (일관된 데이터 제공 우선)</p>
+                <p><strong style="color:var(--mongo-green);">CP 성향 시스템:</strong> HBase, primary 기반 replica set 구성의 MongoDB</p>
             </div>
         </div>
     </div>
     <div class="callout" style="font-size:26px; margin-top:10px;">
-        CAP 분류는 단순 암기보다 장애 상황에서 어떤 보장을 선택하는지 이해하는 것이 중요합니다.
+        CAP 분류는 암기보다 장애 상황에서 어떤 보장을 선택하는지 이해하는 것이 중요합니다.
     </div>
     <div class="counter">6 / 65</div>
 </section>
@@ -1191,8 +1233,8 @@ db.products.find({
             </div>
             <div class="roadmap-step">
                 <div class="roadmap-num">8.x</div>
-                <div class="roadmap-title">엔진 성능의 고도화</div>
-                <div class="roadmap-desc">조인 처리량 증가, 리소스 경합 제거 및 대규모 배치 작업 속도 향상에 포커스를 둡니다.</div>
+                <div class="roadmap-title">버전별 성능 개선 확인</div>
+                <div class="roadmap-desc">버전별로 쿼리 실행, 인덱스, 샤딩, 집계 성능이 개선되므로 운영 환경에서는 릴리즈 노트와 호환성을 함께 확인합니다.</div>
             </div>
             <div class="roadmap-step">
                 <div class="roadmap-num">SEC</div>
@@ -1440,7 +1482,7 @@ db.posts.aggregate([
 </section>
 
 <!-- Slide 44 -->
-<section class="slide" data-slide="44">
+<section class="slide dense" data-slide="44">
     <div class="topline">PART 4 | Node.js 백엔드 통합 및 Mongoose ODM</div>
     <h1>쿼리 성능 분석과 Explain 계획</h1>
     <div class="layout-single">
@@ -1449,9 +1491,9 @@ db.posts.aggregate([
             <li>쿼리 메서드 후미에 <code>.explain("executionStats")</code>를 체이닝하여 실행하면 상세 데이터 수치를 획득할 수 있습니다.</li>
             <li><strong>검토해야 할 주 지표:</strong>
                 <ul>
-                    <li><code>winningPlan.stage</code>: <code>IXSCAN</code>(인덱스 탐색) 여부를 확인하고, <code>COLLSCAN</code>(풀 스캔) 단계의 배제 여부를 파악합니다.</li>
+                    <li><code>winningPlan.stage</code>: <code>IXSCAN</code>(인덱스 탐색) 여부를 확인하고, <code>COLLSCAN</code>(풀 스캔) 발생 여부를 파악합니다.</li>
                     <li><code>executionTimeMillis</code>: 쿼리 실행에 가용한 물리적 경과 시간(ms)을 검토합니다.</li>
-                    <li><code>totalDocsExamined</code>: 질의 필터 조건 처리를 위해 메모리에 읽어들인 실제 문서 개수를 나타냅니다. 결과 건수와의 비율이 1:1에 가까울수록 이상적입니다.</li>
+                    <li><code>totalDocsExamined</code>: 쿼리 필터 처리를 위해 검사한 문서 개수입니다. 반환 결과 수와 가까울수록 이상적입니다.</li>
                 </ul>
             </li>
         </ul>
@@ -1567,7 +1609,7 @@ db.posts.find({
 </section>
 
 <!-- Slide 49 -->
-<section class="slide" data-slide="49">
+<section class="slide dense code-heavy" data-slide="49">
     <div class="topline">PART 5 | 집계 파이프라인</div>
     <h1>Aggregation 성능 점검 포인트</h1>
     <div class="layout-visual-text">
@@ -1579,7 +1621,7 @@ db.posts.find({
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:14px;">
+            <div class="json-block">
 <span class="json-comment">// MongoDB shell 예제</span>
 db.orders.aggregate(
   [
@@ -1591,8 +1633,17 @@ db.orders.aggregate(
         date: <span class="json-number">1</span>
       }
     },
-    { <span class="json-key">$group</span>: { _id: <span class="json-string">"$customer_id"</span>, total: { <span class="json-key">$sum</span>: <span class="json-string">"$price"</span> } } },
-    { <span class="json-key">$sort</span>: { total: <span class="json-number">-1</span> } }
+    {
+      <span class="json-key">$group</span>: {
+        _id: <span class="json-string">"$customer_id"</span>,
+        total: { <span class="json-key">$sum</span>: <span class="json-string">"$price"</span> }
+      }
+    },
+    {
+      <span class="json-key">$sort</span>: {
+        total: <span class="json-number">-1</span>
+      }
+    }
   ],
   { allowDiskUse: <span class="json-boolean">true</span> }
 );
@@ -1603,18 +1654,18 @@ db.orders.aggregate(
 </section>
 
 <!-- Slide 50 -->
-<section class="slide" data-slide="50">
+<section class="slide code-heavy" data-slide="50">
     <div class="topline">PART 5 | 집계 파이프라인</div>
     <h1>이커머스 주문 데이터 통계 분석 예제</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li><strong>집계 요구사항:</strong> 2026년 5월 완료(completed) 상태인 주문 중, 회원 고유 번호별 누적 결제량과 결제 횟수를 얻고 고액 소비자 순으로 정렬하여 상위 5명을 반환받는 분석 쿼리입니다.</li>
+                <li><strong>집계 요구사항:</strong> 2026년 5월 완료(completed)된 주문 중, 고객별 누적 주문 금액과 횟수를 구해 금액 순으로 상위 5명을 정렬하는 쿼리입니다.</li>
                 <li>단계별 스테이지를 배열 요소로 정렬하여 데이터베이스 엔진 내부에서 처리하도록 넘겨줍니다.</li>
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:16px;">
+            <div class="json-block">
 db.orders.aggregate([
   { 
     <span class="json-key">$match</span>: { 
@@ -1672,19 +1723,20 @@ db.users.aggregate([
 </section>
 
 <!-- Slide 52 -->
-<section class="slide" data-slide="52">
+<section class="slide code-heavy" data-slide="52">
     <div class="topline">PART 5 | 집계 파이프라인</div>
     <h1>$lookup 결과를 단일 객체처럼 다루기</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
                 <li><code>$lookup</code> 결과는 배열로 들어옵니다.</li>
-                <li>1:1 참조처럼 다루려면 <code>$unwind</code> 또는 <code>$arrayElemAt</code>을 사용합니다.</li>
-                <li>조인 대상 컬렉션의 매칭 필드 인덱스를 먼저 확인합니다.</li>
+                <li>1:1 참조는 <code>$unwind</code> 또는 <code>$arrayElemAt</code>을 사용합니다.</li>
+                <li>단순 <code>$unwind: "$author"</code>는 매칭된 작성자가 없을 때 해당 게시글을 결과에서 제외합니다.</li>
+                <li>조인 대상 컬렉션의 매칭 필드 인덱스를 확인합니다.</li>
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:13px;">
+            <div class="json-block">
 <span class="json-comment">// MongoDB shell 예제</span>
 db.posts.aggregate([
   {
@@ -1695,7 +1747,12 @@ db.posts.aggregate([
       as: <span class="json-string">"author"</span>
     }
   },
-  { <span class="json-key">$unwind</span>: <span class="json-string">"$author"</span> },
+  {
+    <span class="json-key">$unwind</span>: {
+      path: <span class="json-string">"$author"</span>,
+      preserveNullAndEmptyArrays: <span class="json-boolean">true</span>
+    }
+  },
   {
     <span class="json-key">$project</span>: {
       title: <span class="json-number">1</span>,
@@ -1828,16 +1885,19 @@ db.posts.aggregate([
 </section>
 
 <!-- Slide 59 -->
-<section class="slide" data-slide="59">
+<section class="slide dense code-heavy" data-slide="59">
     <div class="topline">PART 6 | 실무 프로젝트</div>
     <h1>대량의 댓글 처리를 위한 페이징 설계</h1>
-    <div class="layout-single">
-        <ul>
-            <li><strong>용량 상한 이슈:</strong> 특정 인기 글에 댓글이 빠르게 늘어나는 경우, 문서 내에 <code>comments: []</code> 배열로 채우면 16MB 제한으로 서비스 에러가 발생합니다.</li>
-            <li><strong>처리 방식:</strong> 댓글 컬렉션을 분리하여 수십만 개의 데이터를 독립적으로 저장할 수 있게 합니다.</li>
-            <li>초기 설명에는 <code>skip()</code>/<code>limit()</code>을 사용할 수 있지만, 무한 스크롤에서는 <code>createdAt</code> 또는 <code>_id</code> 기반 커서 페이지네이션을 우선 검토합니다.</li>
-        </ul>
-        <div class="json-block" style="margin-top: 10px; font-size:16px;">
+    <div class="layout-visual-text">
+        <div class="layout-single" style="padding-top:0;">
+            <ul>
+                <li><strong>용량 상한 이슈:</strong> 특정 인기 글에 댓글이 빠르게 늘어나는 경우, 문서 내에 <code>comments: []</code> 배열로 채우면 16MB 제한으로 서비스 에러가 발생합니다.</li>
+                <li><strong>처리 방식:</strong> 댓글 컬렉션을 분리하여 수십만 개의 데이터를 독립적으로 저장할 수 있게 합니다.</li>
+                <li>무한 스크롤에서는 <code>createdAt</code> 또는 <code>_id</code> 기반 커서 페이지네이션을 우선 검토합니다.</li>
+            </ul>
+        </div>
+        <div class="visual">
+            <div class="json-block">
 <span class="json-comment">// 댓글 문서 분리 설계 예제</span>
 {
   <span class="json-key">"_id"</span>: ObjectId(<span class="json-string">"60d5ec4b1234567890123456"</span>),
@@ -1854,25 +1914,26 @@ db.comments
   })
   .sort({ createdAt: -1 })
   .limit(20);
+            </div>
         </div>
     </div>
     <div class="counter">59 / 65</div>
 </section>
 
 <!-- Slide 60 -->
-<section class="slide" data-slide="60">
+<section class="slide code-heavy" data-slide="60">
     <div class="topline">PART 6 | 실무 프로젝트</div>
     <h1>댓글 목록 조회를 위한 인덱스</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li>Cursor pagination은 정렬 기준과 인덱스를 함께 설계해야 합니다.</li>
-                <li>같은 <code>createdAt</code> 값이 많을 수 있으므로 <code>_id</code>를 보조 정렬 키로 사용할 수 있습니다.</li>
-                <li>깊은 페이지로 갈수록 <code>skip()</code>보다 커서 조건이 유리합니다.</li>
+                <li>커서 페이징은 정렬 기준과 인덱스를 매칭해야 합니다.</li>
+                <li>동일 생성일(createdAt) 처리를 위해 <code>_id</code>를 보조 정렬 키로 활용합니다.</li>
+                <li>페이지가 뒤로 갈수록 <code>skip()</code>보다 커서 조건이 성능상 훨씬 유리합니다.</li>
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:14px;">
+            <div class="json-block">
 <span class="json-comment">// MongoDB shell 예제</span>
 db.comments.createIndex({
   post_id: <span class="json-number">1</span>,
@@ -1882,7 +1943,13 @@ db.comments.createIndex({
 
 db.comments.find({
   post_id: postId,
-  createdAt: { <span class="json-key">$lt</span>: lastSeenCreatedAt }
+  <span class="json-key">$or</span>: [
+    { createdAt: { <span class="json-key">$lt</span>: lastSeenCreatedAt } },
+    {
+      createdAt: lastSeenCreatedAt,
+      _id: { <span class="json-key">$lt</span>: lastSeenId }
+    }
+  ]
 })
   .sort({ createdAt: <span class="json-number">-1</span>, _id: <span class="json-number">-1</span> })
   .limit(<span class="json-number">20</span>);
@@ -1893,20 +1960,20 @@ db.comments.find({
 </section>
 
 <!-- Slide 61 -->
-<section class="slide" data-slide="61">
+<section class="slide dense code-heavy" data-slide="61">
     <div class="topline">PART 6 | 실무 프로젝트</div>
     <h1>동시성 이슈를 고려한 추천(좋아요) 처리</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li><strong>경쟁 조건(Race Condition):</strong> 수십 명의 사용자가 거의 동시에 좋아요를 눌렀을 때, 단순 읽기 후 수치의 연산은 잘못된 최종 합산 수치를 만듭니다.</li>
-                <li><strong>원자성 확보:</strong> 애플리케이션에서 먼저 읽고 판단하기보다, 단일 update 조건에서 해당 유저의 추천 여부를 걸러 처리합니다.</li>
-                <li>조건절에 <code>likes: { $ne: userId }</code>를 추가해 중복 추천을 제외하고, 배열 갱신과 <code>like_count</code> 증감을 하나의 update 연산으로 처리합니다.</li>
-                <li>좋아요 수가 매우 커질 수 있는 서비스에서는 별도 Like 컬렉션과 unique index 설계를 검토합니다.</li>
+                <li><strong>경쟁 조건:</strong> 수십 명이 동시에 누를 때 단순 읽기-연산-저장(Read-Modify-Write)은 데이터 유실을 유발합니다.</li>
+                <li><strong>원자성 확보:</strong> 조건절에 likes 필터링을 걸고 단일 업데이트 연산으로 원자성을 보장합니다.</li>
+                <li><code>likes: { $ne: userId }</code> 조건과 <code>$inc</code>를 결합해 중복 차단 및 카운팅을 동시 처리합니다.</li>
+                <li>좋아요 수가 극도로 많아지는 대규모 서비스라면 별도의 Like 컬렉션 분리를 권장합니다.</li>
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:15px;">
+            <div class="json-block">
 <span class="json-comment">// 1. 추천(좋아요) 처리 - 원자적 조건 업데이트</span>
 <span class="json-key">const</span> likeResult = <span class="json-key">await</span> Post.updateOne(
   { _id: postId, likes: { <span class="json-key">$ne</span>: userId } }, <span class="json-comment">// 유저가 좋아요 안 누른 경우만 매칭</span>
@@ -1932,25 +1999,26 @@ db.comments.find({
 </section>
 
 <!-- Slide 62 -->
-<section class="slide" data-slide="62">
+<section class="slide dense code-heavy" data-slide="62">
     <div class="topline">PART 6 | 실무 프로젝트</div>
     <h1>좋아요가 커질 때: 별도 Like 컬렉션</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li>게시글 문서의 <code>likes</code> 배열이 계속 커질 수 있다면 별도 컬렉션을 검토합니다.</li>
-                <li>unique index로 같은 사용자의 중복 좋아요를 막을 수 있습니다.</li>
-                <li>정확한 count가 중요하면 transaction이나 재집계 전략을 함께 검토합니다.</li>
+                <li>좋아요 수가 매우 많다면 게시글 내 배열 대신 별도 컬렉션으로 분할 설계합니다.</li>
+                <li><code>post_id</code>와 <code>user_id</code> 복합 unique 인덱스로 중복 좋아요를 방지합니다.</li>
+                <li>동시 삽입/갱신 간 데이터 불일치가 우려되는 경우 트랜잭션을 통해 정합성을 보장합니다.</li>
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:14px;">
+            <div class="json-block">
 <span class="json-comment">// MongoDB shell 예제</span>
 db.likes.createIndex(
   { post_id: <span class="json-number">1</span>, user_id: <span class="json-number">1</span> },
   { unique: <span class="json-boolean">true</span> }
 );
 
+<span class="json-comment">// ※ 두 작업의 원자성을 보장하려면 다중 문서 트랜잭션 필요</span>
 db.likes.insertOne({
   post_id: postId,
   user_id: userId,
@@ -1968,22 +2036,22 @@ db.posts.updateOne(
 </section>
 
 <!-- Slide 63 -->
-<section class="slide" data-slide="63">
+<section class="slide dense" data-slide="63">
     <div class="topline">PART 6 | 실무 프로젝트</div>
     <h1>계층형 댓글(대댓글) 데이터 모델링</h1>
     <div class="layout-single">
         <ul>
-            <li><strong>인접 리스트 (Adjacency List):</strong> 개별 댓글 문서에 직속 상위 댓글 식별자인 <code>parent_id</code>를 필드로 둡니다. 데이터 조회가 직관적이나 무한 중첩 트리 조회 시 N+1 쿼리 오버헤드가 발생할 수 있습니다.</li>
-            <li><strong>조상 경로 배열 (Array of Ancestors):</strong> 상위 노드들의 식별자 전체를 <code>ancestors: [ObjectId("A"), ObjectId("B")]</code>와 같이 배열로 포함합니다. 단일 질의로 하위 댓글 트리를 통째로 찾아오거나 인덱스를 타는 데 적절합니다.</li>
-            <li><strong>구체화된 경로 (Materialized Paths):</strong> <code>path: "0001.0003.0012"</code>처럼 경로 문자열을 저장합니다. prefix 검색과 인덱스 설계를 함께 사용하면 특정 하위 트리 조회에 활용할 수 있습니다.</li>
-                <li><strong>모델 선택 기준:</strong> 깊이가 1단계(댓글-답글)에 그칠 때에는 인접 리스트가 타당하며, 임의 깊이를 지원하는 트리형 스크롤 구조에서는 조상 경로 배열이 안정적입니다.</li>
+            <li><strong>인접 리스트 (Adjacency List):</strong> 직속 상위 댓글 ID(<code>parent_id</code>)를 기록합니다. 구조가 단순하나 무한 중첩 조회 시 N+1 쿼리 오버헤드가 발생할 수 있습니다.</li>
+            <li><strong>조상 경로 배열 (Array of Ancestors):</strong> 상위 모든 조상 ID들을 <code>ancestors: []</code> 배열로 포함합니다. 단일 쿼리로 전체 하위 트리를 조회하기에 유리합니다.</li>
+            <li><strong>구체화된 경로 (Materialized Paths):</strong> <code>"0001.0003.0012"</code>와 같은 경로 문자열을 활용합니다. prefix 검색 인덱스로 하위 트리를 탐색합니다.</li>
+            <li><strong>모델 선택 기준:</strong> 단순 댓글-대댓글(1단계)은 인접 리스트로 충분하며, 임의 깊이 트리 구조에는 조상 경로 배열이 권장됩니다.</li>
         </ul>
     </div>
     <div class="counter">63 / 65</div>
 </section>
 
 <!-- Slide 64 -->
-<section class="slide" data-slide="64">
+<section class="slide dense" data-slide="64">
     <div class="topline">핵심 요약</div>
     <h1>MongoDB 데이터 모델링 설계 수칙</h1>
     <div class="layout-single">
@@ -1991,22 +2059,22 @@ db.posts.updateOne(
             <div class="roadmap-step">
                 <div class="roadmap-num">1</div>
                 <div class="roadmap-title">조회 패턴 우선 분석</div>
-                <div class="roadmap-desc">읽기와 쓰기 비율, 그리고 웹 어플리케이션 단일 뷰에서 필요로 하는 데이터 필드 구성을 파악합니다.</div>
+                <div class="roadmap-desc">읽기/쓰기 비율과 단일 뷰에 필요한 필드를 분석합니다.</div>
             </div>
             <div class="roadmap-step">
                 <div class="roadmap-num">2</div>
                 <div class="roadmap-title">함께 읽히는 데이터는 임베딩 검토</div>
-                <div class="roadmap-desc">생명주기를 함께하고 함께 읽히는 관련 데이터 집합은 컬렉션을 나누기보다 단일 문서 통합을 우선 고려합니다.</div>
+                <div class="roadmap-desc">조회 주기와 생명주기를 공유하는 데이터는 문서 내 임베딩을 우선합니다.</div>
             </div>
             <div class="roadmap-step">
                 <div class="roadmap-num">3</div>
                 <div class="roadmap-title">무한 성장 배열 방지</div>
-                <div class="roadmap-desc">댓글 목록이나 장비 로그처럼 상한선 없이 늘어나는 배열 속성은 16MB 한도를 피하기 위해 참조 구조로 분리하는 편이 안전합니다.</div>
+                <div class="roadmap-desc">상한선 없이 자라는 배열은 16MB 초과를 막기 위해 참조 분리 설계합니다.</div>
             </div>
             <div class="roadmap-step">
                 <div class="roadmap-num">4</div>
                 <div class="roadmap-title">운영 인덱싱 및 보안 연계</div>
-                <div class="roadmap-desc">복합 인덱스의 정렬 오버헤드 체크, Vector Search 활용도, Queryable Encryption 도입 범위를 초기 조율합니다.</div>
+                <div class="roadmap-desc">복합 인덱스, Vector Search, 보안(Encryption) 적용 여부를 조율합니다.</div>
             </div>
         </div>
     </div>
