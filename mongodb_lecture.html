@@ -45,7 +45,7 @@ body {
 .slide:after { content: "Medical AI & Computational Science (MACS lab), JBNU"; position: absolute; left: 120px; bottom: 35px; font-size: 24px; color: #7A8793; font-weight:500; }
 
 /* Typography */
-code { background: #EAF3F9; color: var(--blue); padding: 4px 8px; border-radius: 6px; font-family: monospace; }
+code { background: #EAF3F9; color: var(--blue); padding: 4px 8px; border-radius: 6px; font-family: monospace; font-weight: bold; }
 .topline { font-size: 28px; color: var(--mongo-green); font-weight: 700; letter-spacing: 0.02em; margin-bottom: 20px; }
 h1 { font-size: 52px; line-height: 1.2; margin: 0 0 35px; color: var(--navy); font-weight: 800; }
 ul { margin: 0; padding-left: 40px; font-size: 32px; line-height: 1.6; font-weight: 500; }
@@ -74,7 +74,7 @@ li { margin: 16px 0; }
 .callout {
   background: #E8F5E9; border-left: 12px solid var(--mongo-green);
   padding: 30px 40px; border-radius: 0 16px 16px 0;
-  font-size: 36px; font-weight: 700; color: var(--navy);
+  font-size: 32px; font-weight: 700; color: var(--navy);
   margin-top: 30px; line-height: 1.5;
 }
 .equation-card {
@@ -82,7 +82,7 @@ li { margin: 16px 0; }
   border-radius: 16px; padding: 35px; font-size: 42px;
   text-align: center; color: var(--slate); width: 100%;
 }
-table { width: 100%; border-collapse: collapse; font-size: 32px; background: white; border: 3px solid var(--line); }
+table { width: 100%; border-collapse: collapse; font-size: 32px; background: white; border: 3px solid var(--line); margin-top: 20px; }
 th { background: #E8F5E9; color: var(--navy); font-weight: 800; padding: 20px; border: 2px solid var(--line); text-align: center; }
 td { border: 2px solid var(--line); padding: 20px; vertical-align: middle; text-align: center; }
 
@@ -97,12 +97,13 @@ td { border: 2px solid var(--line); padding: 20px; vertical-align: middle; text-
 /* Custom Visuals for MongoDB */
 .json-block {
     background: #1E1E1E; color: #D4D4D4; padding: 20px; border-radius: 12px; font-family: monospace; font-size: 22px; white-space: pre-wrap; line-height: 1.4;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%;
 }
 .json-key { color: #9CDCFE; }
 .json-string { color: #CE9178; }
 .json-number { color: #B5CEA8; }
 .json-boolean { color: #569CD6; }
+.json-comment { color: #6A9955; }
 
 .pipeline-container { display: flex; flex-direction: row; align-items: center; justify-content: space-around; width: 100%; padding: 40px; }
 .chip-column { display: flex; flex-direction: column; gap: 20px; }
@@ -116,8 +117,6 @@ td { border: 2px solid var(--line); padding: 20px; vertical-align: middle; text-
 .roadmap-desc { font-size: 22px; color: var(--slate); }
 
 .counter { position: absolute; right: 40px; bottom: 35px; color: #7A8793; font-size: 24px; z-index: 10; font-weight: 700; }
-
-/* Controller Logic */
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -129,6 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (index >= 0 && index < slides.length) {
             slides[index].classList.add('active');
             currentSlide = index;
+            
+            const counter = slides[index].querySelector('.counter');
+            if (counter) counter.innerText = `${index + 1} / ${slides.length}`;
         }
     }
     
@@ -152,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="topline">데이터베이스 | DataBase</div>
     <h1>MongoDB Schema & Practice</h1>
     <p>컴퓨터인공지능학부 | 이경수</p>
-    <div class="counter">1 / 18</div>
+    <div class="counter"></div>
 </section>
 
 <!-- Slide 2: Table of Contents -->
@@ -161,19 +163,19 @@ document.addEventListener('DOMContentLoaded', () => {
     <h1>강의 목표 및 목차</h1>
     <div class="layout-single">
         <ul>
-            <li><strong>Part 1: MongoDB 스키마의 개념</strong> - 스키마의 필요성과 특징</li>
-            <li><strong>Part 2: MongoDB Design Pattern</strong> - 효율적인 데이터 모델링 패턴</li>
-            <li><strong>Part 3: MongoDB Practice</strong> - 블로그 시스템 실전 설계</li>
+            <li><strong>Part 1: MongoDB 스키마의 개념</strong> - 스키마리스의 의미, 1:1 및 1:N 관계 모델링</li>
+            <li><strong>Part 2: MongoDB Design Pattern</strong> - 효율적인 데이터 모델링 패턴 4가지</li>
+            <li><strong>Part 3: MongoDB Practice</strong> - 블로그 플랫폼 시스템 실전 설계 및 최적화</li>
         </ul>
         <div class="pipeline-container" style="margin-top: 40px;">
-            <div class="domain-chip">스키마의 이해</div>
+            <div class="domain-chip">스키마/관계 이해</div>
             <div class="arrow">➔</div>
             <div class="domain-chip">디자인 패턴 학습</div>
             <div class="arrow">➔</div>
-            <div class="domain-chip">실전 모델링 적용</div>
+            <div class="domain-chip">실전 서비스 모델링</div>
         </div>
     </div>
-    <div class="counter">2 / 18</div>
+    <div class="counter"></div>
 </section>
 
 <!-- Slide 3: Section 1 -->
@@ -181,28 +183,33 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="topline">PART 1</div>
     <h1>MongoDB 스키마의 개념</h1>
     <p style="color:#DDE6EE; font-size:32px; margin-top:30px;">구조와 제약 조건, 그리고 유연성</p>
-    <div class="counter">3 / 18</div>
+    <div class="counter"></div>
 </section>
 
 <!-- Slide 4: What is Schema -->
 <section class="slide" data-slide="4">
     <div class="topline">PART 1 | MongoDB 스키마의 개념</div>
     <h1>MongoDB에서의 스키마(Schema)란?</h1>
-    <div class="layout-single">
-        <ul>
-            <li><strong>스키마(Schema)</strong>는 데이터베이스에서 데이터의 구조, 속성, 제약조건 등을 정의하는 설계도입니다.</li>
-            <li>RDBMS(관계형 데이터베이스)는 고정된 스키마를 엄격히 따릅니다.</li>
-            <li>반면, <strong>MongoDB는 스키마리스(Schema-less) 구조를 지원</strong>합니다.
-                <ul>
-                    <li>유연한 문서 기반(Document-oriented) 구조로, 같은 컬렉션 안의 문서들이 서로 다른 필드를 가질 수 있습니다.</li>
-                </ul>
-            </li>
-        </ul>
-        <div class="callout">
-            하지만 실제 서비스에서는 데이터 일관성을 위해 <b>Mongoose 같은 ODM</b>을 사용하여 명시적인 스키마를 정의하는 것이 일반적입니다.
+    <div class="layout-visual-text">
+        <div class="layout-single">
+            <ul>
+                <li><strong>스키마(Schema)</strong>는 데이터베이스에서 데이터의 구조(structure), 속성(attributes), 제약조건(constraints) 등을 정의하는 설계도입니다.</li>
+                <li><strong>스키마리스(Schema-less):</strong> MongoDB는 유연한 문서 기반(Document-oriented) 구조로, 같은 컬렉션 안의 문서들이 서로 다른 필드를 가질 수 있습니다.</li>
+                <li><strong>ODM의 활용:</strong> 하지만 데이터 일관성과 검증을 위해 <code>Mongoose</code> 같은 ODM을 사용하여 Node.js 환경에서 명시적 스키마를 정의합니다.</li>
+            </ul>
+        </div>
+        <div class="visual">
+            <div class="json-block">
+<span class="json-comment">// Mongoose Schema Example</span>
+const userSchema = new mongoose.Schema({
+  <span class="json-key">name</span>: { type: String, required: true },
+  <span class="json-key">age</span>: { type: Number, min: 0 },
+  <span class="json-key">email</span>: { type: String, unique: true }
+});
+            </div>
         </div>
     </div>
-    <div class="counter">4 / 18</div>
+    <div class="counter"></div>
 </section>
 
 <!-- Slide 5: Why Schema Design -->
@@ -214,12 +221,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="roadmap-step">
                 <div class="roadmap-num">1</div>
                 <div class="roadmap-title">성능 (Performance)</div>
-                <div class="roadmap-desc">조인(Join)을 최소화하고 쿼리 효율성과 디스크 I/O를 최적화합니다.</div>
+                <div class="roadmap-desc">조인(Join)을 최소화하여 쿼리 효율성을 높이고 디스크 I/O를 최적화합니다.</div>
             </div>
             <div class="roadmap-step">
                 <div class="roadmap-num">2</div>
                 <div class="roadmap-title">확장성 (Scalability)</div>
-                <div class="roadmap-desc">샤딩(Sharding)과 수평 확장, 데이터 파티셔닝에 유리한 구조를 만듭니다.</div>
+                <div class="roadmap-desc">수평 확장(Sharding) 및 데이터 파티셔닝에 대비한 구조를 만듭니다.</div>
             </div>
             <div class="roadmap-step">
                 <div class="roadmap-num">3</div>
@@ -227,65 +234,139 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="roadmap-desc">일관된 데이터 구조를 통해 애플리케이션 코드의 안정성을 향상시킵니다.</div>
             </div>
         </div>
-        <p style="text-align: center; font-size: 28px; font-weight: bold; margin-top: 40px; color: var(--blue);">읽기(Read) vs 쓰기(Write) 비율에 따라 모델링 설계 전략이 완전히 달라집니다!</p>
+        <p style="text-align: center; font-size: 28px; font-weight: bold; margin-top: 40px; color: var(--blue);">읽기(Read)와 쓰기(Write)의 비율, 데이터 크기에 따라 설계 전략이 완전히 달라집니다.</p>
     </div>
-    <div class="counter">5 / 18</div>
+    <div class="counter"></div>
 </section>
 
 <!-- Slide 6: RDBMS vs MongoDB -->
 <section class="slide" data-slide="6">
     <div class="topline">PART 1 | MongoDB 스키마의 개념</div>
-    <h1>RDBMS vs MongoDB 모델링</h1>
+    <h1>데이터 모델링 접근: RDBMS vs MongoDB</h1>
     <div class="layout-comparison" style="margin-top: 30px;">
         <div class="compare-card" style="border-top-color: var(--slate);">
             <h3>RDBMS (관계형)</h3>
             <ul style="font-size:24px;">
-                <li>테이블 기반</li>
-                <li>정규화(Normalization) 선호</li>
-                <li>Foreign Key를 통한 조인(JOIN)</li>
-                <li>스키마가 고정됨</li>
+                <li><strong>구조:</strong> 테이블(Table) 기반</li>
+                <li><strong>원칙:</strong> 데이터 중복을 피하는 <b>정규화(Normalization)</b> 선호</li>
+                <li><strong>관계:</strong> Foreign Key를 통한 <b>JOIN</b>으로 관계 표현</li>
             </ul>
         </div>
         <div class="compare-card">
             <h3>MongoDB (문서형)</h3>
             <ul style="font-size:24px;">
-                <li>문서(Document) 기반</li>
-                <li>비정규화(Denormalization) 및 임베딩(Embedding) 활용</li>
-                <li>조인을 피하고 한 번의 읽기로 해결 (Read-optimized)</li>
-                <li>유연한 스키마(Flexible Schema)</li>
+                <li><strong>구조:</strong> 문서(Document) 기반, 중첩 문서와 배열 자유롭게 사용</li>
+                <li><strong>원칙:</strong> 읽기 최적화를 위한 <b>비정규화(Denormalization)</b> 적극 활용</li>
+                <li><strong>관계:</strong> <b>임베딩(Embedding)</b>과 <b>레퍼런싱(Referencing)</b> 중 선택</li>
             </ul>
         </div>
     </div>
-    <div class="counter">6 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 7: Section 2 -->
-<section class="slide section-slide" data-slide="7">
+<!-- Slide 7: 1:1 Relationship -->
+<section class="slide" data-slide="7">
+    <div class="topline">PART 1 | MongoDB 스키마의 개념</div>
+    <h1>데이터 모델링: 일대일 (1:1) 관계</h1>
+    <div class="layout-visual-text">
+        <div class="layout-single">
+            <ul>
+                <li>사용자(User)와 프로필(Profile), 혹은 환자와 기본 병력 데이터 같은 1:1 관계입니다.</li>
+                <li><strong>Embedding (중첩):</strong> 일반적으로 가장 추천됩니다. 하나의 문서 안에 서브 도큐먼트로 저장하여 1번의 쿼리로 모든 정보를 가져옵니다.</li>
+                <li><strong>Referencing (참조):</strong> 1:1 관계이더라도 어느 한쪽 데이터가 너무 커서 조회가 느려지거나, 분리해서 권한을 관리해야 할 때만 참조를 사용합니다.</li>
+            </ul>
+        </div>
+        <div class="visual">
+            <div class="json-block" style="width: 100%;">
+<span class="json-comment">// 1:1 Embedding Example</span>
+{
+  <span class="json-key">"_id"</span>: <span class="json-string">"user123"</span>,
+  <span class="json-key">"name"</span>: <span class="json-string">"이경수"</span>,
+  <span class="json-key">"profile"</span>: {
+    <span class="json-key">"age"</span>: <span class="json-number">30</span>,
+    <span class="json-key">"address"</span>: <span class="json-string">"Jeonju"</span>
+  }
+}
+            </div>
+        </div>
+    </div>
+    <div class="counter"></div>
+</section>
+
+<!-- Slide 8: 1:N Relationship -->
+<section class="slide" data-slide="8">
+    <div class="topline">PART 1 | MongoDB 스키마의 개념</div>
+    <h1>데이터 모델링: 일대다 (1:N) 관계</h1>
+    <div class="layout-single">
+        <ul style="font-size: 26px;">
+            <li>1:N 관계는 자식 데이터의 <strong>개수(N의 크기)</strong>에 따라 모델링 전략이 나뉩니다.</li>
+        </ul>
+        <table style="font-size: 24px; margin-top:20px;">
+            <tr>
+                <th>관계 규모</th>
+                <th>예시</th>
+                <th>권장 전략</th>
+                <th>설명</th>
+            </tr>
+            <tr>
+                <td><strong>1 to Few (소수)</strong></td>
+                <td>게시글과 태그(Tags)</td>
+                <td><strong>Embedding</strong></td>
+                <td>배열 필드에 직접 값을 삽입. 매우 빠르고 관리가 쉬움.<br/><code>tags: ["MongoDB", "NoSQL"]</code></td>
+            </tr>
+            <tr>
+                <td><strong>1 to Many (다수)</strong></td>
+                <td>게시글과 수백 개의 댓글</td>
+                <td><strong>Child Referencing</strong></td>
+                <td>부모 문서에 자식의 ObjectId 배열을 저장.<br/><code>comments: [id1, id2, ...]</code></td>
+            </tr>
+            <tr>
+                <td><strong>1 to Squillions (무한대)</strong></td>
+                <td>시스템 로깅, 센서 스트림</td>
+                <td><strong>Parent Referencing</strong></td>
+                <td>자식 문서가 부모의 ObjectId를 가짐 (RDBMS의 FK처럼).<br/>배열 크기 제한(16MB) 방지.</td>
+            </tr>
+        </table>
+    </div>
+    <div class="counter"></div>
+</section>
+
+<!-- Slide 9: Section 2 -->
+<section class="slide section-slide" data-slide="9">
     <div class="topline">PART 2</div>
     <h1>MongoDB Design Pattern</h1>
-    <p style="color:#DDE6EE; font-size:32px; margin-top:30px;">효율적인 데이터 구조를 위한 모델링 기법</p>
-    <div class="counter">7 / 18</div>
+    <p style="color:#DDE6EE; font-size:32px; margin-top:30px;">효율적인 데이터 구조를 위한 모델링 패턴</p>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 8: Embedding Pattern -->
-<section class="slide" data-slide="8">
+<!-- Slide 10: Embedding Pattern -->
+<section class="slide" data-slide="10">
     <div class="topline">PART 2 | MongoDB Design Pattern</div>
     <h1>1. Embedding Pattern (중첩 패턴)</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
                 <li>관련된 데이터를 <strong>하나의 문서에 중첩(Embed)하여 저장</strong>하는 방식.</li>
-                <li>조인(Join) 없이 한 번의 Read로 모든 관련 정보 접근 가능.</li>
-                <li><strong>장점:</strong> 빠른 조회 성능, 데이터 일관성 보장.</li>
-                <li><strong>단점:</strong> 데이터 중복 발생 가능, 16MB 문서 크기 제한 초과 위험.</li>
+                <li><strong>장점:</strong>
+                    <ul>
+                        <li>조인(Join) 불필요, 가장 빠른 조회 성능 (1번의 Read).</li>
+                        <li>단일 문서 단위의 데이터 일관성 보장.</li>
+                    </ul>
+                </li>
+                <li><strong>단점:</strong>
+                    <ul>
+                        <li>다른 곳에서도 쓰인다면 데이터 중복 발생 가능.</li>
+                        <li>문서 최대 크기 제한(16MB)을 초과할 위험.</li>
+                    </ul>
+                </li>
             </ul>
-            <p style="font-weight: bold; color: var(--mongo-green); margin-left:40px;">💡 1:1 관계나 크기가 작은 1:N 관계에 적합 (예: 게시글과 태그)</p>
+            <div class="callout" style="font-size:26px; padding:20px;">💡 <b>언제 쓸까?</b> 읽기(Read)가 압도적으로 많고, 데이터 크기가 작으며, 자주 변경되지 않는 데이터 (예: 주소, 태그)</div>
         </div>
         <div class="visual">
             <div class="json-block">
 {
-  <span class="json-key">"_id"</span>: <span class="json-string">"post123"</span>,
-  <span class="json-key">"title"</span>: <span class="json-string">"MongoDB 시작하기"</span>,
+  <span class="json-key">"_id"</span>: <span class="json-string">"post_01"</span>,
+  <span class="json-key">"title"</span>: <span class="json-string">"Design Patterns"</span>,
   <span class="json-key">"author"</span>: {
     <span class="json-key">"name"</span>: <span class="json-string">"이경수"</span>,
     <span class="json-key">"role"</span>: <span class="json-string">"Admin"</span>
@@ -295,33 +376,41 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </div>
     </div>
-    <div class="counter">8 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 9: Reference Pattern -->
-<section class="slide" data-slide="9">
+<!-- Slide 11: Reference Pattern -->
+<section class="slide" data-slide="11">
     <div class="topline">PART 2 | MongoDB Design Pattern</div>
     <h1>2. Reference Pattern (참조 패턴)</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
                 <li>관련 데이터를 다른 컬렉션에 분리하고, <strong>ObjectId를 참조(Reference)</strong>하여 연결하는 방식.</li>
-                <li>RDBMS의 Foreign Key 개념과 매우 유사합니다.</li>
-                <li><strong>장점:</strong> 데이터 중복 최소화, 개별 수정/관리가 용이.</li>
-                <li><strong>단점:</strong> <code>$lookup</code> 등 조인이 필요해 다중 쿼리로 인한 성능 저하 가능.</li>
+                <li><strong>장점:</strong>
+                    <ul>
+                        <li>데이터 중복을 최소화 (정규화).</li>
+                        <li>각 문서를 독립적으로 수정/관리 가능.</li>
+                    </ul>
+                </li>
+                <li><strong>단점:</strong>
+                    <ul>
+                        <li><code>$lookup</code> 등 조인이 필요하여 여러 번의 쿼리(fetch) 발생.</li>
+                        <li>복잡한 조회 시 성능 저하 가능.</li>
+                    </ul>
+                </li>
             </ul>
-            <p style="font-weight: bold; color: var(--mongo-green); margin-left:40px;">💡 크기가 큰 1:N 관계나 N:M 관계에 적합 (예: 대규모 댓글, 공통 카테고리)</p>
         </div>
         <div class="visual">
             <div class="json-block" style="margin-bottom:20px; width: 100%;">
-<span style="color:var(--muted)">// Category Collection</span>
+<span class="json-comment">// Category Collection</span>
 {
   <span class="json-key">"_id"</span>: <span class="json-string">"cat_001"</span>,
   <span class="json-key">"name"</span>: <span class="json-string">"데이터베이스"</span>
 }
             </div>
             <div class="json-block" style="width: 100%;">
-<span style="color:var(--muted)">// Post Collection</span>
+<span class="json-comment">// Post Collection</span>
 {
   <span class="json-key">"title"</span>: <span class="json-string">"MongoDB 시작"</span>,
   <span class="json-key">"category_id"</span>: <span class="json-string">"cat_001"</span>
@@ -329,18 +418,18 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </div>
     </div>
-    <div class="counter">9 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 10: Bucket Pattern -->
-<section class="slide" data-slide="10">
+<!-- Slide 12: Bucket Pattern -->
+<section class="slide" data-slide="12">
     <div class="topline">PART 2 | MongoDB Design Pattern</div>
     <h1>3. Bucket Pattern (버킷 패턴)</h1>
     <div class="layout-single">
         <ul>
-            <li>고빈도 데이터(이벤트, 시계열 로그 등)를 <strong>일정 기준(시간, 유저 등)으로 묶어(Bucket) 하나의 문서에 배열로 저장</strong>하는 방식.</li>
-            <li>문서 수를 획기적으로 줄이고 인덱스 크기를 축소하여 <strong>저장 공간 최적화 및 성능 향상</strong>.</li>
-            <li><strong>적용 예:</strong> IoT 센서 데이터 수집, 주식 거래 기록, 사용자 활동 히스토리.</li>
+            <li>고빈도 데이터(이벤트, 센서, 로그 등)를 <strong>일정 기준(시간, 사용자 등)으로 묶어 하나의 문서 배열로 저장</strong>하는 방식.</li>
+            <li><strong>장점:</strong> 문서 수 대폭 감소 ➔ 인덱스 크기 축소 ➔ 디스크 I/O 최적화 및 조회 성능 향상.</li>
+            <li><strong>단점:</strong> 문서 크기 16MB 초과 여부 모니터링 필요, 개별 이벤트 단위의 부분 업데이트가 다소 까다로움.</li>
         </ul>
         <div class="pipeline-container" style="margin-top: 20px;">
             <div class="chip-column">
@@ -362,11 +451,11 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </div>
     </div>
-    <div class="counter">10 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 11: Computed Pattern -->
-<section class="slide" data-slide="11">
+<!-- Slide 13: Computed Pattern -->
+<section class="slide" data-slide="13">
     <div class="topline">PART 2 | MongoDB Design Pattern</div>
     <h1>4. Computed Pattern (계산 패턴)</h1>
     <div class="layout-visual-text">
@@ -374,151 +463,219 @@ document.addEventListener('DOMContentLoaded', () => {
             <ul>
                 <li>계산된 결과 값(Derived value)을 <strong>문서에 미리 저장(Precomputed)</strong>하는 방식.</li>
                 <li>복잡한 Aggregation Pipeline 연산 비용을 줄여 <strong>Read 성능을 대폭 향상</strong>시킵니다.</li>
-                <li><strong>적용 예:</strong> 영화의 총 매출액, 게시글의 총 댓글 수, 상품의 평균 평점 등.</li>
+                <li><strong>적용 예시:</strong>
+                    <ul>
+                        <li>조회수가 엄청난 리포트/대시보드 (총 판매액, 평균 평점 등).</li>
+                        <li>정렬용 기준 필드 (인기순 정렬을 위한 가중치 점수).</li>
+                    </ul>
+                </li>
             </ul>
-            <div class="callout" style="font-size:28px;">
-                조회수는 높지만, 실시간 100% 정확성보다는 빠른 응답이 중요한 대시보드 및 리포트에 매우 적합합니다.
+            <div class="callout" style="font-size:24px; padding:20px;">
+                데이터 갱신 시 실시간 완벽 동기화가 필요하지 않거나, 주기적인 배치(Batch) 업데이트만으로 충분한 경우 매우 강력합니다.
             </div>
         </div>
         <div class="visual">
-            <div class="equation-card" style="font-weight: bold; color: var(--navy);">
+            <div class="equation-card" style="font-weight: bold; color: var(--navy); font-size:36px;">
                 Revenue = Ticket_Price × Num_Viewers
             </div>
             <div class="equation-card" style="margin-top:20px; font-size:30px; border-color: var(--mongo-green);">
-                미리 계산하여 필드에 저장 <br/>
+                문서에 필드를 추가하여 직접 저장 <br/>
                 <code>"total_revenue": 500000</code>
             </div>
         </div>
     </div>
-    <div class="counter">11 / 18</div>
+    <div class="counter"></div>
 </section>
 
 
-<!-- Slide 12: Section 3 -->
-<section class="slide section-slide" data-slide="12">
+<!-- Slide 14: Section 3 -->
+<section class="slide section-slide" data-slide="14">
     <div class="topline">PART 3</div>
     <h1>MongoDB Practice</h1>
     <p style="color:#DDE6EE; font-size:32px; margin-top:30px;">콘텐츠 플랫폼(블로그) 모델링 실전</p>
-    <div class="counter">12 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 13: Practice Requirements -->
-<section class="slide" data-slide="13">
+<!-- Slide 15: Practice Requirements -->
+<section class="slide" data-slide="15">
     <div class="topline">PART 3 | MongoDB Practice</div>
     <h1>블로그 시스템 요구 명세서</h1>
     <div class="layout-single">
         <ul style="font-size:28px;">
-            <li><strong>목표:</strong> 사용자가 블로그 형식의 게시글을 작성하고, 댓글 및 추천(좋아요)을 주고받는 시스템.</li>
+            <li><strong>목표:</strong> 사용자가 블로그 형식의 게시글을 작성하고, 댓글 및 추천(좋아요)을 주고받는 콘텐츠 플랫폼.</li>
             <li style="margin-top:20px;"><strong>주요 엔티티:</strong></li>
             <ul>
-                <li><strong>사용자(User):</strong> ID, 이름, 이메일, 프로필 이미지, 역할.</li>
-                <li><strong>게시물(Post):</strong> 제목, 본문, 작성자, 첨부 이미지, 상태(공개/비공개).</li>
-                <li><strong>댓글(Comment):</strong> 작성자, 본문, 작성일, 대댓글(부모 ID).</li>
-                <li><strong>추천(Like):</strong> 사용자 1명이 1개의 게시물에 1번만 가능.</li>
-                <li><strong>카테고리(Category) & 태그(Tag):</strong> 게시물 분류 및 검색.</li>
+                <li><strong>사용자(User):</strong> 고유 ID, 이름, 이메일, 프로필 이미지, 역할, 가입일시.</li>
+                <li><strong>게시물(Post):</strong> 제목, 본문, 작성자, 썸네일, 첨부 이미지, 상태(공개/비공개/임시).</li>
+                <li><strong>댓글(Comment):</strong> 본문, 작성자, 작성일, 대댓글(선택적 부모 ID).</li>
+                <li><strong>추천(Like):</strong> 사용자 1명이 1개의 게시물에 1번만 추천 제한.</li>
+                <li><strong>카테고리(Category) & 태그(Tag):</strong> 게시물 분류 및 검색을 위한 키워드.</li>
             </ul>
         </ul>
     </div>
-    <div class="counter">13 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 14: Nesting vs Referencing in Practice -->
-<section class="slide" data-slide="14">
+<!-- Slide 16: Nesting vs Referencing in Practice -->
+<section class="slide" data-slide="16">
     <div class="topline">PART 3 | MongoDB Practice</div>
     <h1>중첩(Nested) vs 참조(Referenced) 실전 판단</h1>
     <div class="layout-comparison" style="margin-top:30px;">
         <div class="compare-card">
             <h3>중첩 (Embedding) 권장</h3>
-            <ul style="font-size:24px;">
-                <li><strong>태그(Tags):</strong> 단순한 문자열 배열이므로 <code>Post</code> 내부에 <code>tags: ["MongoDB", "NoSQL"]</code>로 저장.</li>
-                <li><strong>소규모 댓글:</strong> 댓글 수가 적고 항상 게시글과 함께 보여진다면 <code>Post</code> 문서 내 <code>comments</code> 배열로 저장.</li>
+            <ul style="font-size:22px;">
+                <li><strong>관련 데이터가 항상 함께 조회되는 경우</strong></li>
+                <li>크기가 작고 수정될 일이 많지 않은 데이터.</li>
+                <li><strong>적용 예:</strong>
+                    <ul>
+                        <li>게시글의 첨부 이미지 목록.</li>
+                        <li>게시글 내부의 단순 태그 배열.</li>
+                    </ul>
+                </li>
             </ul>
         </div>
         <div class="compare-card" style="border-top-color: var(--orange);">
             <h3>참조 (Referencing) 권장</h3>
-            <ul style="font-size:24px;">
-                <li><strong>사용자(User):</strong> 독립적으로 자주 조회/수정되므로 별도 컬렉션 유지.</li>
-                <li><strong>카테고리(Category):</strong> 재사용되며 사전 정의되므로 참조 사용.</li>
-                <li><strong>대규모 댓글:</strong> 무한 스크롤 등 댓글이 수백 개 달릴 수 있다면 16MB 제한 방지를 위해 <code>Comment</code> 컬렉션으로 분리.</li>
+            <ul style="font-size:22px;">
+                <li><strong>독립적 관리가 필요하거나 확장될 가능성이 높은 경우</strong></li>
+                <li><strong>적용 예:</strong>
+                    <ul>
+                        <li><strong>사용자(User):</strong> 회원 정보는 여러 곳에서 참조되고 수정됨.</li>
+                        <li><strong>카테고리(Category):</strong> 사전 정의되어 재사용됨.</li>
+                        <li><strong>댓글(Comment):</strong> 무한 스크롤 등 수백 개로 늘어날 위험이 있는 경우.</li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>
-    <div class="counter">14 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 15: Practice 1 -->
-<section class="slide" data-slide="15">
+<!-- Slide 17: Normalization vs Denormalization -->
+<section class="slide" data-slide="17">
     <div class="topline">PART 3 | MongoDB Practice</div>
-    <h1>사례 연구 1: 사용자 추천 (Likes) 설계</h1>
+    <h1>정규화 vs 비정규화 (Tags 처리)</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li>"누가 추천했는지" 중요하지만, 중복 추천을 방지하고 빠르게 추천 수를 세는 것이 주 목적입니다.</li>
-                <li>관계형 DB처럼 <code>Like</code> 테이블을 따로 만들기보다, <strong>Post 내부에 <code>likes: [user_id_1, user_id_2, ...]</code> 배열로 저장</strong>하는 것이 훨씬 효율적입니다.</li>
+                <li>RDBMS에서는 데이터 중복을 막기 위해 교차 테이블(Mapping Table)을 만들어 <strong>정규화</strong>합니다.</li>
+                <li>MongoDB에서는 읽기 효율을 위해 <strong>비정규화(Denormalization)</strong> 전략을 적극 사용합니다.</li>
+                <li>태그는 단순한 키워드이므로 별도 컬렉션으로 분리할 필요 없이 배열로 들고 있는 것이 효율적입니다.</li>
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="width: 100%;">
+            <div class="compare-card" style="width: 100%; border-top-color: var(--slate); margin-bottom: 20px;">
+                <h3 style="font-size:28px;">RDBMS (정규화)</h3>
+                <p style="font-size:20px; font-family: monospace;">Post ➔ PostTag (교차 테이블) ➔ Tag</p>
+                <p style="font-size:18px; color:var(--muted);">복잡한 JOIN 연산 필수</p>
+            </div>
+            <div class="compare-card" style="width: 100%; border-top-color: var(--mongo-green);">
+                <h3 style="font-size:28px;">MongoDB (비정규화)</h3>
+                <p style="font-size:20px; font-family: monospace;">Post.tags = ["MongoDB", "NoSQL"]</p>
+                <p style="font-size:18px; color:var(--muted);">문서 안에 배열로 단순 저장</p>
+            </div>
+        </div>
+    </div>
+    <div class="counter"></div>
+</section>
+
+<!-- Slide 18: Practice Cases 1 -->
+<section class="slide" data-slide="18">
+    <div class="topline">PART 3 | MongoDB Practice</div>
+    <h1>사례 연구 1: 소규모 댓글과 추천(Likes) 설계</h1>
+    <div class="layout-visual-text">
+        <div class="layout-single">
+            <ul style="font-size: 24px;">
+                <li><strong>소규모 댓글:</strong> 댓글 수가 적고 항상 게시글과 묶어 보여준다면, <code>Post</code> 안의 <code>comments</code> 배열 객체로 저장하는 것이 효율적입니다. (조인 비용 Zero)</li>
+                <li><strong>추천(Likes):</strong> "누가 추천했는지" 알아야 하고 중복을 방지해야 합니다. 
+                    <br/>➔ <code>likes: [user_id_1, user_id_2]</code> 배열로 저장.
+                    <br/>➔ RDBMS처럼 Like 매핑 테이블을 만들지 않습니다!
+                </li>
+            </ul>
+        </div>
+        <div class="visual">
+            <div class="json-block" style="width: 100%; font-size: 18px;">
 {
   <span class="json-key">"_id"</span>: <span class="json-string">"post_999"</span>,
-  <span class="json-key">"title"</span>: <span class="json-string">"MongoDB 최적화 기법"</span>,
   <span class="json-key">"likes"</span>: [
     <span class="json-string">"user_01"</span>,
-    <span class="json-string">"user_45"</span>,
-    <span class="json-string">"user_77"</span>
+    <span class="json-string">"user_45"</span>
   ],
-  <span class="json-key">"like_count"</span>: <span class="json-number">3</span> <span style="color:var(--muted)">// Computed Pattern 적용</span>
+  <span class="json-key">"comments"</span>: [
+    { <span class="json-key">"user"</span>: <span class="json-string">"user_02"</span>, <span class="json-key">"text"</span>: <span class="json-string">"최고의 글!"</span> }
+  ]
 }
             </div>
         </div>
     </div>
-    <div class="counter">15 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 16: Practice 2 -->
-<section class="slide" data-slide="16">
+<!-- Slide 19: Practice Cases 2 -->
+<section class="slide" data-slide="19">
     <div class="topline">PART 3 | MongoDB Practice</div>
     <h1>사례 연구 2: 딥 조인(Deep Join)의 함정</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li><strong>User → Post → Comment → Like</strong> 까지 연속으로 참조(Reference)로 설계하면 어떻게 될까요?</li>
-                <li>MongoDB는 관계형 DB처럼 완벽하고 자유로운 다중 JOIN 연산에 최적화되어 있지 않습니다.</li>
+                <li><strong>User → Post → Comment → Like</strong> 까지 모든 것을 참조(Reference)로 설계하면 어떻게 될까요?</li>
+                <li>MongoDB는 관계형 DB처럼 완벽하고 자유로운 다중 JOIN을 지원하지 않습니다.</li>
                 <li><code>$lookup</code>이 여러 단계 누적되면 <strong>조회 속도와 쿼리 가독성이 급격히 저하</strong>됩니다.</li>
             </ul>
         </div>
         <div class="visual">
             <div class="compare-card" style="border-top-color: var(--red); text-align:center;">
-                <h3 style="color:var(--red);">Anti-Pattern</h3>
-                <p style="font-size:24px;">다단계 참조는 MongoDB 철학(Document-Oriented)에 맞지 않습니다. <b>적절한 임베딩(비정규화)</b>을 혼합해야 합니다.</p>
+                <h3 style="color:var(--red);">⚠️ Anti-Pattern</h3>
+                <p style="font-size:22px; line-height: 1.5;">
+                    다단계 참조는 MongoDB 철학(Document-Oriented)에 맞지 않습니다.<br/><br/>
+                    이럴 때는 <b>비정규화(Denormalization)</b>와 <b>임베딩(Embedding)</b>을 혼합하여 참조 단계를 줄여야 합니다.
+                </p>
             </div>
         </div>
     </div>
-    <div class="counter">16 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 17: Read-centric Optimization -->
-<section class="slide" data-slide="17">
+<!-- Slide 20: Read-centric Optimization -->
+<section class="slide" data-slide="20">
     <div class="topline">PART 3 | MongoDB Practice</div>
-    <h1>읽기 중심 최적화 (Read-centric Optimization)</h1>
-    <div class="layout-single">
-        <ul>
-            <li>MongoDB는 빠른 읽기를 위해 <strong>비정규화(Denormalization) 및 데이터 중복</strong>을 적극적으로 활용합니다.</li>
-            <li>게시물 목록을 보여줄 때 매번 User 컬렉션을 조인하지 않고, 게시물 문서 내부에 <strong>작성자의 '이름(username)'이나 '프로필 이미지 URL'을 함께 저장</strong>합니다 (마치 캐싱처럼 활용).</li>
-        </ul>
-        <div class="callout" style="border-color: var(--orange); background: #FFF3E0;">
-            <b>주의점:</b> 사용자 닉네임이 변경되면 해당 사용자가 작성한 모든 게시글을 찾아 업데이트해야 하므로 <b>쓰기(Update) 로직은 조금 더 복잡해집니다.</b> 하지만 읽기가 쓰기보다 압도적으로 많기 때문에 유리합니다!
+    <h1>읽기 중심 최적화 및 확장성 고려</h1>
+    <div class="layout-visual-text">
+        <div class="layout-single">
+            <ul style="font-size: 24px;">
+                <li><strong>캐싱 형태의 비정규화:</strong> 게시물 목록 조회 시, 참조된 <code>User</code> 컬렉션을 매번 조인하지 않고, 작성자의 <code>username</code>이나 <code>profile_url</code>을 게시물에 복사해둡니다.</li>
+                <li><strong>집계용 필드 동기화:</strong> <code>like_count</code>, <code>comment_count</code>를 필드로 미리 만들어(Computed Pattern) 배열 크기를 매번 세지 않도록 설계합니다. 데이터 변경 시 해당 카운트도 <code>$inc</code> 연산자로 동시에 갱신합니다.</li>
+            </ul>
+        </div>
+        <div class="visual">
+            <div class="json-block" style="width:100%; font-size:16px;">
+<span class="json-comment">// Mongoose 조인(populate) 활용 예제</span>
+async function getPostsByCategory(categoryName) {
+  const category = await Category.findOne({ 
+    name: categoryName 
+  });
+  
+  if (!category) return [];
+  
+  const posts = await Post.find({ 
+    category: category._id 
+  }).populate('author_id', 'username'); 
+  <span class="json-comment">// author_id를 바탕으로 username만 조인해서 가져옴</span>
+  
+  return posts;
+}
+            </div>
         </div>
     </div>
-    <div class="counter">17 / 18</div>
+    <div class="counter"></div>
 </section>
 
-<!-- Slide 18: Outro -->
-<section class="slide" data-slide="18" style="justify-content: center; align-items: center; text-align: center;">
+<!-- Slide 21: Outro -->
+<section class="slide" data-slide="21" style="justify-content: center; align-items: center; text-align: center;">
     <h1 style="font-size: 100px; color: var(--mongo-green); margin-bottom:20px;">Thanks!</h1>
     <p style="font-size: 40px; color: var(--navy); margin-bottom:40px;">질문은 여기에…</p>
     <code style="font-size: 32px; background: #E8F5E9; color: var(--blue); padding: 10px 20px;">ksl@jbnu.ac.kr</code>
-    <div class="counter">18 / 18</div>
+    <div class="counter"></div>
 </section>
 
 </main>
