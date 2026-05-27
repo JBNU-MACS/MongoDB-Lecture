@@ -166,12 +166,12 @@ td { border: 2px solid var(--line); padding: 15px; vertical-align: middle; text-
   margin-top: 18px;
 }
 .slide.dense .roadmap-desc {
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1.35;
 }
 .slide.code-heavy .json-block {
   font-size: 16px;
-  line-height: 1.3;
+  line-height: 1.34;
   padding: 18px;
 }
 .slide.code-heavy .layout-visual-text {
@@ -646,7 +646,7 @@ db.posts.find(
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:16px;">
+            <div class="json-block" style="font-size:18px;">
 <span class="json-comment">// MongoDB shell 예제</span>
 db.createCollection(<span class="json-string">"users"</span>, {
   validator: {
@@ -974,7 +974,7 @@ db.createCollection(<span class="json-string">"users"</span>, {
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:16px;">
+            <div class="json-block" style="font-size:18px;">
 <span class="json-comment">// MongoDB shell 예제</span>
 db.sensor_buckets.updateOne(
   {
@@ -1011,17 +1011,17 @@ db.sensor_buckets.updateOne(
             </ul>
         </div>
         <div class="visual">
-            <div class="equation-card" style="font-size: 26px;">
-                <h3 style="color:var(--navy); margin-top:0;">통계 필드 상시 갱신</h3>
-                <p>평점 등록 시마다 전체 연산(Average)을 배제하고 부분 누적 처리 적용</p>
-                <div class="json-block" style="text-align:left; font-size:20px;">
+            <div class="equation-card" style="font-size: 24px; padding: 20px; margin-bottom: 15px;">
+                <h3 style="color:var(--navy); margin-top:0; font-size: 26px;">통계 필드 상시 갱신</h3>
+                <p style="margin: 0; font-size: 20px;">평점 등록 시마다 전체 연산(Average)을 배제하고 부분 누적 처리 적용</p>
+            </div>
+            <div class="json-block" style="font-size:20px;">
 {
   <span class="json-key">"title"</span>: <span class="json-string">"Inception"</span>,
   <span class="json-key">"total_reviews"</span>: <span class="json-number">15000</span>, <span class="json-comment">// 사전 계산값</span>
   <span class="json-key">"total_score"</span>: <span class="json-number">72000</span>,  <span class="json-comment">// 사전 계산값</span>
   <span class="json-key">"avg_rating"</span>: <span class="json-number">4.8</span>      <span class="json-comment">// (total_score / total_reviews)</span>
 }
-                </div>
             </div>
         </div>
     </div>
@@ -1041,7 +1041,7 @@ db.sensor_buckets.updateOne(
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:18px;">
+            <div class="json-block" style="font-size:20px;">
 <span class="json-comment">// MongoDB shell 예제</span>
 db.movies.updateOne(
   { _id: movieId },
@@ -1108,7 +1108,7 @@ db.movies.updateOne(
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:16px;">
+            <div class="json-block" style="font-size:18px;">
 <span class="json-comment">// MongoDB shell 예제</span>
 db.posts.updateOne(
   { _id: postId },
@@ -1611,11 +1611,11 @@ db.posts.find({
         <div class="pipeline-container" style="padding-top:20px;">
             <div class="domain-chip" style="font-size:22px; width:22%;">주문 데이터 적재 컬렉션</div>
             <div class="arrow">➔</div>
-            <div class="domain-chip" style="font-size:22px; width:22%;"><strong>$match</strong><br><span style="font-size:16px;">(배송 완료 건 선별)</span></div>
+            <div class="domain-chip" style="font-size:22px; width:22%;"><strong>$match</strong><br><span style="font-size:18px;">(배송 완료 건 선별)</span></div>
             <div class="arrow">➔</div>
-            <div class="domain-chip" style="font-size:22px; width:22%;"><strong>$group</strong><br><span style="font-size:16px;">(고객별 총합 합계산)</span></div>
+            <div class="domain-chip" style="font-size:22px; width:22%;"><strong>$group</strong><br><span style="font-size:18px;">(고객별 총합 합계산)</span></div>
             <div class="arrow">➔</div>
-            <div class="domain-chip" style="font-size:22px; width:22%;"><strong>$sort</strong><br><span style="font-size:16px;">(상위 소비액순 정렬)</span></div>
+            <div class="domain-chip" style="font-size:22px; width:22%;"><strong>$sort</strong><br><span style="font-size:18px;">(상위 소비액순 정렬)</span></div>
         </div>
     </div>
     <div class="counter">47 / 65</div>
@@ -1663,7 +1663,7 @@ db.posts.find({
 </section>
 
 <!-- Slide 49 -->
-<section class="slide dense code-heavy" data-slide="49">
+<section class="slide dense" data-slide="49">
     <div class="topline">PART 5 | 집계 파이프라인</div>
     <h1>Aggregation 성능 점검 포인트</h1>
     <div class="layout-visual-text">
@@ -1675,32 +1675,14 @@ db.posts.find({
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block">
-<span class="json-comment">// MongoDB shell 예제</span>
-db.orders.aggregate(
-  [
-    { <span class="json-key">$match</span>: { status: <span class="json-string">"completed"</span> } },
-    {
-      <span class="json-key">$project</span>: {
-        customer_id: <span class="json-number">1</span>,
-        price: <span class="json-number">1</span>,
-        date: <span class="json-number">1</span>
-      }
-    },
-    {
-      <span class="json-key">$group</span>: {
-        _id: <span class="json-string">"$customer_id"</span>,
-        total: { <span class="json-key">$sum</span>: <span class="json-string">"$price"</span> }
-      }
-    },
-    {
-      <span class="json-key">$sort</span>: {
-        total: <span class="json-number">-1</span>
-      }
-    }
-  ],
-  { allowDiskUse: <span class="json-boolean">true</span> }
-);
+            <div class="json-block" style="font-size:18px;">
+<span class="json-comment">// MongoDB shell 예제 (파이프라인 최적화)</span>
+db.orders.aggregate([
+  { <span class="json-key">$match</span>: { status: <span class="json-string">"completed"</span> } },
+  { <span class="json-key">$project</span>: { customer_id: <span class="json-number">1</span>, price: <span class="json-number">1</span>, date: <span class="json-number">1</span> } },
+  { <span class="json-key">$group</span>: { _id: <span class="json-string">"$customer_id"</span>, total: { <span class="json-key">$sum</span>: <span class="json-string">"$price"</span> } } },
+  { <span class="json-key">$sort</span>: { total: <span class="json-number">-1</span> } }
+], { allowDiskUse: <span class="json-boolean">true</span> });
             </div>
         </div>
     </div>
@@ -1708,7 +1690,7 @@ db.orders.aggregate(
 </section>
 
 <!-- Slide 50 -->
-<section class="slide code-heavy" data-slide="50">
+<section class="slide" data-slide="50">
     <div class="topline">PART 5 | 집계 파이프라인</div>
     <h1>이커머스 주문 데이터 통계 분석 예제</h1>
     <div class="layout-visual-text">
@@ -1719,27 +1701,24 @@ db.orders.aggregate(
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block">
+            <div class="json-block" style="font-size:18px;">
 db.orders.aggregate([
   { 
     <span class="json-key">$match</span>: { 
-      <span class="json-key">status</span>: <span class="json-string">"completed"</span>, 
-      <span class="json-key">date</span>: {
-        <span class="json-key">$gte</span>: ISODate(<span class="json-string">"2026-05-01"</span>),
-        <span class="json-key">$lt</span>: ISODate(<span class="json-string">"2026-06-01"</span>)
-      } 
+      status: <span class="json-string">"completed"</span>, 
+      date: { <span class="json-key">$gte</span>: ISODate(<span class="json-string">"2026-05-01"</span>), <span class="json-key">$lt</span>: ISODate(<span class="json-string">"2026-06-01"</span>) }
     } 
   },
   { 
     <span class="json-key">$group</span>: { 
-      <span class="json-key">_id</span>: <span class="json-string">"$customer_id"</span>,
-      <span class="json-key">total_spent</span>: { <span class="json-key">$sum</span>: <span class="json-string">"$price"</span> },
-      <span class="json-key">order_count</span>: { <span class="json-key">$sum</span>: <span class="json-number">1</span> }
+      _id: <span class="json-string">"$customer_id"</span>,
+      total_spent: { <span class="json-key">$sum</span>: <span class="json-string">"$price"</span> },
+      order_count: { <span class="json-key">$sum</span>: <span class="json-number">1</span> }
     } 
   },
-  { <span class="json-key">$sort</span>: { <span class="json-key">total_spent</span>: <span class="json-number">-1</span> } },
+  { <span class="json-key">$sort</span>: { total_spent: <span class="json-number">-1</span> } },
   { <span class="json-key">$limit</span>: <span class="json-number">5</span> }
-])
+]);
             </div>
         </div>
     </div>
@@ -1777,7 +1756,7 @@ db.users.aggregate([
 </section>
 
 <!-- Slide 52 -->
-<section class="slide code-heavy" data-slide="52">
+<section class="slide" data-slide="52">
     <div class="topline">PART 5 | 집계 파이프라인</div>
     <h1>$lookup 결과를 단일 객체처럼 다루기</h1>
     <div class="layout-visual-text">
@@ -1790,7 +1769,7 @@ db.users.aggregate([
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block">
+            <div class="json-block" style="font-size:18px;">
 <span class="json-comment">// MongoDB shell 예제</span>
 db.posts.aggregate([
   {
@@ -1801,19 +1780,8 @@ db.posts.aggregate([
       as: <span class="json-string">"author"</span>
     }
   },
-  {
-    <span class="json-key">$unwind</span>: {
-      path: <span class="json-string">"$author"</span>,
-      preserveNullAndEmptyArrays: <span class="json-boolean">true</span>
-    }
-  },
-  {
-    <span class="json-key">$project</span>: {
-      title: <span class="json-number">1</span>,
-      authorName: <span class="json-string">"$author.name"</span>,
-      publishedAt: <span class="json-number">1</span>
-    }
-  }
+  { <span class="json-key">$unwind</span>: { path: <span class="json-string">"$author"</span>, preserveNullAndEmptyArrays: <span class="json-boolean">true</span> } },
+  { <span class="json-key">$project</span>: { title: <span class="json-number">1</span>, authorName: <span class="json-string">"$author.name"</span>, publishedAt: <span class="json-number">1</span> } }
 ]);
             </div>
         </div>
@@ -1831,12 +1799,12 @@ db.posts.aggregate([
             <li>배열의 각 원소를 기준으로 그룹화하거나 정렬해야 할 때 사용합니다.</li>
         </ul>
         <div class="pipeline-container" style="padding-top:10px;">
-            <div class="domain-chip" style="font-size:18px; width:45%;">
+            <div class="domain-chip" style="font-size:20px; width:45%;">
                 <strong>Before $unwind (배열 구조)</strong><br>
                 <code>{ user: "A", items: ["apple", "banana"] }</code>
             </div>
             <div class="arrow">➔</div>
-            <div class="domain-chip" style="font-size:18px; width:45%;">
+            <div class="domain-chip" style="font-size:20px; width:45%;">
                 <strong>After $unwind (스트림 평탄화)</strong><br>
                 <code>{ user: "A", items: "apple" }</code><br>
                 <code>{ user: "A", items: "banana" }</code>
@@ -1853,7 +1821,7 @@ db.posts.aggregate([
     <div class="layout-comparison">
         <div class="compare-card">
             <h3>Queryable Encryption (보안)</h3>
-            <ul style="font-size:22px;">
+            <ul>
                 <li>민감한 데이터 필드는 클라이언트 측에서 암호화되어 전송 및 보관됩니다.</li>
                 <li>Equality와 Range 검색 조건은 이미 상용 환경에서 정식 지원 중입니다.</li>
                 <li>다만, 부분 문자열(Substring) 등의 고급 질의 유형은 버전에 따라 public preview 단계에 속해 있으므로 도입 전 확인을 요합니다.</li>
@@ -1861,7 +1829,7 @@ db.posts.aggregate([
         </div>
         <div class="compare-card" style="border-top-color: var(--orange);">
             <h3>API 진화 대응 (App Services / Data API)</h3>
-            <ul style="font-size:22px;">
+            <ul>
                 <li>클라우드 종속 API는 지원 정책이 바뀔 수 있으므로 도입 전 현재 정책을 확인해야 합니다.</li>
                 <li>신규 시스템에서는 공식 드라이버와 백엔드 API 서버 기반 구조를 우선 검토합니다.</li>
             </ul>
@@ -1939,7 +1907,7 @@ db.posts.aggregate([
 </section>
 
 <!-- Slide 59 -->
-<section class="slide dense code-heavy" data-slide="59">
+<section class="slide" data-slide="59">
     <div class="topline">PART 6 | 실무 프로젝트</div>
     <h1>대량의 댓글 처리를 위한 페이징 설계</h1>
     <div class="layout-visual-text">
@@ -1951,7 +1919,7 @@ db.posts.aggregate([
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block">
+            <div class="json-block" style="font-size:20px;">
 <span class="json-comment">// 댓글 문서 분리 설계 예제</span>
 {
   <span class="json-key">"_id"</span>: ObjectId(<span class="json-string">"60d5ec4b1234567890123456"</span>),
@@ -1967,7 +1935,7 @@ db.posts.aggregate([
 </section>
 
 <!-- Slide 60 -->
-<section class="slide code-heavy" data-slide="60">
+<section class="slide" data-slide="60">
     <div class="topline">PART 6 | 실무 프로젝트</div>
     <h1>댓글 목록 조회를 위한 인덱스</h1>
     <div class="layout-visual-text">
@@ -1979,26 +1947,18 @@ db.posts.aggregate([
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block">
-<span class="json-comment">// MongoDB shell 예제</span>
-db.comments.createIndex({
-  post_id: <span class="json-number">1</span>,
-  createdAt: <span class="json-number">-1</span>,
-  _id: <span class="json-number">-1</span>
-});
+            <div class="json-block" style="font-size:18px;">
+// 복합 인덱스 개설 및 커서 기반 페이징 질의 예제
+db.comments.createIndex({ post_id: 1, createdAt: -1, _id: -1 });
 
 db.comments.find({
   post_id: postId,
   <span class="json-key">$or</span>: [
     { createdAt: { <span class="json-key">$lt</span>: lastSeenCreatedAt } },
-    {
-      createdAt: lastSeenCreatedAt,
-      _id: { <span class="json-key">$lt</span>: lastSeenId }
-    }
+    { createdAt: lastSeenCreatedAt, _id: { <span class="json-key">$lt</span>: lastSeenId } }
   ]
 })
-  .sort({ createdAt: <span class="json-number">-1</span>, _id: <span class="json-number">-1</span> })
-  .limit(<span class="json-number">20</span>);
+.sort({ createdAt: -1, _id: -1 }).limit(20);
             </div>
         </div>
     </div>
@@ -2006,7 +1966,7 @@ db.comments.find({
 </section>
 
 <!-- Slide 61 -->
-<section class="slide dense code-heavy" data-slide="61">
+<section class="slide dense" data-slide="61">
     <div class="topline">PART 6 | 실무 프로젝트</div>
     <h1>동시성 이슈를 고려한 추천(좋아요) 처리</h1>
     <div class="layout-visual-text">
@@ -2019,24 +1979,17 @@ db.comments.find({
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block">
-<span class="json-comment">// 1. 추천(좋아요) 처리 - 원자적 조건 업데이트</span>
-<span class="json-key">const</span> likeResult = <span class="json-key">await</span> Post.updateOne(
-  { _id: postId, likes: { <span class="json-key">$ne</span>: userId } }, <span class="json-comment">// 유저가 좋아요 안 누른 경우만 매칭</span>
-  {
-    <span class="json-key">$addToSet</span>: { likes: userId },
-    <span class="json-key">$inc</span>: { like_count: <span class="json-number">1</span> }
-  }
+            <div class="json-block" style="font-size:18px;">
+<span class="json-comment">// 1. 좋아요 추가 (중복 방지 조건)</span>
+<span class="json-key">await</span> Post.updateOne(
+  { _id: postId, likes: { <span class="json-key">$ne</span>: userId } },
+  { <span class="json-key">$addToSet</span>: { likes: userId }, <span class="json-key">$inc</span>: { like_count: <span class="json-number">1</span> } }
 );
-<span class="json-comment">// modifiedCount === 0 인 경우 이미 누른 상태임</span>
 
-<span class="json-comment">// 2. 추천 취소(좋아요 취소) 처리</span>
-<span class="json-key">const</span> unlikeResult = <span class="json-key">await</span> Post.updateOne(
-  { _id: postId, likes: userId }, <span class="json-comment">// 유저가 기존에 누른 상태인 경우만 매칭</span>
-  {
-    <span class="json-key">$pull</span>: { likes: userId },
-    <span class="json-key">$inc</span>: { like_count: <span class="json-number">-1</span> }
-  }
+<span class="json-comment">// 2. 좋아요 취소 (기존 존재 조건)</span>
+<span class="json-key">await</span> Post.updateOne(
+  { _id: postId, likes: userId },
+  { <span class="json-key">$pull</span>: { likes: userId }, <span class="json-key">$inc</span>: { like_count: <span class="json-number">-1</span> } }
 );
             </div>
         </div>
@@ -2045,7 +1998,7 @@ db.comments.find({
 </section>
 
 <!-- Slide 62 -->
-<section class="slide dense code-heavy" data-slide="62">
+<section class="slide" data-slide="62">
     <div class="topline">PART 6 | 실무 프로젝트</div>
     <h1>좋아요가 커질 때: 별도 Like 컬렉션</h1>
     <div class="layout-visual-text">
@@ -2057,24 +2010,13 @@ db.comments.find({
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block">
-<span class="json-comment">// MongoDB shell 예제</span>
-db.likes.createIndex(
-  { post_id: <span class="json-number">1</span>, user_id: <span class="json-number">1</span> },
-  { unique: <span class="json-boolean">true</span> }
-);
+            <div class="json-block" style="font-size:20px;">
+<span class="json-comment">// 복합 unique 인덱스 생성</span>
+db.likes.createIndex({ post_id: <span class="json-number">1</span>, user_id: <span class="json-number">1</span> }, { unique: <span class="json-boolean">true</span> });
 
-<span class="json-comment">// ※ 두 작업의 원자성을 보장하려면 다중 문서 트랜잭션 필요</span>
-db.likes.insertOne({
-  post_id: postId,
-  user_id: userId,
-  createdAt: <span class="json-key">new</span> Date()
-});
-
-db.posts.updateOne(
-  { _id: postId },
-  { <span class="json-key">$inc</span>: { like_count: <span class="json-number">1</span> } }
-);
+<span class="json-comment">// 좋아요 도큐먼트 삽입 및 카운트 증가 (트랜잭션 권장)</span>
+db.likes.insertOne({ post_id: postId, user_id: userId, createdAt: <span class="json-key">new</span> Date() });
+db.posts.updateOne({ _id: postId }, { <span class="json-key">$inc</span>: { like_count: <span class="json-number">1</span> } });
             </div>
         </div>
     </div>
