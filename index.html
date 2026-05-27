@@ -22,12 +22,12 @@
 body {
   margin: 0; background: #111827; 
   font-family: 'Noto Sans KR', 'Pretendard', sans-serif;
-  color: var(--navy); overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh;
+  color: var(--navy); overflow: hidden; width: 100vw; height: 100vh; position: relative;
 }
 .deck { 
   width: 1920px; height: 1080px; 
-  transform-origin: center center;
-  position: relative;
+  transform-origin: 0 0;
+  position: absolute;
   background: var(--paper);
   box-shadow: 0 0 50px rgba(0,0,0,0.5);
   overflow: hidden;
@@ -146,6 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const deck = document.querySelector('.deck');
         if (deck) {
             const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            const scaledWidth = 1920 * scale;
+            const scaledHeight = 1080 * scale;
+            deck.style.left = `${(window.innerWidth - scaledWidth) / 2}px`;
+            deck.style.top = `${(window.innerHeight - scaledHeight) / 2}px`;
             deck.style.transform = `scale(${scale})`;
         }
     }
