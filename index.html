@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>데이터베이스 | MongoDB Master Class</title>
+<title>데이터베이스 | MongoDB Master Class (Expert Edition)</title>
 <style>
 :root {
   --navy: #001E2B;
@@ -20,8 +20,8 @@
 }
 * { box-sizing: border-box; }
 body {
-  margin: 0; background: #111827; 
-  font-family: 'Noto Sans KR', 'Pretendard', sans-serif;
+  margin: 0; background: #001E2B; 
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
   color: var(--navy); overflow: hidden; display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh;
 }
 .deck { 
@@ -29,7 +29,7 @@ body {
   transform-origin: center center;
   position: relative;
   background: var(--paper);
-  box-shadow: 0 0 50px rgba(0,0,0,0.5);
+  box-shadow: 0 0 100px rgba(0,0,0,0.8);
   overflow: hidden;
 }
 .slide {
@@ -37,65 +37,76 @@ body {
   width: 1920px; height: 1080px;
   padding: 60px 100px; 
   background: var(--paper);
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .slide.active { display: flex; flex-direction: column; }
-.slide:before { content: ""; position: absolute; left: 0; top: 0; width: 16px; height: 100%; background: linear-gradient(var(--mongo-green), var(--green)); }
-.slide:after { content: "Medical AI & Computational Science (MACS lab), JBNU"; position: absolute; left: 100px; bottom: 30px; font-size: 20px; color: #7A8793; font-weight:500; }
+.slide:before { content: ""; position: absolute; left: 0; top: 0; width: 20px; height: 100%; background: linear-gradient(var(--mongo-green), var(--green)); }
+.slide:after { content: "© Medical AI & Computational Science (MACS lab), JBNU | Expert MongoDB Course"; position: absolute; left: 100px; bottom: 30px; font-size: 18px; color: #7A8793; font-weight:600; }
 
 /* Typography */
-code { background: #EAF3F9; color: var(--blue); padding: 4px 8px; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 0.9em; }
-.topline { font-size: 24px; color: var(--mongo-green); font-weight: 700; letter-spacing: 0.02em; margin-bottom: 15px; }
-h1 { font-size: 48px; line-height: 1.2; margin: 0 0 25px; color: var(--navy); font-weight: 800; }
-h2 { font-size: 36px; color: var(--blue); margin: 20px 0 10px; }
-ul { margin: 0; padding-left: 30px; font-size: 28px; line-height: 1.5; font-weight: 500; }
-li { margin: 12px 0; }
+code { background: #F0F4F8; color: #D73A49; padding: 4px 10px; border-radius: 6px; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 0.85em; font-weight: 600; }
+.topline { font-size: 24px; color: var(--mongo-green); font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 15px; }
+h1 { font-size: 56px; line-height: 1.1; margin: 0 0 30px; color: var(--navy); font-weight: 900; letter-spacing: -0.02em; }
+h2 { font-size: 38px; color: var(--blue); margin: 25px 0 15px; font-weight: 700; border-bottom: 3px solid var(--green); display: inline-block; padding-bottom: 5px; }
+ul { margin: 0; padding-left: 35px; font-size: 30px; line-height: 1.4; font-weight: 500; color: var(--slate); }
+li { margin: 15px 0; }
+li strong { color: var(--navy); font-weight: 700; }
 
 /* Layouts */
-.content { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; flex: 1; min-height: 0; }
-.content.single { grid-template-columns: 1fr; align-items: start; }
+.content { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: start; flex: 1; min-height: 0; margin-top: 20px; }
+.content.single { grid-template-columns: 1fr; }
 .visual { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
 
 /* Section Divider */
-.section-slide { justify-content: center; align-items: center; background: linear-gradient(135deg, #001E2B 0%, #00684A 100%); text-align: center; }
-.section-slide h1 { font-size: 72px; color: white; margin-top: 20px;}
-.section-slide .topline { font-size: 32px; color: var(--green); margin-bottom: 20px; font-weight: 800; }
-.section-slide:before { background: linear-gradient(var(--green), var(--mongo-green)); }
+.section-slide { justify-content: center; align-items: center; background: radial-gradient(circle at center, #003049 0%, #001E2B 100%); text-align: center; }
+.section-slide h1 { font-size: 90px; color: white; margin-top: 20px; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.section-slide .topline { font-size: 36px; color: var(--green); margin-bottom: 25px; font-weight: 900; }
+.section-slide:before { background: linear-gradient(var(--green), var(--mongo-green)); width: 40px; }
 
 /* Title Slide */
 .title-slide { justify-content: center; align-items: center; background: linear-gradient(135deg, #001E2B 0%, #00684A 100%); text-align: center; }
-.title-slide h1 { font-size: 90px; color: #FFFFFF; margin-top: 20px;}
-.title-slide .topline { font-size: 36px; color: var(--green); margin-bottom: 20px; font-weight: 800; }
+.title-slide h1 { font-size: 110px; color: #FFFFFF; margin-top: 20px; line-height: 1; }
+.title-slide .topline { font-size: 40px; color: var(--green); margin-bottom: 25px; font-weight: 900; }
 .title-slide:before { display:none; }
 .title-slide:after { display:none; }
-.title-slide p { font-size:32px; color:#DDE6EE; margin-top:30px; font-weight:500;}
+.title-slide p { font-size:38px; color:#DDE6EE; margin-top:50px; font-weight:600; opacity: 0.9;}
 
 /* Components */
 .callout {
-  background: #E8F5E9; border-left: 10px solid var(--mongo-green);
-  padding: 20px 30px; border-radius: 0 12px 12px 0;
-  font-size: 28px; font-weight: 700; color: var(--navy);
-  margin-top: 20px; line-height: 1.4;
+  background: #F1F8E9; border-left: 12px solid var(--mongo-green);
+  padding: 25px 35px; border-radius: 0 20px 20px 0;
+  font-size: 30px; font-weight: 700; color: var(--navy);
+  margin-top: 30px; line-height: 1.4; box-shadow: 5px 5px 15px rgba(0,0,0,0.05);
 }
 .json-block {
-    background: #1E1E1E; color: #D4D4D4; padding: 25px; border-radius: 12px; font-family: 'Fira Code', monospace; font-size: 20px; white-space: pre-wrap; line-height: 1.3;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; border: 1px solid #333;
+    background: #0D1117; color: #C9D1D9; padding: 30px; border-radius: 16px; font-family: 'Fira Code', monospace; font-size: 22px; white-space: pre-wrap; line-height: 1.4;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 100%; border: 1px solid #30363D; position: relative;
 }
-.json-key { color: #9CDCFE; }
-.json-string { color: #CE9178; }
-.json-number { color: #B5CEA8; }
-.json-boolean { color: #569CD6; }
-.json-comment { color: #6A9955; font-style: italic; }
+.json-block:after { content: "MONGODB-QUERY"; position: absolute; top: 10px; right: 20px; font-size: 12px; color: #8B949E; font-weight: 800; }
 
-.pipeline-container { display: flex; flex-direction: row; align-items: center; justify-content: space-around; width: 100%; padding: 20px; }
-.domain-chip { background: white; border: 2px solid var(--mongo-green); padding: 15px 25px; border-radius: 10px; font-weight: bold; font-size: 24px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-.arrow { font-size: 40px; color: var(--mongo-green); font-weight: bold; }
+.json-key { color: #7EE787; }
+.json-string { color: #A5D6FF; }
+.json-number { color: #D2A8FF; }
+.json-boolean { color: #FF7B72; }
+.json-comment { color: #8B949E; font-style: italic; }
 
-.compare-card { background: white; border-top: 6px solid var(--mongo-green); padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 24px; border-radius: 12px; width: 100%; }
-.compare-card h3 { margin-top: 0; color: var(--navy); font-size: 32px; }
+.pipeline-container { display: flex; flex-direction: row; align-items: center; justify-content: space-around; width: 100%; padding: 30px; background: #F6F8FA; border-radius: 20px; margin-top: 20px; }
+.domain-chip { background: white; border: 3px solid var(--mongo-green); padding: 20px 30px; border-radius: 15px; font-weight: 800; font-size: 26px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.2s; }
+.domain-chip:hover { transform: translateY(-5px); }
+.arrow { font-size: 50px; color: var(--mongo-green); font-weight: 900; }
 
-.counter { position: absolute; right: 40px; bottom: 30px; color: #7A8793; font-size: 20px; z-index: 10; font-weight: 700; }
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: 100%; }
+.compare-card { background: white; border-top: 10px solid var(--mongo-green); padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); font-size: 26px; border-radius: 15px; transition: all 0.3s; }
+.compare-card:hover { transform: scale(1.02); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
+.compare-card h3 { margin-top: 0; color: var(--navy); font-size: 34px; font-weight: 800; margin-bottom: 20px; }
+
+.counter { position: absolute; right: 50px; bottom: 30px; color: #7A8793; font-size: 22px; z-index: 10; font-weight: 800; background: #F1F1F1; padding: 5px 15px; border-radius: 20px; }
+
+/* Metrics */
+.metric-box { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #E3F2FD; border-radius: 15px; border: 2px solid #2196F3; }
+.metric-val { font-size: 48px; font-weight: 900; color: #1565C0; }
+.metric-label { font-size: 20px; font-weight: 700; color: #546E7A; }
 
 /* Controller Logic */
 </style>
@@ -128,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     showSlide(currentSlide);
 
-    // Scaling logic for different screen sizes
     function rescale() {
         const deck = document.querySelector('.deck');
         const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
@@ -144,38 +154,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- 1. Title -->
 <section class="slide title-slide">
-    <div class="topline">Advanced DataBase Course</div>
-    <h1>MongoDB Master Class: <br/>From Fundamentals to AI-Native</h1>
-    <p>컴퓨터인공지능학부 | 이경수</p>
+    <div class="topline">Medical AI & Computational Science</div>
+    <h1>MongoDB Master Class: <br/>Architecture & Design</h1>
+    <p>컴퓨터인공지능학부 | 이경수 교수</p>
     <div class="counter">1 / 50</div>
 </section>
 
 <!-- 2. TOC -->
 <section class="slide">
-    <div class="topline">Course Overview</div>
-    <h1>강의 목차</h1>
+    <div class="topline">Course Curriculum</div>
+    <h1>강의 아젠다 (The Road to Expert)</h1>
     <div class="content">
         <div class="layout-single">
-            <ul style="font-size: 24px;">
-                <li><strong>Part 1: MongoDB Fundamentals (Slide 3-10)</strong></li>
-                <li><strong>Part 2: CRUD & Indexing Strategy (Slide 11-18)</strong></li>
-                <li><strong>Part 3: Schema Design Patterns (Slide 19-27)</strong></li>
-                <li><strong>Part 4: Advanced Modeling & Transactions (Slide 28-35)</strong></li>
-                <li><strong>Part 5: MongoDB Atlas & AI-Native Features (Slide 36-43)</strong></li>
-                <li><strong>Part 6: Enterprise Practice & Case Study (Slide 44-50)</strong></li>
+            <ul style="font-size: 26px;">
+                <li><strong>Phase 1: Architecture & Internal (Slide 3-10)</strong>
+                    <br/><small>Storage Engine, BSON, Write Concern, Read Preference</small></li>
+                <li><strong>Phase 2: Advanced CRUD & Indexing (Slide 11-18)</strong>
+                    <br/><small>Aggregation Framework, ESR Rule, Partial & Multikey Index</small></li>
+                <li><strong>Phase 3: The 7 Design Patterns (Slide 19-27)</strong>
+                    <br/><small>Schema Patterns for High-Scale Applications</small></li>
+                <li><strong>Phase 4: Distributed System & Transaction (Slide 28-35)</strong>
+                    <br/><small>Replica Set, Sharding Architecture, ACID Transaction</small></li>
+                <li><strong>Phase 5: Modern Stack: AI & Atlas (Slide 36-43)</strong>
+                    <br/><small>Vector Search, RAG Architecture, Atlas Search</small></li>
+                <li><strong>Phase 6: Practical Enterprise Engineering (Slide 44-50)</strong>
+                    <br/><small>Anti-Patterns, Modeling Case Study, Performance Tuning</small></li>
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size: 16px;">
+            <div class="json-block">
 {
-  <span class="json-key">"course"</span>: <span class="json-string">"MongoDB Mastery"</span>,
-  <span class="json-key">"level"</span>: <span class="json-string">"Advanced"</span>,
-  <span class="json-key">"topics"</span>: [
-    <span class="json-string">"NoSQL Schema"</span>,
-    <span class="json-string">"Performance Tuning"</span>,
-    <span class="json-string">"Vector Search"</span>,
-    <span class="json-string">"Distributed Systems"</span>
-  ]
+  <span class="json-key">"target"</span>: <span class="json-string">"Full-stack Engineer"</span>,
+  <span class="json-key">"outcome"</span>: <span class="json-string">"Architecture Design Ability"</span>,
+  <span class="json-key">"stack"</span>: [<span class="json-string">"Atlas"</span>, <span class="json-string">"Vector"</span>, <span class="json-string">"Agg"</span>]
 }
             </div>
         </div>
@@ -183,50 +194,53 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="counter">2 / 50</div>
 </section>
 
-<!-- Part 1: Fundamentals -->
+<!-- PART 1 -->
 <section class="slide section-slide">
-    <div class="topline">PART 1</div>
-    <h1>MongoDB Fundamentals</h1>
-    <p style="color:#DDE6EE; font-size:28px;">NoSQL의 철학과 도큐먼트 모델의 이해</p>
+    <div class="topline">PHASE 1</div>
+    <h1>Architecture & Internals</h1>
+    <p style="color:#DDE6EE; font-size:32px;">MongoDB가 데이터를 처리하는 물리적 메커니즘</p>
     <div class="counter">3 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 1 | Fundamentals</div>
-    <h1>왜 MongoDB인가? (Philosophy)</h1>
-    <div class="layout-single">
-        <ul>
-            <li><strong>Developer Productivity:</strong> 객체 지향 언어의 데이터 구조(JSON/BSON)와 매핑이 쉬움.</li>
-            <li><strong>Scale-out Architecture:</strong> 서비스 중단 없이 수평적 확장(Horizontal Scaling) 가능.</li>
-            <li><strong>Rich Query Language:</strong> 단순 Key-Value를 넘어 복잡한 분석 및 검색 지원.</li>
-            <li><strong>Dynamic Schema:</strong> 비즈니스 요구사항 변화에 유연하게 대응 가능.</li>
-        </ul>
-        <div class="callout">"데이터를 애플리케이션이 사용하는 방식 그대로 저장한다"는 것이 핵심입니다.</div>
+    <div class="topline">PHASE 1 | Internals</div>
+    <h1>Storage Engine: WiredTiger</h1>
+    <div class="content">
+        <div class="layout-single">
+            <ul>
+                <li><strong>Document-Level Concurrency:</strong> 여러 클라이언트가 동시에 다른 문서를 수정 가능 (No Lock).</li>
+                <li><strong>Compression:</strong> Snappy/Zlib 알고리즘으로 스토리지 비용 30-80% 절감.</li>
+                <li><strong>Checkpointing:</strong> 60초마다 데이터를 디스크에 플러시하여 데이터 영속성 보장.</li>
+                <li><strong>Snapshot:</strong> 읽기 작업 시 일관된 데이터 뷰 제공.</li>
+            </ul>
+        </div>
+        <div class="visual">
+            <div class="metric-box">
+                <div class="metric-val">~80%</div>
+                <div class="metric-label">Storage Savings via Compression</div>
+            </div>
+        </div>
     </div>
     <div class="counter">4 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 1 | Fundamentals</div>
-    <h1>BSON (Binary JSON) 이해하기</h1>
+    <div class="topline">PHASE 1 | Internals</div>
+    <h1>Write Concern (w) & Journaling (j)</h1>
     <div class="content">
         <div class="layout-single">
             <ul>
-                <li>JSON은 텍스트 기반으로 가독성이 좋으나 검색/연산 성능에 한계.</li>
-                <li><strong>BSON</strong>은 MongoDB의 내부 저장 포맷으로 바이너리 구조.</li>
-                <li><strong>추가 데이터 타입 지원:</strong> ObjectId, Date, BinData(이미지 등), Decimal128 등.</li>
-                <li>효율적인 인덱싱과 트래버스(Traverse)를 위해 설계됨.</li>
+                <li><strong>w: 1</strong> - Primary 노드에만 기록되면 성공 (빠름).</li>
+                <li><strong>w: majority</strong> - 과반수 노드에 기록 보장 (안전).</li>
+                <li><strong>j: true</strong> - 메모리뿐만 아니라 Journal 로그 파일까지 기록 (크래시 대응).</li>
             </ul>
         </div>
         <div class="visual">
             <div class="json-block">
-<span class="json-comment">// BSON Example</span>
-{
-  <span class="json-key">"_id"</span>: <span class="json-string">ObjectId("60d5f...")</span>,
-  <span class="json-key">"price"</span>: <span class="json-number">NumberDecimal("19.99")</span>,
-  <span class="json-key">"active"</span>: <span class="json-boolean">true</span>,
-  <span class="json-key">"created_at"</span>: <span class="json-string">ISODate("2026-05-27T...")</span>
-}
+db.users.insertOne(
+  { name: <span class="json-string">"Alice"</span> },
+  { writeConcern: { <span class="json-key">w</span>: <span class="json-string">"majority"</span>, <span class="json-key">j</span>: <span class="json-boolean">true</span>, <span class="json-key">wtimeout</span>: <span class="json-number">5000</span> } }
+)
             </div>
         </div>
     </div>
@@ -234,59 +248,43 @@ document.addEventListener('DOMContentLoaded', () => {
 </section>
 
 <section class="slide">
-    <div class="topline">PART 1 | Fundamentals</div>
-    <h1>RDBMS vs MongoDB 용어 비교</h1>
+    <div class="topline">PHASE 1 | Internals</div>
+    <h1>Read Preference & Consistency</h1>
     <div class="layout-single">
-        <table style="width:100%; border-collapse: collapse; margin-top:30px;">
-            <tr style="background: var(--navy); color: white;">
-                <th style="padding:20px;">RDBMS Concept</th>
-                <th style="padding:20px;">MongoDB Concept</th>
-            </tr>
-            <tr>
-                <td style="padding:20px; border:1px solid var(--line);">Database</td>
-                <td style="padding:20px; border:1px solid var(--line);">Database</td>
-            </tr>
-            <tr>
-                <td style="padding:20px; border:1px solid var(--line);">Table</td>
-                <td style="padding:20px; border:1px solid var(--line);">Collection</td>
-            </tr>
-            <tr>
-                <td style="padding:20px; border:1px solid var(--line);">Row (Record)</td>
-                <td style="padding:20px; border:1px solid var(--line);">Document</td>
-            </tr>
-            <tr>
-                <td style="padding:20px; border:1px solid var(--line);">Column</td>
-                <td style="padding:20px; border:1px solid var(--line);">Field</td>
-            </tr>
-            <tr>
-                <td style="padding:20px; border:1px solid var(--line);">JOIN</td>
-                <td style="padding:20px; border:1px solid var(--line);">$lookup, Embedding</td>
-            </tr>
-        </table>
+        <div class="compare-grid">
+            <div class="compare-card">
+                <h3>Primary (Default)</h3>
+                <p>항상 최신 데이터를 읽음. 쓰기가 몰리면 읽기 성능 저하 가능.</p>
+            </div>
+            <div class="compare-card" style="border-top-color: var(--blue);">
+                <h3>SecondaryPreferred</h3>
+                <p>읽기 부하 분산(Read Scaling). 단, 복제 지연(Replication Lag)으로 인한 과거 데이터 가능성 존재.</p>
+            </div>
+        </div>
+        <div class="callout">"분산 시스템에서 일관성(Consistency)과 가용성(Availability)의 트레이드오프를 결정하는 핵심 설정입니다."</div>
     </div>
     <div class="counter">6 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 1 | Fundamentals</div>
-    <h1>Document Structure (Embedding)</h1>
+    <div class="topline">PHASE 1 | Internals</div>
+    <h1>BSON: Type System Deep Dive</h1>
     <div class="content">
         <div class="layout-single">
-            <h2>중첩(Embedding)의 장점</h2>
             <ul>
-                <li><strong>One-Stop Read:</strong> 한 번의 I/O로 모든 관련 데이터를 조회.</li>
-                <li><strong>Locality:</strong> 연관된 데이터가 물리적으로 가까운 곳에 위치.</li>
-                <li><strong>Atomic Write:</strong> 하나의 문서는 항상 원자적 업데이트 보장.</li>
+                <li><strong>ObjectId:</strong> 12-byte (Timestamp + MachineID + PID + Counter).</li>
+                <li><strong>Date:</strong> 64-bit 정수 (Unix Epoch ms).</li>
+                <li><strong>Decimal128:</strong> 정확한 소수점 계산 (금융 서비스 필수).</li>
+                <li><strong>Null vs Missing:</strong> 필드가 null인 것과 아예 없는 것은 다르게 취급됨.</li>
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block">
+            <div class="json-block" style="font-size:18px;">
 {
-  <span class="json-key">"user"</span>: <span class="json-string">"kyungsoo"</span>,
-  <span class="json-key">"addresses"</span>: [
-    { <span class="json-key">"city"</span>: <span class="json-string">"Jeonju"</span>, <span class="json-key">"zip"</span>: <span class="json-string">"54896"</span> },
-    { <span class="json-key">"city"</span>: <span class="json-string">"Seoul"</span>, <span class="json-key">"zip"</span>: <span class="json-string">"06123"</span> }
-  ]
+  <span class="json-key">"_id"</span>: <span class="json-string">ObjectId("60d5f...")</span>,
+  <span class="json-key">"balance"</span>: <span class="json-number">NumberDecimal("100.50")</span>,
+  <span class="json-key">"status"</span>: <span class="json-boolean">null</span>,
+  <span class="json-comment">// "deleted_at" 필드 미존재 (Missing)</span>
 }
             </div>
         </div>
@@ -295,234 +293,223 @@ document.addEventListener('DOMContentLoaded', () => {
 </section>
 
 <section class="slide">
-    <div class="topline">PART 1 | Fundamentals</div>
-    <h1>Document Structure (Referencing)</h1>
-    <div class="content">
-        <div class="layout-single">
-            <h2>참조(Referencing)의 장점</h2>
-            <ul>
-                <li><strong>Data Consistency:</strong> 중복 데이터가 없어 수정 시 유리.</li>
-                <li><strong>Flexibility:</strong> 다수의 관계가 복잡할 때 유연함.</li>
-                <li><strong>Avoid 16MB Limit:</strong> 문서 하나가 너무 커지는 것을 방지.</li>
-            </ul>
-        </div>
-        <div class="visual">
-            <div class="json-block">
-<span class="json-comment">// Orders Collection</span>
-{
-  <span class="json-key">"order_no"</span>: <span class="json-number">101</span>,
-  <span class="json-key">"user_id"</span>: <span class="json-string">ObjectId("60d5f...")</span>,
-  <span class="json-key">"product_ids"</span>: [
-    <span class="json-string">ObjectId("77b21...")</span>
-  ]
-}
-            </div>
-        </div>
+    <div class="topline">PHASE 1 | Internals</div>
+    <h1>Query Execution Plan (Explain)</h1>
+    <div class="layout-single">
+        <ul>
+            <li><code>db.collection.find().explain("executionStats")</code></li>
+            <li><strong>COLLSCAN:</strong> 전체 스캔 (성능 경고!).</li>
+            <li><strong>IXSCAN:</strong> 인덱스 스캔 (권장).</li>
+            <li><strong>FETCH:</strong> 인덱스에서 찾은 주소로 실제 문서를 가져옴.</li>
+            <li><strong>SORT:</strong> 메모리 내 정렬 (32MB 제한 주의).</li>
+        </ul>
     </div>
     <div class="counter">8 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 1 | Fundamentals</div>
-    <h1>데이터 설계 원칙: Read vs Write</h1>
+    <div class="topline">PHASE 1 | Internals</div>
+    <h1>The Power of Locality</h1>
     <div class="layout-single">
         <div class="compare-card">
-            <h3>Read-Optimized (일반적)</h3>
-            <p>조회 성능을 위해 비정규화를 허용하고 데이터를 중첩함.</p>
+            <h3>Normalization (RDBMS)</h3>
+            <p>Data scattered across tables. High disk seek time.</p>
         </div>
         <div class="compare-card" style="margin-top:20px; border-top-color: var(--orange);">
-            <h3>Write-Optimized</h3>
-            <p>데이터의 일관성이 중요하거나 수정이 잦은 경우 정규화(참조)를 선택.</p>
+            <h3>Denormalization (MongoDB)</h3>
+            <p>Data grouped in a single block. Sequential I/O. Fast read.</p>
         </div>
-        <div class="callout" style="text-align:center;">
-            "애플리케이션의 쿼리 패턴을 먼저 파악하는 것이 설계의 1순위입니다."
-        </div>
+        <p style="text-align: center; font-weight: 800; color: var(--blue); margin-top: 20px;">"CPU는 기다려주지 않습니다. 데이터가 가까이 있어야 합니다."</p>
     </div>
     <div class="counter">9 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 1 | Fundamentals</div>
-    <h1>GridFS: 대용량 파일 저장</h1>
+    <div class="topline">PHASE 1 | Internals</div>
+    <h1>Replica Set OpLog (Operations Log)</h1>
     <div class="layout-single">
         <ul>
-            <li>MongoDB 문서 크기 제한은 <strong>16MB</strong>.</li>
-            <li>이를 초과하는 파일(고화질 영상, 큰 PDF 등)을 저장하기 위한 명세.</li>
-            <li>파일을 작은 청크(Chunks, 기본 255KB)로 나누어 별도 컬렉션에 저장.</li>
-            <li><strong>장점:</strong> 파일 시스템과 DB를 일원화하여 관리 가능, 샤딩 지원.</li>
+            <li>Primary의 모든 데이터 변경 사항이 기록되는 Capped Collection.</li>
+            <li>Secondary는 이 OpLog를 비동기적으로 복제하여 동기화.</li>
+            <li>Change Streams의 기술적 기반.</li>
+            <li>복제 지연이 발생하면 OpLog가 덮어씌워져 'Stale' 상태가 될 수 있음.</li>
         </ul>
     </div>
     <div class="counter">10 / 50</div>
 </section>
 
-<!-- Part 2: CRUD & Indexing -->
+<!-- PHASE 2 -->
 <section class="slide section-slide">
-    <div class="topline">PART 2</div>
-    <h1>CRUD & Indexing Strategy</h1>
-    <p style="color:#DDE6EE; font-size:28px;">효율적인 쿼리 작성과 인덱스 최적화</p>
+    <div class="topline">PHASE 2</div>
+    <h1>Advanced CRUD & Aggregation</h1>
+    <p style="color:#DDE6EE; font-size:32px;">단순 조회를 넘어선 데이터 분석 기법</p>
     <div class="counter">11 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 2 | CRUD & Indexing</div>
-    <h1>Insert & Save Operations</h1>
-    <div class="content">
-        <div class="layout-single">
-            <pre class="json-block" style="font-size:16px;">
-<span class="json-comment">// Single Insert</span>
-db.users.insertOne({
-  name: "Lee",
-  age: 30
-});
-
-<span class="json-comment">// Bulk Insert (추천)</span>
-db.users.insertMany([
-  { name: "Kim", age: 25 },
-  { name: "Park", age: 35 }
-]);
-            </pre>
+    <div class="topline">PHASE 2 | Aggregation</div>
+    <h1>The Pipeline Architecture</h1>
+    <div class="layout-single">
+        <div class="pipeline-container">
+            <div class="domain-chip">$match (Filter)</div>
+            <div class="arrow">➔</div>
+            <div class="domain-chip">$group (Summarize)</div>
+            <div class="arrow">➔</div>
+            <div class="domain-chip">$sort (Order)</div>
+            <div class="arrow">➔</div>
+            <div class="domain-chip">$limit (Restrict)</div>
         </div>
-        <div class="visual">
-            <ul>
-                <li><code>ordered: true</code> (기본값): 하나라도 에러 시 중단.</li>
-                <li><code>ordered: false</code>: 에러가 나도 나머지는 계속 진행.</li>
-                <li>Write Concern을 통해 데이터 저장의 신뢰도 수준 조절 가능.</li>
-            </ul>
-        </div>
+        <ul>
+            <li>각 단계(Stage)의 출력은 다음 단계의 입력이 됨.</li>
+            <li>메모리 제한(100MB) 발생 시 <code>allowDiskUse: true</code> 옵션 사용.</li>
+            <li>SQL보다 직관적이고 가독성이 높음 (Complex Logic).</li>
+        </ul>
     </div>
     <div class="counter">12 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 2 | CRUD & Indexing</div>
-    <h1>Advanced Query Operators (1/2)</h1>
-    <div class="layout-single">
-        <table style="width:100%; font-size:22px;">
-            <tr style="background:#f4f4f4;"><th>Operator</th><th>Meaning</th><th>Usage</th></tr>
-            <tr><td><code>$eq</code> / <code>$ne</code></td><td>같음 / 다름</td><td><code>{ age: { $eq: 20 } }</code></td></tr>
-            <tr><td><code>$gt</code> / <code>$gte</code></td><td>큼 / 크거나 같음</td><td><code>{ price: { $gt: 100 } }</code></td></tr>
-            <tr><td><code>$in</code> / <code>$nin</code></td><td>배열 내 존재 여부</td><td><code>{ tags: { $in: ["db", "ai"] } }</code></td></tr>
-            <tr><td><code>$exists</code></td><td>필드 존재 여부</td><td><code>{ phone: { $exists: true } }</code></td></tr>
-        </table>
+    <div class="topline">PHASE 2 | Aggregation</div>
+    <h1>Aggregation Pro: $unwind & $lookup</h1>
+    <div class="content">
+        <div class="layout-single">
+            <ul>
+                <li><strong>$unwind:</strong> 배열을 개별 문서로 펼침 (집계 전 필수).</li>
+                <li><strong>$lookup:</strong> Left Outer Join 수행.</li>
+            </ul>
+            <pre class="json-block" style="font-size:16px;">
+{
+  <span class="json-key">$lookup</span>: {
+    <span class="json-key">from</span>: <span class="json-string">"users"</span>,
+    <span class="json-key">localField</span>: <span class="json-string">"author_id"</span>,
+    <span class="json-key">foreignField</span>: <span class="json-string">"_id"</span>,
+    <span class="json-key">as</span>: <span class="json-string">"author_details"</span>
+  }
+}
+            </pre>
+        </div>
+        <div class="visual">
+            <div class="callout">참조 데이터가 많을 경우 $lookup 보다는 **Embedding**을 먼저 고려하세요.</div>
+        </div>
     </div>
     <div class="counter">13 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 2 | CRUD & Indexing</div>
-    <h1>Advanced Query Operators (2/2) - Array</h1>
-    <div class="content">
-        <div class="layout-single">
-            <pre class="json-block" style="font-size:16px;">
-<span class="json-comment">// 배열 요소 중 조건을 만족하는 것이 하나라도 있는 경우</span>
-db.posts.find({ 
-  comments: { $elemMatch: { author: "Lee", rating: { $gt: 4 } } }
-});
-
-<span class="json-comment">// 배열의 크기 조건</span>
-db.posts.find({ tags: { $size: 3 } });
-            </pre>
-        </div>
-        <div class="visual">
-            <div class="callout"><code>$elemMatch</code>는 배열 내 객체의 여러 필드를 동시에 검증할 때 필수입니다.</div>
-        </div>
+    <div class="topline">PHASE 2 | CRUD</div>
+    <h1>BulkWrite: High-Throughput Ingestion</h1>
+    <div class="layout-single">
+        <ul>
+            <li>수천 개의 쓰기 작업을 하나의 네트워크 패킷으로 묶어 처리.</li>
+            <li>네트워크 왕복(RTT) 비용을 획기적으로 절감.</li>
+            <li><code>Insert</code>, <code>Update</code>, <code>Delete</code>를 한 번에 실행 가능.</li>
+        </ul>
+        <pre class="json-block" style="font-size:18px;">
+db.collection.bulkWrite([
+  { insertOne: { document: { _id: 1 } } },
+  { updateOne: { filter: { _id: 2 }, update: { $set: { val: 10 } } } }
+]);
+        </pre>
     </div>
     <div class="counter">14 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 2 | CRUD & Indexing</div>
-    <h1>Update Operators (Atomic)</h1>
+    <div class="topline">PHASE 2 | Indexing</div>
+    <h1>Partial & Sparse Indexes</h1>
     <div class="layout-single">
-        <ul>
-            <li><code>$set</code>: 특정 필드만 수정하거나 추가.</li>
-            <li><code>$inc</code>: 숫자 값 증가/감소 (조회수, 추천수 등).</li>
-            <li><code>$push</code> / <code>$pull</code>: 배열 요소 추가/삭제.</li>
-            <li><code>$unset</code>: 필드 자체를 삭제.</li>
-        </ul>
-        <pre class="json-block" style="font-size:18px;">
-db.products.updateOne(
-  { _id: 101 },
-  { $inc: { stock: -1 }, $set: { updated_at: new Date() } }
-);
-        </pre>
+        <div class="compare-grid">
+            <div class="compare-card">
+                <h3>Partial Index</h3>
+                <p>특정 조건(예: rating > 4) 문서만 인덱싱. 저장공간 및 성능 최적화.</p>
+            </div>
+            <div class="compare-card" style="border-top-color: var(--orange);">
+                <h3>Sparse Index</h3>
+                <p>필드가 존재하는 문서만 인덱싱. NULL 필드 제외 시 유용.</p>
+            </div>
+        </div>
     </div>
     <div class="counter">15 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 2 | CRUD & Indexing</div>
-    <h1>Indexing: 성능의 핵심</h1>
+    <div class="topline">PHASE 2 | Indexing</div>
+    <h1>Hashed & Text Indexes</h1>
     <div class="layout-single">
         <ul>
-            <li>인덱스가 없으면 <strong>Full Collection Scan (COLLSCAN)</strong> 발생.</li>
-            <li><strong>Single Field Index:</strong> 특정 필드 하나에 생성.</li>
-            <li><strong>Compound Index:</strong> 여러 필드 조합. (순서가 매우 중요: ESR 법칙)</li>
-            <li><strong>Multikey Index:</strong> 배열 필드 내 요소를 인덱싱.</li>
+            <li><strong>Hashed Index:</strong> Shard Key의 고른 분산을 위해 필드 값을 해싱.</li>
+            <li><strong>Text Index:</strong> 단순 키워드 검색 지원 (Atlas Search 도입 전 대안).
+                <code>db.posts.createIndex({ content: "text" })</code>
+            </li>
         </ul>
-        <pre class="json-block">db.users.createIndex({ "email": 1 }, { unique: true });</pre>
     </div>
     <div class="counter">16 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 2 | CRUD & Indexing</div>
-    <h1>Compound Index & ESR Rule</h1>
-    <div class="layout-single">
-        <div class="compare-card">
-            <h3>Equality ➔ Sort ➔ Range (ESR)</h3>
-            <p>1. <strong>Equality:</strong> 정확히 일치하는 조건 (e.g., status: "active")</p>
-            <p>2. <strong>Sort:</strong> 정렬이 필요한 필드</p>
-            <p>3. <strong>Range:</strong> 범위 조건 (e.g., price > 100)</p>
+    <div class="topline">PHASE 2 | Indexing</div>
+    <h1>Multikey Index (Array Indexing)</h1>
+    <div class="content">
+        <div class="layout-single">
+            <ul>
+                <li>배열의 각 요소를 개별 인덱스 항목으로 저장.</li>
+                <li>배열 내 필터링 속도를 극대화.</li>
+                <li><strong>주의:</strong> 배열 내 문서가 많으면 인덱스 크기가 폭발적으로 증가.</li>
+            </ul>
         </div>
-        <div class="callout">이 순서를 지키지 않으면 인덱스 효율이 급격히 떨어집니다.</div>
+        <div class="visual">
+            <div class="json-block">
+<span class="json-comment">// tags: ["A", "B"] 인 경우</span>
+<span class="json-comment">// 인덱스에 "A"와 "B"가 각각 기록됨</span>
+db.posts.createIndex({ <span class="json-key">"tags"</span>: <span class="json-number">1</span> });
+            </div>
+        </div>
     </div>
     <div class="counter">17 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 2 | CRUD & Indexing</div>
-    <h1>TTL & Partial Indexes</h1>
+    <div class="topline">PHASE 2 | Indexing</div>
+    <h1>Index Building: Foreground vs Background</h1>
     <div class="layout-single">
         <ul>
-            <li><strong>TTL Index:</strong> 일정 시간 후 문서를 자동 삭제 (로그, 세션 등).
-                <code>db.logs.createIndex({ "createdAt": 1 }, { expireAfterSeconds: 3600 })</code>
-            </li>
-            <li><strong>Partial Index:</strong> 조건에 맞는 문서만 인덱싱하여 인덱스 크기 절약.
-                <code>db.users.createIndex({ email: 1 }, { partialFilterExpression: { email: { $exists: true } } })</code>
-            </li>
+            <li>MongoDB 4.2 이상부터는 모든 인덱스 생성이 최적화됨.</li>
+            <li>실행 중인 쿼리를 방해하지 않으면서 점진적으로 생성.</li>
+            <li>하지만 대규모 컬렉션의 경우 여전히 IO 부하가 있으므로 트래픽이 낮은 시간대에 수행 권장.</li>
         </ul>
     </div>
     <div class="counter">18 / 50</div>
 </section>
 
-<!-- Part 3: Design Patterns -->
+<!-- PHASE 3 -->
 <section class="slide section-slide">
-    <div class="topline">PART 3</div>
-    <h1>Schema Design Patterns</h1>
-    <p style="color:#DDE6EE; font-size:28px;">재사용 가능하고 검증된 모델링 기법</p>
+    <div class="topline">PHASE 3</div>
+    <h1>The 7 Mastery Patterns</h1>
+    <p style="color:#DDE6EE; font-size:32px;">확장 가능한 데이터 모델을 위한 정석 패턴</p>
     <div class="counter">19 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 3 | Design Patterns</div>
+    <div class="topline">PHASE 3 | Design Patterns</div>
     <h1>Pattern 1: Attribute Pattern</h1>
     <div class="content">
         <div class="layout-single">
+            <h2>언제 쓰는가?</h2>
             <ul>
-                <li>필드 이름이 불규칙하거나 검색 조건이 가변적일 때 사용.</li>
-                <li>필드들을 <code>key-value</code> 쌍의 배열로 변환.</li>
-                <li><strong>장점:</strong> 인덱스 하나로 수많은 속성 검색 가능.</li>
+                <li>필드 이름이 너무 많거나 불규칙할 때.</li>
+                <li>수백 개의 속성을 인덱싱해야 할 때.</li>
             </ul>
+            <p>➔ <code>{"key": "val"}</code> 배열로 구조화.</p>
         </div>
         <div class="visual">
-            <div class="json-block">
+            <div class="json-block" style="font-size:18px;">
 {
-  <span class="json-key">"attrs"</span>: [
-    { <span class="json-key">"k"</span>: <span class="json-string">"color"</span>, <span class="json-key">"v"</span>: <span class="json-string">"red"</span> },
-    { <span class="json-key">"k"</span>: <span class="json-string">"size"</span>, <span class="json-key">"v"</span>: <span class="json-number">10</span> }
+  <span class="json-key">"specs"</span>: [
+    { <span class="json-key">"k"</span>: <span class="json-string">"battery"</span>, <span class="json-key">"v"</span>: <span class="json-string">"5000mAh"</span> },
+    { <span class="json-key">"k"</span>: <span class="json-string">"screen"</span>, <span class="json-key">"v"</span>: <span class="json-string">"OLED"</span> }
   ]
 }
+<span class="json-comment">// Index: specs.k_1_specs.v_1</span>
             </div>
         </div>
     </div>
@@ -530,21 +517,18 @@ db.products.updateOne(
 </section>
 
 <section class="slide">
-    <div class="topline">PART 3 | Design Patterns</div>
+    <div class="topline">PHASE 3 | Design Patterns</div>
     <h1>Pattern 2: Extended Reference Pattern</h1>
     <div class="layout-single">
         <ul>
-            <li>다른 컬렉션의 데이터를 참조하되, <strong>자주 쓰이는 정보는 미리 복사</strong>해 둠.</li>
-            <li>조인 횟수를 줄여 읽기 성능 극대화.</li>
-            <li>원본 데이터 변경 시 업데이트 전파(Fan-out)가 필요함.</li>
+            <li><strong>Concept:</strong> "Join is expensive, so copy what you need."</li>
+            <li>자주 조회되는 필드(예: 작성자 이름)를 문서 내에 복사.</li>
+            <li><strong>Pros:</strong> No Lookups. <strong>Cons:</strong> Stale data risk.</li>
         </ul>
         <pre class="json-block">
 {
-  <span class="json-key">"order_id"</span>: <span class="json-number">1</span>,
-  <span class="json-key">"user_info"</span>: { <span class="json-comment">// 참조 + 요약 정보 포함</span>
-     <span class="json-key">"id"</span>: <span class="json-string">ObjectId("...")</span>,
-     <span class="json-key">"name"</span>: <span class="json-string">"Lee"</span>
-  }
+  <span class="json-key">"post"</span>: <span class="json-string">"Hello MongoDB"</span>,
+  <span class="json-key">"author"</span>: { <span class="json-key">"_id"</span>: <span class="json-number">1</span>, <span class="json-key">"name"</span>: <span class="json-string">"Lee"</span> } <span class="json-comment">// 복사된 정보</span>
 }
         </pre>
     </div>
@@ -552,38 +536,36 @@ db.products.updateOne(
 </section>
 
 <section class="slide">
-    <div class="topline">PART 3 | Design Patterns</div>
+    <div class="topline">PHASE 3 | Design Patterns</div>
     <h1>Pattern 3: Subset Pattern</h1>
     <div class="layout-single">
         <ul>
-            <li>1:N 관계에서 N이 너무 클 때(Working Set 문제), <strong>최근 데이터 일부만 중첩</strong>하고 나머지는 참조로 분리.</li>
-            <li>예: 게시물의 최근 댓글 10개만 Post에 보관, 나머지는 별도 조회.</li>
-            <li>메모리 히트율(Hit Rate)을 높이는 전략.</li>
+            <li><strong>Concept:</strong> "Most people only care about the latest."</li>
+            <li>게시글의 **최근 댓글 5개**만 Post에 포함, 나머지는 별도 컬렉션.</li>
+            <li>Working Set 크기를 줄여 메모리 활용 최적화.</li>
         </ul>
     </div>
     <div class="counter">22 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 3 | Design Patterns</div>
-    <h1>Pattern 4: Bucket Pattern (Deep Dive)</h1>
+    <div class="topline">PHASE 3 | Design Patterns</div>
+    <h1>Pattern 4: Bucket Pattern</h1>
     <div class="content">
         <div class="layout-single">
+            <h2>언제 쓰는가?</h2>
             <ul>
-                <li>시계열 데이터 최적화.</li>
-                <li>단일 문서당 인덱스 오버헤드를 줄임.</li>
-                <li>쿼리 결과의 크기를 적절히 유지.</li>
+                <li>초 단위 로그 데이터.</li>
+                <li>인덱스 크기 폭발 방지.</li>
             </ul>
+            <p>➔ 데이터가 들어올 때 기존 문서를 찾아 <code>$push</code>.</p>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:14px;">
+            <div class="json-block">
 {
-  <span class="json-key">"dev_id"</span>: <span class="json-number">101</span>,
-  <span class="json-key">"bucket_start"</span>: <span class="json-string">"12:00"</span>,
-  <span class="json-key">"samples"</span>: [
-    {<span class="json-key">"t"</span>: <span class="json-number">0</span>, <span class="json-key">"v"</span>: <span class="json-number">20</span>}, {<span class="json-key">"t"</span>: <span class="json-number">1</span>, <span class="json-key">"v"</span>: <span class="json-number">21</span>} ...
-  ],
-  <span class="json-key">"avg"</span>: <span class="json-number">20.5</span>
+  <span class="json-key">"sensor_id"</span>: <span class="json-number">1</span>,
+  <span class="json-key">"hour"</span>: <span class="json-string">"2026-05-27:14"</span>,
+  <span class="json-key">"readings"</span>: [<span class="json-number">25.1, 25.2, 25.4...</span>]
 }
             </div>
         </div>
@@ -592,394 +574,378 @@ db.products.updateOne(
 </section>
 
 <section class="slide">
-    <div class="topline">PART 3 | Design Patterns</div>
-    <h1>Pattern 5: Schema Versioning Pattern</h1>
+    <div class="topline">PHASE 3 | Design Patterns</div>
+    <h1>Pattern 5: Computed Pattern</h1>
     <div class="layout-single">
         <ul>
-            <li>다운타임 없는 데이터 마이그레이션.</li>
-            <li>문서에 <code>schema_version</code> 필드를 추가.</li>
-            <li>애플리케이션이 구버전과 신버전 문서를 모두 핸들링할 수 있게 함.</li>
-            <li>배치 작업으로 점진적 마이그레이션 수행 가능.</li>
+            <li><strong>Concept:</strong> "Do the math on write, not on read."</li>
+            <li>조회수, 좋아요 수, 평균 별점 등을 필드로 미리 유지.</li>
+            <li>집계 연산 부하를 0으로 만듦.</li>
         </ul>
+        <pre class="json-block">
+db.posts.updateOne(
+  { _id: <span class="json-number">123</span> },
+  { <span class="json-key">$inc</span>: { <span class="json-key">view_count</span>: <span class="json-number">1</span> } }
+);
+        </pre>
     </div>
     <div class="counter">24 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 3 | Design Patterns</div>
-    <h1>Pattern 6: Computed Pattern (Best Case)</h1>
+    <div class="topline">PHASE 3 | Design Patterns</div>
+    <h1>Pattern 6: Schema Versioning Pattern</h1>
     <div class="layout-single">
         <ul>
-            <li>읽기가 압도적인 데이터(통계, 카운터)에 적용.</li>
-            <li>성능 부하가 큰 집계(Aggregation)를 쓰기 시점에 분산 처리.</li>
-            <li>사용자 경험(UX) 개선의 핵심.</li>
+            <li>비즈니스 로직 변화로 스키마가 변경될 때.</li>
+            <li>기존 데이터를 모두 한 번에 바꿀 수 없을 때(Downtime 방지).</li>
+            <li><code>schema_version: 2</code> 필드를 보고 애플리케이션에서 분기 처리.</li>
         </ul>
-        <pre class="json-block">
-db.users.updateOne(
-  { _id: 123 },
-  { $inc: { total_points: 50, visit_count: 1 } }
-);
-        </pre>
     </div>
     <div class="counter">25 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 3 | Design Patterns</div>
+    <div class="topline">PHASE 3 | Design Patterns</div>
     <h1>Pattern 7: Outlier Pattern</h1>
     <div class="layout-single">
         <ul>
-            <li>대부분의 데이터는 규칙을 따르지만 일부 예외(슈퍼스타, 헤비 유저)가 있을 때.</li>
-            <li>예외 케이스를 위한 별도의 플래그나 오버플로우 문서를 생성.</li>
-            <li>일반적인 데이터의 성능 저하를 방지.</li>
+            <li>대부분의 문서는 작지만 특정 문서(예: 인기글)가 16MB를 위협할 때.</li>
+            <li>해당 문서만 <code>has_overflow: true</code> 플래그를 달고 추가 컬렉션 활용.</li>
+            <li>일반적인 데이터의 성능을 희생하지 않는 예외 처리 방식.</li>
         </ul>
     </div>
     <div class="counter">26 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 3 | Design Patterns</div>
-    <h1>Anti-Pattern: 잦은 $lookup</h1>
+    <div class="topline">PHASE 3 | Design Patterns</div>
+    <h1>Pattern Choosing Guide</h1>
     <div class="layout-single">
-        <ul>
-            <li>MongoDB는 관계형 DB가 아닙니다.</li>
-            <li>성능의 핵심은 <strong>"Data Locality"</strong>입니다.</li>
-            <li>3개 이상의 컬렉션을 <code>$lookup</code>으로 잇고 있다면 모델링 실패의 징조입니다.</li>
-        </ul>
-        <div class="callout" style="border-color:var(--red);">정규화의 유혹을 뿌리치고 비정규화를 두려워하지 마세요.</div>
+        <table style="width:100%; font-size:24px;">
+            <tr style="background:var(--navy); color:white;"><th>Condition</th><th>Pattern</th></tr>
+            <tr><td>성능보다 정확성</td><td>Referencing</td></tr>
+            <tr><td>읽기 성능 극대화</td><td>Embedding + Computed</td></tr>
+            <tr><td>데이터 양 폭발</td><td>Bucket + Subset</td></tr>
+            <tr><td>가변적인 속성</td><td>Attribute</td></tr>
+        </table>
     </div>
     <div class="counter">27 / 50</div>
 </section>
 
-<!-- Part 4: Advanced Modeling -->
+<!-- PHASE 4 -->
 <section class="slide section-slide">
-    <div class="topline">PART 4</div>
-    <h1>Advanced Modeling & Transactions</h1>
-    <p style="color:#DDE6EE; font-size:28px;">트랜잭션 관리와 대규모 데이터 처리</p>
+    <div class="topline">PHASE 4</div>
+    <h1>Distributed Systems & Transaction</h1>
+    <p style="color:#DDE6EE; font-size:32px;">가용성과 데이터 일관성의 조화</p>
     <div class="counter">28 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 4 | Advanced Modeling</div>
-    <h1>Multi-Document Transactions</h1>
+    <div class="topline">PHASE 4 | Distributed</div>
+    <h1>Replica Set: High Availability (HA)</h1>
     <div class="layout-single">
         <ul>
-            <li>MongoDB 4.0 이상부터 ACID 트랜잭션 지원.</li>
-            <li>여러 문서나 컬렉션에 걸친 작업을 하나의 논리적 단위로 묶음.</li>
-            <li><strong>주의:</strong> 성능 오버헤드가 있으므로 반드시 필요한 경우만 사용.</li>
+            <li><strong>Failover:</strong> Primary 장애 시 12초 내외로 새로운 Primary 선출.</li>
+            <li><strong>Majority Rule:</strong> 최소 3대의 노드가 있어야 정상 작동 (홀수 노드 권장).</li>
+            <li><strong>Arbiter:</strong> 데이터는 없지만 투표권만 갖는 노드 (비용 절감용).</li>
         </ul>
-        <pre class="json-block" style="font-size:14px;">
-const session = db.getMongo().startSession();
-session.startTransaction();
-try {
-  db.accounts.updateOne({ id: 1 }, { $inc: { bal: -100 } }, { session });
-  db.accounts.updateOne({ id: 2 }, { $inc: { bal: 100 } }, { session });
-  session.commitTransaction();
-} catch (e) {
-  session.abortTransaction();
-}
-        </pre>
     </div>
     <div class="counter">29 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 4 | Advanced Modeling</div>
-    <h1>Aggregation Framework (Pipeline)</h1>
-    <div class="layout-single">
-        <ul>
-            <li>데이터를 처리하고 가공하는 파이프라인 구조.</li>
-            <li><code>$match</code> ➔ <code>$group</code> ➔ <code>$sort</code> ➔ <code>$project</code></li>
-            <li>SQL의 <code>GROUP BY</code>와 <code>JOIN</code> 등을 훨씬 강력하게 대체.</li>
-        </ul>
+    <div class="topline">PHASE 4 | Distributed</div>
+    <h1>Sharding Architecture</h1>
+    <div class="content">
+        <div class="layout-single">
+            <ul>
+                <li><strong>Mongos:</strong> 쿼리 라우터 (클라이언트와 통신).</li>
+                <li><strong>Config Server:</strong> 샤드 키 범위 및 위치 정보 저장.</li>
+                <li><strong>Shard Nodes:</strong> 실제 데이터를 나누어 저장하는 노드.</li>
+            </ul>
+        </div>
+        <div class="visual">
+            <div class="callout">"샤딩은 한 번 적용하면 되돌리기 매우 힘듭니다. 신중한 설계가 필요합니다."</div>
+        </div>
     </div>
     <div class="counter">30 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 4 | Advanced Modeling</div>
-    <h1>Aggregation Example: 매출 분석</h1>
+    <div class="topline">PHASE 4 | Distributed</div>
+    <h1>Choosing the Shard Key</h1>
     <div class="layout-single">
-        <pre class="json-block" style="font-size:16px;">
-db.orders.aggregate([
-  { $match: { status: "completed" } },
-  { $group: { 
-      _id: "$category", 
-      total: { $sum: "$price" },
-      count: { $sum: 1 } 
-  } },
-  { $sort: { total: -1 } }
-]);
-        </pre>
+        <ul>
+            <li><strong>Cardinality:</strong> 값이 다양해야 함 (예: gender는 최악).</li>
+            <li><strong>Frequency:</strong> 특정 값에 몰리지 않아야 함.</li>
+            <li><strong>Monotonic Increase:</strong> Timestamp 등은 쓰기 시 특정 샤드에만 몰림 (Hashed Sharding 고려).</li>
+        </ul>
     </div>
     <div class="counter">31 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 4 | Advanced Modeling</div>
-    <h1>Change Streams: 실전 활용</h1>
+    <div class="topline">PHASE 4 | Transaction</div>
+    <h1>Multi-Document ACID Transaction</h1>
     <div class="layout-single">
         <ul>
-            <li>데이터의 삽입/수정/삭제를 실시간으로 구독.</li>
-            <li><strong>활용:</strong> 푸시 알림, 캐시 갱신, 실시간 대시보드.</li>
-            <li>Replica Set 혹은 Sharded Cluster 환경 필수.</li>
+            <li>원격 뱅킹, 주문 시스템 등 무결성이 생명인 곳에서 사용.</li>
+            <li>단일 문서 원자성은 기본 지원하므로, 여러 문서를 묶을 때만 사용.</li>
+            <li><strong>Snapshot Isolation:</strong> 트랜잭션 도중의 변경 사항은 외부에서 보이지 않음.</li>
         </ul>
-        <pre class="json-block">
-const pipeline = [{ $match: { "operationType": "insert" } }];
-db.collection.watch(pipeline).on("change", data => {
-  console.log("New data:", data.fullDocument);
-});
-        </pre>
     </div>
     <div class="counter">32 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 4 | Advanced Modeling</div>
-    <h1>Working Set & RAM 관리</h1>
+    <div class="topline">PHASE 4 | Transaction</div>
+    <h1>Transaction vs Performance</h1>
     <div class="layout-single">
-        <ul>
-            <li>MongoDB 성능의 핵심은 <strong>"Working Set이 RAM에 들어오는가?"</strong>입니다.</li>
-            <li>인덱스와 자주 쓰이는 데이터는 항상 메모리에 로드되어야 함.</li>
-            <li>Page Fault가 잦아지면 Disk I/O 병목으로 성능 급락.</li>
-        </ul>
-        <div class="callout">"인덱스 크기(Index Size)는 항상 RAM 가용 용량보다 작아야 합니다."</div>
+        <div class="metric-box">
+            <div class="metric-val">10-20%</div>
+            <div class="metric-label">Typical Performance Overhead</div>
+        </div>
+        <p style="margin-top:30px;">트랜잭션은 유선상의 오버헤드와 락(Lock) 경합을 유발합니다. <br/><strong>가장 좋은 방법은 트랜잭션이 필요 없도록 문서를 설계(Embedding)하는 것입니다.</strong></p>
     </div>
     <div class="counter">33 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 4 | Advanced Modeling</div>
-    <h1>Sharding: 데이터 분산 저장</h1>
+    <div class="topline">PHASE 4 | Distributed</div>
+    <h1>Causal Consistency</h1>
     <div class="layout-single">
         <ul>
-            <li>데이터를 여러 서버(Shard)에 나누어 저장.</li>
-            <li><strong>Shard Key:</strong> 분산의 기준이 되는 필드 (선정이 매우 중요).</li>
-            <li>Hashed Sharding vs Ranged Sharding.</li>
-            <li>쓰기 부하가 단일 서버 한계를 넘을 때 도입.</li>
+            <li>선행된 쓰기 작업의 결과를 후행된 읽기 작업이 항상 보장받는 메커니즘.</li>
+            <li>분산 DB에서 "내가 쓴 글이 바로 안 보여요" 문제를 해결.</li>
+            <li>Session 기능을 통해 활성화.</li>
         </ul>
     </div>
     <div class="counter">34 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 4 | Advanced Modeling</div>
-    <h1>Capped Collections</h1>
+    <div class="topline">PHASE 4 | Distributed</div>
+    <h1>Zonal Sharding (Global Cluster)</h1>
     <div class="layout-single">
         <ul>
-            <li>크기가 고정된 특수 컬렉션.</li>
-            <li>용량이 다 차면 가장 오래된 데이터를 덮어씀 (Circular Buffer).</li>
-            <li>로그 저장, 선입선출(FIFO) 큐 등에 최적.</li>
-            <li>인덱스가 없어도 삽입 순서로 매우 빠르게 조회 가능.</li>
+            <li>지리적 위치에 따라 데이터를 특정 샤드에 배치.</li>
+            <li>예: 한국 사용자의 데이터는 서울 리전에, 미국 사용자는 버지니아 리전에.</li>
+            <li>지연 시간(Latency) 최소화 및 데이터 규제 대응.</li>
         </ul>
     </div>
     <div class="counter">35 / 50</div>
 </section>
 
-<!-- Part 5: Atlas & AI -->
+<!-- PHASE 5 -->
 <section class="slide section-slide">
-    <div class="topline">PART 5</div>
-    <h1>MongoDB Atlas & AI-Native</h1>
+    <div class="topline">PHASE 5</div>
+    <h1>AI-Native MongoDB Atlas</h1>
     <div class="counter">36 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 5 | Atlas & AI</div>
-    <h1>The Data Platform: Atlas</h1>
-    <div class="layout-single">
-        <ul>
-            <li>단순 클라우드 DB가 아닌 통합 데이터 서비스 플랫폼.</li>
-            <li><strong>Search:</strong> Full-text search (Lucene).</li>
-            <li><strong>Charts:</strong> 데이터 시각화 도구.</li>
-            <li><strong>Triggers & Functions:</strong> 서버리스 백엔드 로직 연동.</li>
-            <li><strong>Data Federation:</strong> S3 등 외부 데이터와 통합 쿼리.</li>
-        </ul>
+    <div class="topline">PHASE 5 | AI</div>
+    <h1>Atlas Vector Search</h1>
+    <div class="content">
+        <div class="layout-single">
+            <ul>
+                <li>이미지, 텍스트의 **Embedding Vector**를 직접 인덱싱.</li>
+                <li>HNSW 알고리즘을 통한 초고속 유사도 검색.</li>
+                <li>AI 애플리케이션의 장기 기억 장치(Long-term Memory) 역할.</li>
+            </ul>
+        </div>
+        <div class="visual">
+            <div class="json-block" style="font-size:16px;">
+{
+  <span class="json-key">"title"</span>: <span class="json-string">"MongoDB 강의"</span>,
+  <span class="json-key">"vector"</span>: [<span class="json-number">0.12, -0.05, 0.88, ...</span>]
+}
+            </div>
+        </div>
     </div>
     <div class="counter">37 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 5 | Atlas & AI</div>
-    <h1>Vector Search: Semantic Search</h1>
+    <div class="topline">PHASE 5 | AI</div>
+    <h1>RAG: The Modern AI Stack</h1>
     <div class="layout-single">
-        <ul>
-            <li>전통적 키워드 검색 ➔ <strong>의미 기반(Semantic) 검색</strong>.</li>
-            <li>문장/이미지를 고차원 벡터로 변환하여 거리를 계산.</li>
-            <li>"애플" 검색 시 "아이폰", "잡스" 관련 결과 도출 가능.</li>
-            <li><code>$vectorSearch</code> 연산자 사용.</li>
-        </ul>
+        <ol style="font-size: 28px;">
+            <li>User 질문 ➔ Embedding 모델 ➔ Vector 생성</li>
+            <li><strong>MongoDB Vector Search</strong> ➔ 유사 문서 추출</li>
+            <li>추출된 문서 + 질문 ➔ LLM (Prompt)</li>
+            <li>LLM ➔ 근거 기반의 정확한 답변 생성</li>
+        </ol>
+        <div class="callout" style="border-color: var(--blue);">데이터베이스가 AI의 지식 베이스가 됩니다.</div>
     </div>
     <div class="counter">38 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 5 | Atlas & AI</div>
-    <h1>RAG (Retrieval-Augmented Generation)</h1>
+    <div class="topline">PHASE 5 | Search</div>
+    <h1>Atlas Search: Beyond Key-Value</h1>
     <div class="layout-single">
-        <div class="pipeline-container">
-            <div class="domain-chip">Question</div>
-            <div class="arrow">➔</div>
-            <div class="domain-chip" style="background:var(--mongo-green); color:white;">Atlas Vector Search</div>
-            <div class="arrow">➔</div>
-            <div class="domain-chip">Context + Question</div>
-            <div class="arrow">➔</div>
-            <div class="domain-chip">LLM</div>
-        </div>
-        <p style="margin-top:30px;">LLM의 환각(Hallucination) 현상을 방지하기 위해 DB에 저장된 실제 지식을 주입하는 기술.</p>
+        <ul>
+            <li>Lucene 기반 통합 검색 엔진.</li>
+            <li><strong>Autocomplete:</strong> 자동 완성 기능.</li>
+            <li><strong>Synonyms:</strong> "차" 검색 시 "자동차"도 포함.</li>
+            <li><strong>Highlighting:</strong> 검색어 강조 표시.</li>
+        </ul>
     </div>
     <div class="counter">39 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 5 | Atlas & AI</div>
-    <h1>Mongoose & Vector Search Code</h1>
+    <div class="topline">PHASE 5 | AI</div>
+    <h1>Semantic Search vs Keyword Search</h1>
     <div class="layout-single">
-        <pre class="json-block" style="font-size:16px;">
-<span class="json-comment">// Vector Search Query</span>
-const results = await Product.aggregate([
-  {
-    $vectorSearch: {
-      index: "vector_index",
-      path: "embedding_field",
-      queryVector: [0.1, -0.2, ...],
-      numCandidates: 100,
-      limit: 10
-    }
-  }
-]);
-        </pre>
+        <div class="compare-grid">
+            <div class="compare-card">
+                <h3>Keyword Search</h3>
+                <p>"사과" 검색 ➔ "사과"라는 글자가 포함된 문서만 반환.</p>
+            </div>
+            <div class="compare-card" style="border-top-color: var(--mongo-green);">
+                <h3>Semantic Search</h3>
+                <p>"사과" 검색 ➔ "빨간 과일", "청송", "백설공주" 관련 문서도 반환.</p>
+            </div>
+        </div>
     </div>
     <div class="counter">40 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 5 | Atlas & AI</div>
-    <h1>Atlas Search: Fuzzy Matching</h1>
+    <div class="topline">PHASE 5 | Serverless</div>
+    <h1>MongoDB Atlas Serverless</h1>
     <div class="layout-single">
         <ul>
-            <li>사용자의 오타를 자동으로 수정하여 검색.</li>
-            <li>예: "MonboDB" ➔ "MongoDB" 결과 반환.</li>
-            <li>다국어 지원 및 정교한 가중치(Scoring) 조절 가능.</li>
+            <li>클러스터 크기를 고민할 필요 없음.</li>
+            <li>0에서 수천 쿼리까지 자동 스케일링.</li>
+            <li>초기 서비스나 트래픽 변동이 심한 프로젝트에 최적.</li>
+            <li>사용한 만큼만 지불 (Pay-as-you-go).</li>
         </ul>
     </div>
     <div class="counter">41 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 5 | Atlas & AI</div>
-    <h1>Atlas Device Sync</h1>
+    <div class="topline">PHASE 5 | Stream</div>
+    <h1>Atlas Stream Processing</h1>
     <div class="layout-single">
         <ul>
-            <li>모바일/Edge 기기의 데이터와 클라우드 DB를 자동 동기화.</li>
-            <li>오프라인 우선(Offline-first) 앱 개발에 최적.</li>
-            <li>네트워크 연결 시 충돌 해결(Conflict Resolution) 자동 처리.</li>
+            <li>Kafka와 연동하거나 자체 스트림 데이터를 실시간 처리.</li>
+            <li>지속적인 집계(Continuous Aggregation).</li>
+            <li>데이터가 DB에 저장되기 전에 창(Window) 연산 수행 가능.</li>
         </ul>
     </div>
     <div class="counter">42 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 5 | Atlas & AI</div>
-    <h1>Security: Queryable Encryption</h1>
+    <div class="topline">PHASE 5 | Security</div>
+    <h1>Queryable Encryption: Zero Trust</h1>
     <div class="layout-single">
         <ul>
-            <li>데이터를 암호화된 상태로 검색.</li>
-            <li>서버 관리자조차 실제 데이터를 볼 수 없는 극강의 보안.</li>
-            <li>금융, 의료 등 민감 데이터 처리에 필수적.</li>
+            <li>클라이언트 측 암호화 (Client-Side Field Level Encryption).</li>
+            <li>DB 서버는 암호화된 값만 보며, 암호화된 상태로 인덱스 검색 가능.</li>
+            <li>복호화 키는 절대 DB에 저장되지 않음.</li>
         </ul>
     </div>
     <div class="counter">43 / 50</div>
 </section>
 
-<!-- Part 6: Practice -->
+<!-- PHASE 6 -->
 <section class="slide section-slide">
-    <div class="topline">PART 6</div>
-    <h1>Enterprise Practice</h1>
-    <p style="color:#DDE6EE; font-size:28px;">대규모 서비스 설계 실전 케이스</p>
+    <div class="topline">PHASE 6</div>
+    <h1>Practical Enterprise Engineering</h1>
     <div class="counter">44 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 6 | Practice</div>
-    <h1>Case: 소셜 미디어 피드 설계</h1>
+    <div class="topline">PHASE 6 | Practice</div>
+    <h1>Modeling Case Study: Content Platform</h1>
     <div class="layout-single">
-        <ul>
-            <li><strong>문제:</strong> 팔로잉하는 사람들의 글을 실시간으로 조합해야 함 (Pull 방식 vs Push 방식).</li>
-            <li><strong>해결:</strong> <strong>Fan-out on Write</strong> (Computed Pattern 활용).</li>
-            <li>사용자가 글을 쓰면 팔로워들의 '수신함(Feed) 컬렉션'에 글 ID를 미리 넣어줌.</li>
-            <li>읽기 시점에는 자신의 Feed 컬렉션만 조회하면 끝.</li>
-        </ul>
+        <pre class="json-block" style="font-size:16px;">
+<span class="json-comment">// Mongoose Schema Design</span>
+const PostSchema = new Schema({
+  title: String,
+  content: String,
+  author: { <span class="json-comment">// Extended Reference</span>
+    id: ObjectId, name: String, avatar: String 
+  },
+  tags: [String], <span class="json-comment">// Multikey Index</span>
+  recent_comments: [CommentSchema], <span class="json-comment">// Subset Pattern</span>
+  stats: { <span class="json-comment">// Computed Pattern</span>
+    likes: Number, views: Number 
+  }
+});
+        </pre>
     </div>
     <div class="counter">45 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 6 | Practice</div>
-    <h1>Case: E-Commerce 상품 정보</h1>
+    <div class="topline">PHASE 6 | Practice</div>
+    <h1>Anti-Pattern: The Massive Array</h1>
     <div class="layout-single">
-        <ul>
-            <li>카테고리마다 속성이 제각각 (전자제품-전압, 의류-사이즈).</li>
-            <li><strong>Attribute Pattern</strong>으로 모든 상품을 하나의 인덱스로 관리.</li>
-            <li>상품 상세 내역은 <code>Extended Reference</code>로 조회 성능 확보.</li>
-        </ul>
+        <div class="compare-card" style="border-top-color: var(--red);">
+            <h3 style="color:var(--red);">DANGER!</h3>
+            <p>문서 내 배열이 계속 커지게 방치하지 마세요. (예: 100만 명의 구독자를 하나의 배열에 저장)</p>
+            <p>➔ 문서 16MB 제한 초과, 인덱스 성능 급락, 업데이트 지연.</p>
+        </div>
+        <div class="callout" style="margin-top:20px;">무제한으로 커질 수 있는 데이터는 반드시 컬렉션을 분리(Reference)해야 합니다.</div>
     </div>
     <div class="counter">46 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 6 | Practice</div>
-    <h1>Case: 시계열 센서 모니터링</h1>
+    <div class="topline">PHASE 6 | Performance</div>
+    <h1>Index ESR Rule Recap</h1>
     <div class="layout-single">
-        <ul>
-            <li>초당 수천 개의 데이터 유입.</li>
-            <li><strong>Bucket Pattern</strong>을 분 단위로 적용.</li>
-            <li>과거 데이터는 <strong>TTL Index</strong>나 <strong>Online Archive</strong>로 자동 정리.</li>
-        </ul>
+        <p style="font-size:32px; font-weight:900;">Equality ➔ Sort ➔ Range</p>
+        <pre class="json-block">
+<span class="json-comment">// Good Index</span>
+{ status: 1, created_at: -1, price: 1 }
+
+<span class="json-comment">// Bad Index (Range before Sort)</span>
+{ status: 1, price: 1, created_at: -1 }
+        </pre>
+        <p>순서가 틀리면 인덱스에서 찾은 후 메모리에서 별도의 정렬(In-memory sort)이 일어납니다.</p>
     </div>
     <div class="counter">47 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 6 | Practice</div>
-    <h1>Monitoring: Profiler & Explain</h1>
+    <div class="topline">PHASE 6 | Operations</div>
+    <h1>Monitoring: The Vital Signs</h1>
     <div class="layout-single">
         <ul>
-            <li>느린 쿼리 진단: <code>db.setProfilingLevel(1, 100)</code> (100ms 이상 기록).</li>
-            <li>실행 계획 확인: <code>.explain("executionStats")</code>.</li>
-            <li><strong>Check points:</strong>
-                <ul>
-                    <li><code>totalKeysExamined</code> vs <code>nReturned</code></li>
-                    <li><code>IXSCAN</code> vs <code>COLLSCAN</code></li>
-                </ul>
-            </li>
+            <li><strong>Opcounter:</strong> 초당 쿼리 수.</li>
+            <li><strong>Queues:</strong> 쿼리 대기열 (부하 지표).</li>
+            <li><strong>Page Faults:</strong> RAM 부족 신호.</li>
+            <li><strong>Disk Util:</strong> I/O 병목 확인.</li>
         </ul>
     </div>
     <div class="counter">48 / 50</div>
 </section>
 
 <section class="slide">
-    <div class="topline">PART 6 | Practice</div>
-    <h1>Backup & High Availability</h1>
+    <div class="topline">PHASE 6 | Practice</div>
+    <h1>마지막 조언: Think in Documents</h1>
     <div class="layout-single">
         <ul>
-            <li><strong>Replica Set:</strong> 최소 3대의 노드로 구성 (1 Primary, 2 Secondaries).</li>
-            <li>자동 Failover 메커니즘.</li>
-            <li>백업: Snapshot 기반 (Atlas) 혹은 mongodump.</li>
-            <li>RPO(복구 지점 목표)와 RTO(복구 시간 목표) 설정의 중요성.</li>
+            <li>관계형 사고방식(Normalization)을 버려야 MongoDB의 진가가 드러납니다.</li>
+            <li><strong>"이 데이터를 어떻게 함께 조회할 것인가?"</strong>가 모델링의 유일한 정답입니다.</li>
+            <li>패턴은 도구일 뿐, 실제 쿼리 성능이 모든 것을 말해줍니다.</li>
         </ul>
     </div>
     <div class="counter">49 / 50</div>
 </section>
 
-<section class="slide" style="justify-content: center; align-items: center; text-align: center;">
-    <h1 style="font-size: 80px; color: var(--mongo-green);">Wrap Up</h1>
-    <p style="font-size: 32px; margin-top:20px;">
-        1. Query Pattern First <br/>
-        2. Embed for Read, Reference for Consistency <br/>
-        3. Index with ESR Rule <br/>
-        4. Leverage Atlas for Modern AI Apps
-    </p>
-    <div class="callout" style="margin-top:50px;">강의를 마칩니다. 수고하셨습니다!</div>
+<section class="slide title-slide">
+    <h1 style="font-size: 100px;">Q & A</h1>
+    <p>수고하셨습니다. 데이터베이스 전문가로 거듭나시길 바랍니다!</p>
+    <div class="callout" style="margin-top:50px; background:white;">ksl@jbnu.ac.kr</div>
     <div class="counter">50 / 50</div>
 </section>
 
