@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>데이터베이스 설계 | MongoDB 스키마 설계 및 데이터 모델링 실무</title>
+<title>데이터베이스 설계 | MongoDB 스키마 설계와 데이터 모델링</title>
 <style>
 :root {
   --navy: #001E2B;
@@ -57,14 +57,14 @@ li { margin: 16px 0; }
 .visual { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
 
 /* Section Divider */
-.section-slide { justify-content: center; align-items: center; background: linear-gradient(135deg, #001E2B 0%, #00684A 100%); text-align: center; }
-.section-slide h1 { font-size: 80px; color: white; margin-top: 30px;}
+.section-slide { justify-content: center; align-items: center; background: linear-gradient(135deg, #001E2B 0%, #005C42 100%); text-align: center; }
+.section-slide h1 { font-size: 64px; color: white; margin-top: 30px;}
 .section-slide .topline { font-size: 36px; color: var(--green); margin-bottom: 25px; font-weight: 800; }
 .section-slide:before { background: linear-gradient(var(--green), var(--mongo-green)); }
 
 /* Title Slide */
-.title-slide { justify-content: center; align-items: center; background: linear-gradient(135deg, #001E2B 0%, #00684A 100%); text-align: center; }
-.title-slide h1 { font-size: 100px; color: #FFFFFF; margin-top: 30px;}
+.title-slide { justify-content: center; align-items: center; background: linear-gradient(135deg, #001E2B 0%, #005C42 100%); text-align: center; }
+.title-slide h1 { font-size: 84px; color: #FFFFFF; margin-top: 30px;}
 .title-slide .topline { font-size: 40px; color: var(--green); margin-bottom: 25px; font-weight: 800; }
 .title-slide:before { display:none; }
 .title-slide p { font-size:36px; color:#DDE6EE; margin-top:40px; font-weight:500;}
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- Slide 1 -->
 <section class="slide title-slide active" data-slide="1">
     <div class="topline">데이터베이스 설계 | Database Design</div>
-    <h1>MongoDB 스키마 설계 및 데이터 모델링 실무</h1>
+    <h1>MongoDB 스키마 설계와 데이터 모델링</h1>
     <p>문서 모델링 원칙부터 집계 파이프라인, 인덱스 최적화까지</p>
     <div class="counter">1 / 50</div>
 </section>
@@ -521,14 +521,14 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- Slide 13 -->
 <section class="slide" data-slide="13">
     <div class="topline">PART 2 | 데이터 모델링 원칙</div>
-    <h1>1:N 관계: Cardinality(농도)에 따른 설계 구분</h1>
+    <h1>1:N 관계: 데이터 증가 규모에 따른 설계</h1>
     <div class="layout-single">
         <ul>
             <li>관계형 모델은 외래키 정규화로 일괄 처리하지만, 문서형 데이터베이스는 관계의 성장 크기에 따라 다른 접근이 요구됩니다.</li>
             <br>
             <li><strong>One-to-Few (소규모 관계):</strong> 데이터가 많아야 수십 개 미만인 경우. 하나의 부모 문서 내부에 임베딩 배열로 축적합니다. (예: 사용자의 배송지 목록)</li>
             <li><strong>One-to-Many (중규모 관계):</strong> 데이터가 수백~수천 개로 유한한 경우. 독립된 컬렉션으로 구현하되 부모 문서에서 자식 문서의 식별자 배열을 유지할 수 있습니다. (예: 카테고리-상품 리스트)</li>
-            <li><strong>One-to-Squillions (대규모 관계):</strong> 데이터가 끊임없이 증가하고 수만 건 이상 늘어날 수 있는 경우. 부모의 식별자 배열이 16MB 상한선을 초과할 우려가 있으므로, 반드시 자식 문서 쪽에서 부모의 <code>_id</code>를 참조하도록 모델링합니다. (예: 특정 서버 로그)</li>
+            <li><strong>One-to-Squillions (대규모 관계):</strong> 데이터가 끊임없이 증가하고 수만 건 이상 늘어날 수 있는 경우. 부모의 식별자 배열이 16MB 상한선을 초과할 우려가 있으므로, 자식 문서 쪽에서 부모의 <code>_id</code>를 참조하는 편이 안전합니다. (예: 특정 서버 로그)</li>
         </ul>
     </div>
     <div class="counter">13 / 50</div>
@@ -636,9 +636,9 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li><strong>핵심 목적:</strong> 단일 도메인 조회 시 수반되는 디스크 참조 횟수를 줄이고 네트워크 비용을 낮추는 구조입니다.</li>
-                <li><strong>적용 케이스:</strong> 일대일 대응이거나, 일대다 관계에서 다(Many) 측의 데이터 개수와 용량이 물리적으로 적을 때 유효합니다.</li>
-                <li><strong>설계 주의점:</strong> 갱신 빈도가 과다한 공유 자원을 내장하면 데이터의 불일치 현상이 초과로 발생할 위험성이 있습니다.</li>
+                <li>주문 상세처럼 항상 함께 읽히는 데이터는 한 문서에 모아 두면 조회 과정이 단순해집니다.</li>
+                <li>관련 데이터의 개수와 크기가 제한적일 때 임베딩을 먼저 검토합니다.</li>
+                <li>여러 문서에서 공유하는 값이 자주 바뀐다면 중복 저장 때문에 갱신 비용이 커질 수 있습니다.</li>
             </ul>
         </div>
         <div class="visual">
@@ -669,9 +669,9 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li><strong>핵심 목적:</strong> 공통 데이터의 중복 적재를 피해 갱신 이상을 막고 문서의 비대화를 예방하는 패턴입니다.</li>
-                <li><strong>적용 케이스:</strong> 도메인 개체들이 각각 자주 조회되거나, 부모-자식의 포함 차수(Cardinality)가 커 16MB 제한 준수가 힘들 때 활용합니다.</li>
-                <li>도입에 따른 조인 비용과 쿼리 다수 실행 비용이 수반되는 정적 설계의 정형적 패턴입니다.</li>
+                <li>공통 데이터를 한 곳에서 관리해야 하거나 문서가 지나치게 커지는 상황에서는 참조 구조를 검토합니다.</li>
+                <li>도메인 개체들이 각각 자주 조회되거나, 부모-자식 관계의 크기가 커 16MB 제한을 넘기 쉬울 때 활용합니다.</li>
+                <li>참조 구조를 사용하면 조인 비용과 추가 쿼리 비용이 생기므로 조회 패턴을 함께 확인해야 합니다.</li>
             </ul>
         </div>
         <div class="visual">
@@ -937,8 +937,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="roadmap-step">
                 <div class="roadmap-num">3</div>
-                <div class="roadmap-title">영속성 생명주기 훅 지원</div>
-                <div class="roadmap-desc">저장 작업(pre-save) 직전의 암호 갱신 검증이나 삭제 직후의 연쇄 작용을 코드로 관리합니다.</div>
+                <div class="roadmap-title">저장 전/후 처리 훅</div>
+                <div class="roadmap-desc">저장 작업(pre-save) 직전의 암호 갱신 확인이나 삭제 직후의 후속 처리를 코드로 관리합니다.</div>
             </div>
         </div>
     </div>
@@ -977,7 +977,7 @@ module.exports = mongoose.model(<span class="json-string">'User'</span>, userSch
     <h1>Mongoose Middleware Hook 활용</h1>
     <div class="layout-single">
         <ul>
-            <li>데이터베이스로 적재되기 이전 프로세스 흐름 상에서 민감 정보를 단방향 해시 암호화하는 실전 설계 기법입니다.</li>
+            <li>사용자 문서를 저장하기 전에 비밀번호를 단방향 해시로 바꾸는 예제입니다.</li>
         </ul>
         <div class="json-block" style="margin-top: 10px; font-size:18px;">
 <span class="json-key">const</span> bcrypt = require(<span class="json-string">'bcrypt'</span>);
@@ -1008,7 +1008,7 @@ userSchema.pre(<span class="json-string">'save'</span>, <span class="json-key">a
             <ul>
                 <li>참조 구조(Referencing) 데이터 조회 시 수동으로 복수 조회를 하거나 <code>$lookup</code> 쿼리를 짜는 오버헤드를 최소화하기 위해 사용합니다.</li>
                 <li>스키마 상에 ref 옵션으로 연관 관계를 선언하고, 쿼리 수행 단계에서 <code>populate()</code>를 명시하여 결합 데이터를 추출합니다.</li>
-                <li>내부적으로는 여러 번 조회하는 다수 쿼리로 분할 연동되므로 <strong>루프 내 실행은 반드시 지양</strong>해야 합니다.</li>
+                <li>내부적으로는 여러 번 조회하는 다수 쿼리로 나뉠 수 있으므로 <strong>루프 안에서 반복 호출하지 않도록 주의</strong>해야 합니다.</li>
             </ul>
         </div>
         <div class="visual">
@@ -1107,8 +1107,8 @@ db.posts.aggregate([
             </li>
         </ul>
         <div class="callout" style="border-color: var(--red);">
-            <strong>상용 환경에서의 가용성 경고:</strong><br>
-            대량 데이터 보유 컬렉션에서의 <code>COLLSCAN</code>은 심각한 디스크 I/O 대기와 데이터베이스 서버 자원 고갈을 직결시키므로 인덱싱 누락 여부를 지속 감시해야 합니다.
+            <strong>운영 환경 점검:</strong><br>
+            대량 데이터 컬렉션에서 <code>COLLSCAN</code>이 반복되면 디스크 I/O 대기와 서버 자원 소모로 이어질 수 있으므로 인덱싱 누락 여부를 먼저 확인해야 합니다.
         </div>
     </div>
     <div class="counter">34 / 50</div>
@@ -1231,7 +1231,7 @@ db.orders.aggregate([
             <ul>
                 <li><strong>역할:</strong> 관계형 데이터베이스의 Outer Join과 동등한 기법으로, 기준 문서와 대상 컬렉션 문서 간의 관계 매핑을 처리합니다.</li>
                 <li>조인 결과물은 명시한 식별 키(<code>as</code>)에 맞춰 <strong>배열 필드 형태</strong>로 결합되므로 단일 객체 매핑 시 후처리가 연이어 필요합니다.</li>
-                <li>스캔 범위 분리를 위해 조인 대상 컬렉션(<code>from</code>)의 외래키 매칭 필드(<code>foreignField</code>)에 반드시 **인덱싱이 사전 개설**되어 있어야 성능이 보장됩니다.</li>
+                <li>조인 대상 컬렉션(<code>from</code>)의 매칭 필드(<code>foreignField</code>)에는 인덱스가 있는지 먼저 확인합니다.</li>
             </ul>
         </div>
         <div class="visual">
@@ -1239,7 +1239,7 @@ db.orders.aggregate([
 db.users.aggregate([
   {
     <span class="json-key">$lookup</span>: {
-      <span class="json-key">from</span>: <span class="json-string">"posts"</span>,        <span class="json-comment">// 조약 대상 컬렉션</span>
+      <span class="json-key">from</span>: <span class="json-string">"posts"</span>,        <span class="json-comment">// 조인 대상 컬렉션</span>
       <span class="json-key">localField</span>: <span class="json-string">"_id"</span>,    <span class="json-comment">// 기준 컬렉션 매칭 필드</span>
       <span class="json-key">foreignField</span>: <span class="json-string">"user_id"</span>, <span class="json-comment">// 대상 컬렉션 참조 필드</span>
       <span class="json-key">as</span>: <span class="json-string">"user_posts"</span>        <span class="json-comment">// 주입될 신규 배열 필드명</span>
@@ -1339,7 +1339,7 @@ db.users.aggregate([
         </ul>
         <div class="callout" style="border-color: var(--orange); background: #FFF3E0;">
             <strong>갱신 오버헤드 주의:</strong><br>
-            저자가 닉네임을 변경할 시 해당 작성자의 과거 작성글 전부를 갱신해 주는 벌크 수정 처리가 발생합니다. 따라서 데이터의 조회 빈도와 수정 주기의 비율을 정밀하게 계측해야 합니다.
+            저자가 닉네임을 변경하면 해당 작성자의 과거 작성글을 갱신하는 벌크 수정이 필요합니다. 따라서 데이터의 조회 빈도와 수정 주기를 먼저 확인해야 합니다.
         </div>
     </div>
     <div class="counter">44 / 50</div>
@@ -1353,15 +1353,15 @@ db.users.aggregate([
         <div class="layout-single">
             <ul>
                 <li><strong>안티패턴:</strong> NoSQL 환경에서 정규화 편향에 의해 User, Post, Comment, Tag, Like 컬렉션을 개별로 나누고 조인을 수행하는 구조입니다.</li>
-                <li>단일 피드 노출 작업 시 마이크로초 단위의 지연이 연쇄 누적되므로 데이터 조인의 비용이 급증하고 쿼리의 관리 가독성이 떨어집니다.</li>
-                <li><strong>대안적 정돈:</strong> 게시글의 부가 정보(예: 태그 리스트, 단순 좋아요 총량)는 Post 문서 내부에 내장시켜 한 번의 스캔으로 리소스를 획득하게끔 설계합니다.</li>
+                <li>단일 피드 노출 작업에서 작은 지연도 여러 번 누적되면 조인 비용이 커지고 쿼리를 관리하기 어려워집니다.</li>
+                <li><strong>대안:</strong> 게시글의 부가 정보(예: 태그 리스트, 단순 좋아요 총량)는 Post 문서 안에 두어 한 번의 조회로 가져오도록 설계합니다.</li>
             </ul>
         </div>
         <div class="visual">
             <div class="compare-card" style="border-top-color: var(--red); text-align:center;">
-                <h3 style="color:var(--red);">정규화 강박의 탈피</h3>
+                <h3 style="color:var(--red);">문서 경계는 조회 단위에서 출발</h3>
                 <p style="font-size:24px; text-align: left; line-height: 1.5;">
-                    무조건적인 분할 설계(Normalization)에서 벗어나, 도메인의 공통 읽기/쓰기 단위를 기준으로 문서를 통합 관리하는 것이 MongoDB 모델링의 핵심 가치입니다.
+                    MongoDB 모델링에서는 정규화 여부보다 먼저 “어떤 데이터를 한 번에 읽고 쓰는가”를 기준으로 문서의 범위를 정합니다.
                 </p>
             </div>
         </div>
@@ -1376,10 +1376,10 @@ db.users.aggregate([
     <div class="layout-single">
         <ul>
             <li><strong>용량 상한 이슈:</strong> 특정 인기 글에 댓글이 폭발적으로 늘어나는 경우, 문서 내에 <code>comments: []</code> 배열로 채우면 16MB 제한으로 서비스 에러가 발생합니다.</li>
-            <li><strong>해결 방안:</strong> 댓글 컬렉션을 분리하여 수십만 개의 데이터가 독자 적재될 수 있도록 처리합니다.</li>
-            <li>각 댓글은 부모인 <code>post_id</code> 식별자를 가지고 있도록 설정하며, <code>{ post_id: 1, createdAt: -1 }</code> 복합 인덱스를 개설하여 <code>skip()</code>/<code>limit()</code> 페이징 작업을 지원합니다.</li>
+            <li><strong>처리 방식:</strong> 댓글 컬렉션을 분리하여 수십만 개의 데이터를 독립적으로 저장할 수 있게 합니다.</li>
+            <li>초기 설명에는 <code>skip()</code>/<code>limit()</code>을 사용할 수 있지만, 무한 스크롤에서는 <code>createdAt</code> 또는 <code>_id</code> 기반 커서 페이지네이션을 우선 검토합니다.</li>
         </ul>
-        <div class="json-block" style="margin-top: 10px; font-size:18px;">
+        <div class="json-block" style="margin-top: 10px; font-size:16px;">
 <span class="json-comment">// 댓글 문서 분리 설계 예제</span>
 {
   <span class="json-key">"_id"</span>: ObjectId(<span class="json-string">"60d5ec4b1234567890123456"</span>),
@@ -1388,7 +1388,14 @@ db.users.aggregate([
   <span class="json-key">"text"</span>: <span class="json-string">"해당 설계 원리에 동의합니다."</span>,
   <span class="json-key">"createdAt"</span>: ISODate(<span class="json-string">"2026-05-27T10:00:00Z"</span>)
 }
-<span class="json-comment">// 페이징 실행 쿼리: db.comments.find({ post_id: postId }).sort({ createdAt: -1 }).skip(20).limit(20)</span>
+<span class="json-comment">// 커서 기반 페이징 예시</span>
+db.comments
+  .find({
+    post_id: postId,
+    createdAt: { <span class="json-key">$lt</span>: lastSeenCreatedAt }
+  })
+  .sort({ createdAt: -1 })
+  .limit(20);
         </div>
     </div>
     <div class="counter">46 / 50</div>
@@ -1402,12 +1409,13 @@ db.users.aggregate([
         <div class="layout-single">
             <ul>
                 <li><strong>경쟁 조건(Race Condition):</strong> 수십 명의 사용자가 거의 동시에 좋아요를 눌렀을 때, 단순 읽기 후 수치의 연산은 잘못된 최종 합산 수치를 만듭니다.</li>
-                <li><strong>원자성 확보:</strong> 어플리케이션 계층에서의 중복성 확인 조건부 연산을 피하고, 단일 쿼리 조건 단계에서 해당 유저의 추천 여부를 걸러 원자적인 처리를 구현합니다.</li>
-                <li>조건절에 <code>likes: { $ne: userId }</code>를 추가해 중복 추천을 원천 차단하며 <code>like_count</code> 증감을 단일 트랜잭션으로 체이닝합니다.</li>
+                <li><strong>원자성 확보:</strong> 애플리케이션에서 먼저 읽고 판단하기보다, 단일 update 조건에서 해당 유저의 추천 여부를 걸러 처리합니다.</li>
+                <li>조건절에 <code>likes: { $ne: userId }</code>를 추가해 중복 추천을 제외하고, 배열 갱신과 <code>like_count</code> 증감을 하나의 update 연산으로 처리합니다.</li>
+                <li>좋아요 수가 매우 커질 수 있는 서비스에서는 별도 Like 컬렉션과 unique index 설계를 검토합니다.</li>
             </ul>
         </div>
         <div class="visual">
-            <div class="json-block" style="font-size:16px;">
+            <div class="json-block" style="font-size:15px;">
 <span class="json-comment">// 1. 추천(좋아요) 처리 - 원자적 조건 업데이트</span>
 <span class="json-key">const</span> likeResult = <span class="json-key">await</span> Post.updateOne(
   { _id: postId, likes: { <span class="json-key">$ne</span>: userId } }, <span class="json-comment">// 유저가 좋아요 안 누른 경우만 매칭</span>
@@ -1441,7 +1449,7 @@ db.users.aggregate([
             <li><strong>인접 리스트 (Adjacency List):</strong> 개별 댓글 문서에 직속 상위 댓글 식별자인 <code>parent_id</code>를 필드로 둡니다. 데이터 조회가 직관적이나 무한 중첩 트리 조회 시 N+1 쿼리 오버헤드가 발생할 수 있습니다.</li>
             <li><strong>조상 경로 배열 (Array of Ancestors):</strong> 상위 노드들의 식별자 전체를 <code>ancestors: [ObjectId("A"), ObjectId("B")]</code>와 같이 배열로 포함합니다. 단일 질의로 하위 댓글 트리를 통째로 찾아오거나 인덱스를 타는 데 적절합니다.</li>
             <li><strong>구체화된 경로 (Materialized Paths):</strong> <code>path: "0001.0003.0012"</code>와 같이 조상들의 경로 문자열을 기술합니다. 정규식 쿼리를 사용하여 특정 깊이 탐색 작업을 효율화합니다.</li>
-            <li><strong>모델 선정 권장 기준:</strong> 깊이가 1단계(댓글-답글)에 그칠 때에는 인접 리스트가 타당하며, 임의 깊이를 지원하는 트리형 스크롤 구조에서는 조상 경로 배열을 채용하는 방안이 안정적입니다.</li>
+                <li><strong>모델 선택 기준:</strong> 깊이가 1단계(댓글-답글)에 그칠 때에는 인접 리스트가 타당하며, 임의 깊이를 지원하는 트리형 스크롤 구조에서는 조상 경로 배열이 안정적입니다.</li>
         </ul>
     </div>
     <div class="counter">48 / 50</div>
@@ -1466,7 +1474,7 @@ db.users.aggregate([
             <div class="roadmap-step">
                 <div class="roadmap-num">3</div>
                 <div class="roadmap-title">무한 성장 배열 방지</div>
-                <div class="roadmap-desc">댓글 목록이나 장비 로그처럼 상한선 없이 늘어나는 배열 속성은 16MB 한도 방지를 위해 반드시 참조 구조로 전환합니다.</div>
+                <div class="roadmap-desc">댓글 목록이나 장비 로그처럼 상한선 없이 늘어나는 배열 속성은 16MB 한도를 피하기 위해 참조 구조로 분리하는 편이 안전합니다.</div>
             </div>
             <div class="roadmap-step">
                 <div class="roadmap-num">4</div>
