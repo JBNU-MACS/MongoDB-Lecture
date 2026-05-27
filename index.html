@@ -170,9 +170,9 @@ td { border: 2px solid var(--line); padding: 15px; vertical-align: middle; text-
   line-height: 1.35;
 }
 .slide.code-heavy .json-block {
-  font-size: 15px; /* Slightly larger code blocks for readability */
-  line-height: 1.35;
-  padding: 20px;
+  font-size: 14px;
+  line-height: 1.3;
+  padding: 18px;
 }
 .slide.code-heavy .layout-visual-text {
   grid-template-columns: 50% 50%;
@@ -184,6 +184,43 @@ td { border: 2px solid var(--line); padding: 15px; vertical-align: middle; text-
 .slide.compact-table th,
 .slide.compact-table td {
   padding: 10px;
+}
+
+@media print {
+  body {
+    background: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .progress, .touch-controls {
+    display: none !important;
+  }
+  .deck {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 1920px !important;
+    height: auto !important;
+    transform: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+  .slide {
+    display: flex !important;
+    position: relative !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    width: 1920px !important;
+    height: 1080px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    opacity: 1 !important;
+    animation: none !important;
+  }
+}
+@page {
+  size: 1920px 1080px;
+  margin: 0;
 }
 </style>
 <script>
@@ -407,12 +444,12 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li>분산 네트워크 환경에서 다음 3가지 특성을 동시에 모두 만족하는 것은 불가능하다는 이론입니다.</li>
-                <li><strong>C (Consistency, 일관성):</strong> 분산 노드 중 어느 곳에 쿼리하더라도 항상 가장 최근에 업데이트된 동일한 데이터를 조회할 수 있어야 합니다.</li>
-                <li><strong>A (Availability, 가용성):</strong> 일부 노드에 장애가 발생하더라도 정상 작동 중인 노드는 항상 클라이언트의 요청에 에러 없이 응답해야 합니다.</li>
-                <li><strong>P (Partition Tolerance, 분할 내성):</strong> 노드 간 네트워크 단절이 발생하더라도 시스템 전체가 정상적으로 동작해야 합니다.</li>
-                <li><strong>MongoDB Replica Set:</strong> primary 중심의 쓰기와 복제를 사용합니다.</li>
-                <li>장애나 네트워크 분할 상황에서는 <code>readConcern</code>/<code>writeConcern</code> 설정에 따라 일관성과 가용성의 균형이 달라질 수 있습니다.</li>
+                <li>분산 시스템에서 세 보장을 동시에 만족하기 어렵다는 이론입니다.</li>
+                <li><strong>C (Consistency, 일관성):</strong> 어떤 노드에 요청하든 가장 최근에 쓰인 동일한 데이터를 반환합니다.</li>
+                <li><strong>A (Availability, 가용성):</strong> 일부 노드 장애 시에도 살아있는 노드는 항상 정상 응답합니다.</li>
+                <li><strong>P (Partition Tolerance, 분할 내성):</strong> 노드 간 네트워크 단절(분할)이 발생해도 시스템이 유지됩니다.</li>
+                <li><strong>Replica Set:</strong> Primary 노드 중심의 쓰기 작업과 세컨더리 복제를 활용합니다.</li>
+                <li>네트워크 분할 시 <code>readConcern</code>/<code>writeConcern</code> 설정에 따라 합의 수준이 결정됩니다.</li>
             </ul>
         </div>
         <div class="visual">
@@ -1906,14 +1943,6 @@ db.posts.aggregate([
   <span class="json-key">"text"</span>: <span class="json-string">"해당 설계 원리에 동의합니다."</span>,
   <span class="json-key">"createdAt"</span>: ISODate(<span class="json-string">"2026-05-27T10:00:00Z"</span>)
 }
-<span class="json-comment">// 커서 기반 페이징 예시</span>
-db.comments
-  .find({
-    post_id: postId,
-    createdAt: { <span class="json-key">$lt</span>: lastSeenCreatedAt }
-  })
-  .sort({ createdAt: -1 })
-  .limit(20);
             </div>
         </div>
     </div>
@@ -1969,7 +1998,7 @@ db.comments.find({
                 <li><strong>경쟁 조건:</strong> 수십 명이 동시에 누를 때 단순 읽기-연산-저장(Read-Modify-Write)은 데이터 유실을 유발합니다.</li>
                 <li><strong>원자성 확보:</strong> 조건절에 likes 필터링을 걸고 단일 업데이트 연산으로 원자성을 보장합니다.</li>
                 <li><code>likes: { $ne: userId }</code> 조건과 <code>$inc</code>를 결합해 중복 차단 및 카운팅을 동시 처리합니다.</li>
-                <li>좋아요 수가 극도로 많아지는 대규모 서비스라면 별도의 Like 컬렉션 분리를 권장합니다.</li>
+                <li>좋아요 수가 계속 증가하는 서비스라면 별도 Like 컬렉션 분리를 검토합니다.</li>
             </ul>
         </div>
         <div class="visual">
@@ -2007,7 +2036,7 @@ db.comments.find({
             <ul>
                 <li>좋아요 수가 매우 많다면 게시글 내 배열 대신 별도 컬렉션으로 분할 설계합니다.</li>
                 <li><code>post_id</code>와 <code>user_id</code> 복합 unique 인덱스로 중복 좋아요를 방지합니다.</li>
-                <li>동시 삽입/갱신 간 데이터 불일치가 우려되는 경우 트랜잭션을 통해 정합성을 보장합니다.</li>
+                <li>정확한 count가 중요하면 트랜잭션을 사용하고, 약간의 지연이 허용되면 재집계나 비동기 보정 전략을 검토합니다.</li>
             </ul>
         </div>
         <div class="visual">
