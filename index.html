@@ -23,6 +23,8 @@ body {
   margin: 0; background: #111827; 
   font-family: 'Noto Sans KR', 'Pretendard', sans-serif;
   color: var(--navy); overflow: hidden; width: 100vw; height: 100vh; position: relative;
+  touch-action: pan-y;
+  overscroll-behavior: none;
 }
 .deck { 
   width: 1920px; height: 1080px; 
@@ -117,50 +119,129 @@ td { border: 2px solid var(--line); padding: 15px; vertical-align: middle; text-
 .roadmap-desc { font-size: 20px; color: var(--slate); }
 
 .counter { position: absolute; right: 40px; bottom: 35px; color: #7A8793; font-size: 24px; z-index: 10; font-weight: 700; }
+.progress { position: fixed; left: 0; top: 0; height: 5px; width: 100vw; background: rgba(255,255,255,0.15); z-index: 40; }
+.progress-bar { height: 100%; width: 2%; background: var(--green); transition: width 0.25s ease; }
+.touch-controls {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  gap: 10px;
+  z-index: 50;
+}
+.touch-controls button {
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 50%;
+  background: rgba(0, 30, 43, 0.82);
+  color: #fff;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+}
+.touch-controls button:disabled { opacity: 0.35; cursor: default; }
+@media (min-width: 900px) {
+  .touch-controls { opacity: 0.62; }
+  .touch-controls:hover { opacity: 1; }
+}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const slides = document.querySelectorAll('.slide');
+    const progressBar = document.querySelector('.progress-bar');
+    const prevButton = document.querySelector('[data-action="prev"]');
+    const nextButton = document.querySelector('[data-action="next"]');
     let currentSlide = 0;
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let pointerStartTime = 0;
     
     function showSlide(index) {
+        const nextIndex = Math.max(0, Math.min(index, slides.length - 1));
         slides.forEach(s => s.classList.remove('active'));
-        if (index >= 0 && index < slides.length) {
-            slides[index].classList.add('active');
-            currentSlide = index;
-            // Update counter automatically based on slide index
-            const counter = slides[index].querySelector('.counter');
-            if (counter) counter.innerText = `${index + 1} / 50`;
-        }
+        slides[nextIndex].classList.add('active');
+        currentSlide = nextIndex;
+
+        const counter = slides[nextIndex].querySelector('.counter');
+        if (counter) counter.innerText = `${nextIndex + 1} / ${slides.length}`;
+        if (progressBar) progressBar.style.width = `${((nextIndex + 1) / slides.length) * 100}%`;
+        if (prevButton) prevButton.disabled = nextIndex === 0;
+        if (nextButton) nextButton.disabled = nextIndex === slides.length - 1;
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+        showSlide(currentSlide - 1);
     }
     
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === ' ') {
-            if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
-        } else if (e.key === 'ArrowLeft') {
-            if (currentSlide > 0) showSlide(currentSlide - 1);
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+            nextSlide();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+            prevSlide();
+        } else if (e.key === 'Home') {
+            showSlide(0);
+        } else if (e.key === 'End') {
+            showSlide(slides.length - 1);
         }
     });
+
+    document.addEventListener('touchstart', (e) => {
+        if (!e.changedTouches.length) return;
+        pointerStartX = e.changedTouches[0].clientX;
+        pointerStartY = e.changedTouches[0].clientY;
+        pointerStartTime = Date.now();
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        if (!e.changedTouches.length) return;
+        const dx = e.changedTouches[0].clientX - pointerStartX;
+        const dy = e.changedTouches[0].clientY - pointerStartY;
+        const elapsed = Date.now() - pointerStartTime;
+        const horizontalSwipe = Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy) * 1.4 && elapsed < 700;
+        if (!horizontalSwipe) return;
+        if (dx < 0) nextSlide();
+        else prevSlide();
+    }, { passive: true });
+
+    if (prevButton) prevButton.addEventListener('click', prevSlide);
+    if (nextButton) nextButton.addEventListener('click', nextSlide);
     
     showSlide(0);
 
     function updateScale() {
         const deck = document.querySelector('.deck');
         if (deck) {
-            const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            const viewport = window.visualViewport || window;
+            const viewWidth = viewport.width || window.innerWidth;
+            const viewHeight = viewport.height || window.innerHeight;
+            const offsetLeft = viewport.offsetLeft || 0;
+            const offsetTop = viewport.offsetTop || 0;
+            const scale = Math.min(viewWidth / 1920, viewHeight / 1080);
             const scaledWidth = 1920 * scale;
             const scaledHeight = 1080 * scale;
-            deck.style.left = `${(window.innerWidth - scaledWidth) / 2}px`;
-            deck.style.top = `${(window.innerHeight - scaledHeight) / 2}px`;
+            deck.style.left = `${offsetLeft + (viewWidth - scaledWidth) / 2}px`;
+            deck.style.top = `${offsetTop + (viewHeight - scaledHeight) / 2}px`;
             deck.style.transform = `scale(${scale})`;
         }
     }
     window.addEventListener('resize', updateScale);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', updateScale);
     updateScale();
 });
 </script>
 </head>
 <body>
+<div class="progress" aria-hidden="true"><div class="progress-bar"></div></div>
+<nav class="touch-controls" aria-label="slide navigation">
+    <button type="button" data-action="prev" aria-label="previous slide">‹</button>
+    <button type="button" data-action="next" aria-label="next slide">›</button>
+</nav>
 <main class="deck">
 
 <!-- Slide 1 -->
@@ -814,17 +895,27 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- Slide 27 -->
 <section class="slide" data-slide="27">
     <div class="topline">PART 4 | Modern Backend Integration</div>
-    <h1>Node.js Backend와 MongoDB</h1>
+    <h1>2026 MongoDB 개발 트렌드</h1>
     <div class="layout-single">
-        <ul>
-            <li>MongoDB는 <strong>JSON(BSON) 기반</strong>이므로, 자바스크립트 생태계인 Node.js와 환상적인 궁합을 자랑합니다.</li>
-            <li>백엔드 개발 시 네이티브 드라이버(<code>mongodb</code>)를 직접 사용할 수도 있지만, 대부분 실무에서는 <strong>ODM(Object Data Modeling)</strong> 도구를 사용합니다.</li>
-            <li>가장 널리 쓰이는 ODM은 <strong>Mongoose</strong>이며, 최근 TypeScript 생태계에서는 <strong>Prisma</strong> 혹은 <strong>TypeORM</strong> 등도 지원을 확대하고 있습니다.</li>
-        </ul>
+        <div class="roadmap-container">
+            <div class="roadmap-step">
+                <div class="roadmap-num">AI</div>
+                <div class="roadmap-title">Vector Search + RAG</div>
+                <div class="roadmap-desc">문서 데이터와 임베딩을 같은 컬렉션에 저장하고, 필터 조건과 의미 검색을 함께 사용합니다.</div>
+            </div>
+            <div class="roadmap-step">
+                <div class="roadmap-num">8.x</div>
+                <div class="roadmap-title">성능과 운영 자동화</div>
+                <div class="roadmap-desc">MongoDB 8.x 계열은 쿼리, 샤딩, 시계열 워크로드의 성능 개선을 중심에 둡니다.</div>
+            </div>
+            <div class="roadmap-step">
+                <div class="roadmap-num">SEC</div>
+                <div class="roadmap-title">Queryable Encryption</div>
+                <div class="roadmap-desc">민감 필드를 클라이언트 측에서 암호화한 채 equality/range 조건으로 조회하는 패턴이 중요해졌습니다.</div>
+            </div>
+        </div>
         <div class="callout">
-            <strong>ORM vs ODM</strong><br>
-            RDBMS ➔ ORM (Object Relational Mapping) (예: Hibernate, Sequelize)<br>
-            MongoDB ➔ ODM (Object Document Mapping) (예: Mongoose)
+            2026년 기준 실무 MongoDB 학습은 단순 CRUD를 넘어, <strong>AI 검색, 암호화된 조회, 샤딩/인덱스 운영, API 대체 전략</strong>까지 함께 다뤄야 합니다.
         </div>
     </div>
     <div class="counter">27 / 50</div>
@@ -963,28 +1054,36 @@ userSchema.index({ age: <span class="json-number">-1</span>, username: <span cla
 <!-- Slide 33 -->
 <section class="slide" data-slide="33">
     <div class="topline">PART 4 | Modern Backend Integration</div>
-    <h1>특수 인덱스: Text & Geospatial</h1>
+    <h1>최신 검색: Atlas Vector Search</h1>
     <div class="layout-visual-text">
         <div class="layout-single">
             <ul>
-                <li><strong>Text Index:</strong> 블로그 본문처럼 긴 문장에서 단어 검색 기능(Full-Text Search)을 제공.</li>
-                <li><strong>Geospatial Index (2dsphere):</strong> 위도/경도 기반으로 반경 내 검색, 가까운 매장 찾기 등에 사용.</li>
+                <li><strong>Vector Search</strong>는 키워드가 아니라 문장의 의미를 벡터로 비교합니다.</li>
+                <li>MongoDB는 임베딩 벡터와 원본 문서, 메타데이터 필터를 같은 문서 모델 안에서 함께 다룰 수 있습니다.</li>
+                <li>2026년에는 자동 임베딩, 중첩 임베딩 배열 검색, 플랫 인덱스 같은 기능이 빠르게 확장되고 있습니다.</li>
             </ul>
         </div>
         <div class="visual">
             <div class="json-block" style="font-size:16px;">
-<span class="json-comment">// 위치(Geo) 검색 인덱스 생성</span>
-storeSchema.index({ location: <span class="json-string">"2dsphere"</span> });
-
-<span class="json-comment">// 반경 5km 이내의 매장 찾기 쿼리</span>
-Store.find({
-  location: {
-    $near: {
-      $geometry: { type: <span class="json-string">"Point"</span>, coordinates: [ <span class="json-number">127.1</span>, <span class="json-number">35.8</span> ] },
-      $maxDistance: <span class="json-number">5000</span> <span class="json-comment">// meters</span>
+db.posts.aggregate([
+  {
+    <span class="json-key">$vectorSearch</span>: {
+      <span class="json-key">index</span>: <span class="json-string">"post_embedding_index"</span>,
+      <span class="json-key">path</span>: <span class="json-string">"embedding"</span>,
+      <span class="json-key">queryVector</span>: userQuestionEmbedding,
+      <span class="json-key">numCandidates</span>: <span class="json-number">100</span>,
+      <span class="json-key">limit</span>: <span class="json-number">5</span>,
+      <span class="json-key">filter</span>: { status: <span class="json-string">"published"</span> }
+    }
+  },
+  {
+    <span class="json-key">$project</span>: {
+      title: <span class="json-number">1</span>,
+      summary: <span class="json-number">1</span>,
+      score: { <span class="json-key">$meta</span>: <span class="json-string">"vectorSearchScore"</span> }
     }
   }
-});
+])
             </div>
         </div>
     </div>
@@ -1180,14 +1279,24 @@ db.users.aggregate([
 <!-- Slide 41 -->
 <section class="slide" data-slide="41">
     <div class="topline">PART 5 | Aggregation Pipeline</div>
-    <h1>Aggregation 성능 최적화 (Memory Limit)</h1>
-    <div class="layout-single">
-        <ul>
-            <li>Aggregation Pipeline의 한 스테이지에서 사용할 수 있는 메모리는 <strong>100MB</strong>로 제한됩니다.</li>
-            <li><code>$sort</code>나 <code>$group</code> 처리 중 100MB를 초과하면 쿼리가 실패합니다.</li>
-            <li><strong>해결책 1:</strong> 최대한 파이프라인의 맨 앞(앞단)에서 <code>$match</code>를 걸어 데이터를 걸러냅니다.</li>
-            <li><strong>해결책 2:</strong> <code>allowDiskUse: true</code> 옵션을 주어 초과분을 디스크에 임시 파일로 쓰게 합니다 (단, 속도가 크게 저하됨).</li>
-        </ul>
+    <h1>보안과 API 변화: 운영에서 놓치기 쉬운 부분</h1>
+    <div class="layout-comparison">
+        <div class="compare-card">
+            <h3>Queryable Encryption</h3>
+            <ul style="font-size:22px;">
+                <li>민감 데이터는 클라이언트에서 암호화된 상태로 저장됩니다.</li>
+                <li>Equality와 range query는 프로덕션 지원 범위에 들어왔습니다.</li>
+                <li>Prefix, suffix, substring query는 MongoDB 8.2 기준 Public Preview이므로 운영 적용은 신중해야 합니다.</li>
+            </ul>
+        </div>
+        <div class="compare-card" style="border-top-color: var(--orange);">
+            <h3>Data API / App Services</h3>
+            <ul style="font-size:22px;">
+                <li>Atlas App Services와 Data API는 EOL 상태로 문서화되어 있습니다.</li>
+                <li>새 프로젝트는 공식 드라이버, Realm SDK 대체 전략, 자체 API 서버를 우선 검토합니다.</li>
+                <li>강의 예제도 "브라우저에서 DB 직접 호출"보다 백엔드 API 계층을 전제로 설계합니다.</li>
+            </ul>
+        </div>
     </div>
     <div class="counter">41 / 50</div>
 </section>
@@ -1298,13 +1407,15 @@ db.users.aggregate([
         <div class="visual">
             <div class="json-block" style="font-size:16px;">
 <span class="json-comment">// 좋아요를 클릭했을 때 원자적(Atomic) 업데이트</span>
-Post.updateOne(
-  { _id: postId },
+<span class="json-key">const</span> result = <span class="json-key">await</span> Post.updateOne(
+  { _id: postId, likes: { <span class="json-key">$ne</span>: userId } },
   {
-    <span class="json-key">$addToSet</span>: { likes: userId }, <span class="json-comment">// 중복 시 무시됨</span>
-    <span class="json-key">$inc</span>: { like_count: <span class="json-number">1</span> }     <span class="json-comment">// 카운트 증가</span>
+    <span class="json-key">$addToSet</span>: { likes: userId },
+    <span class="json-key">$inc</span>: { like_count: <span class="json-number">1</span> }
   }
 );
+
+<span class="json-comment">// result.modifiedCount === 0 이면 이미 좋아요를 누른 사용자</span>
             </div>
         </div>
     </div>
@@ -1329,7 +1440,7 @@ Post.updateOne(
 <!-- Slide 49 -->
 <section class="slide" data-slide="49">
     <div class="topline">핵심 요약</div>
-    <h1>실무 MongoDB 모델링 3계명</h1>
+    <h1>실무 MongoDB 모델링 4계명</h1>
     <div class="layout-single">
         <div class="roadmap-container">
             <div class="roadmap-step">
@@ -1347,6 +1458,11 @@ Post.updateOne(
                 <div class="roadmap-title">무한 배열을 경계하라</div>
                 <div class="roadmap-desc">끝없이 증가하는 로그나 댓글 등을 임베딩 배열로 만들면 16MB 한계에 부딪혀 서버 장애가 발생합니다.</div>
             </div>
+            <div class="roadmap-step">
+                <div class="roadmap-num">4</div>
+                <div class="roadmap-title">AI/보안/운영을 함께 설계하라</div>
+                <div class="roadmap-desc">Vector Search, Queryable Encryption, EOL API 대체 전략은 새 프로젝트의 초기 설계 단계에서 결정하세요.</div>
+            </div>
         </div>
     </div>
     <div class="counter">49 / 50</div>
@@ -1357,6 +1473,9 @@ Post.updateOne(
     <h1 style="font-size: 100px; color: var(--mongo-green); margin-bottom:20px;">Thanks!</h1>
     <p style="font-size: 40px; color: var(--navy); margin-bottom:40px;">질의 응답 (Q&A)</p>
     <code style="font-size: 32px; background: #E8F5E9; color: var(--blue); padding: 10px 20px;">ksl@jbnu.ac.kr</code>
+    <p style="font-size: 22px; color: #7A8793; max-width: 1200px; line-height: 1.6; margin-top: 45px;">
+        최신 동향 참고: MongoDB Docs, Atlas Vector Search Changelog, Queryable Encryption Docs, Atlas App Services/Data API deprecation notes
+    </p>
     <div class="counter">50 / 50</div>
 </section>
 
